@@ -681,9 +681,9 @@
                 </div>
 
                 <div>
-                    <label for="studentCompletedJuzInput" class="field-label">عدد الأجزاء المنجزة معنا <span class="text-red-500">*</span></label>
+                    <label for="studentCompletedJuzInput" class="field-label">عدد الأجزاء المنجزة <span class="text-red-500">*</span></label>
                     <input id="studentCompletedJuzInput" type="number" min="0" max="30" step="0.25" value="0" required class="field" aria-describedby="completedJuzHelp">
-                    <p id="completedJuzHelp" class="muted mt-1">أدخل ما أتمه الطالب في المسجد فقط، من 0 إلى 30. يقبل الربع والنصف (مثال: 2.5)، ولا يُحسب تلقائياً من عدد التسميعات.</p>
+                    <p id="completedJuzHelp" class="muted mt-1">من 0 إلى 30، ويقبل الربع والنصف (مثال: 2.5). يُحدَّث يدوياً ولا يُحسب تلقائياً من عدد التسميعات.</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -697,12 +697,6 @@
                             <option value="حلقة المغرب" selected>حلقة المغرب</option>
                             <option value="حلقة البراعم">حلقة البراعم</option>
                         </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">
-                            العمر / المرحلة
-                        </label>
-                        <input type="text" id="studentAgeInput" placeholder="مثال: 12 سنة / ابتدائي" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none">
                     </div>
                 </div>
 
@@ -911,7 +905,7 @@
                 <!-- Info Cards -->
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-sm space-y-2">
                     <div class="flex justify-between gap-4 items-center text-xs sm:text-sm">
-                        <span class="text-slate-500">الأجزاء المنجزة معنا:</span><strong id="profileCompletedJuz" class="text-emerald-800">0 / 30</strong>
+                        <span class="text-slate-500">عدد الأجزاء المنجزة:</span><strong id="profileCompletedJuz" class="text-emerald-800">0 / 30</strong>
                     </div>
                     <div class="juz-progress"><span id="profileJuzProgress" style="width:0%"></span></div>
                     <div class="flex justify-between items-center text-xs sm:text-sm">
@@ -1198,7 +1192,6 @@
                 startDate: "2025-01-01",
                 startSurah: "النبأ",
                 halaqa: "حلقة العصر",
-                age: "11 سنة",
                 phone: "01012345678",
                 goal: "حفظ جزء عم وتبارك كاملاً",
                 notes: "مستواه ممتاز وصوته ندي ولديه حرص على الحضور."
@@ -1209,7 +1202,6 @@
                 startDate: "2025-01-15",
                 startSurah: "الفاتحة",
                 halaqa: "حلقة المغرب",
-                age: "9 سنوات",
                 phone: "01123456789",
                 goal: "إتقان قصار السور مع التجويد",
                 notes: "يحتاج عناية بحكم الإقلاب وتفخيم الراء."
@@ -1220,7 +1212,6 @@
                 startDate: "2024-11-20",
                 startSurah: "البقرة",
                 halaqa: "حلقة الفجر",
-                age: "15 سنة",
                 phone: "01234567890",
                 goal: "تثبيت البقرة وآل عمران",
                 notes: "متقن للمخارج وحريص على المراجعة الدورية."
@@ -1231,7 +1222,6 @@
                 startDate: "2025-02-01",
                 startSurah: "الضحى",
                 halaqa: "حلقة البراعم",
-                age: "7 سنوات",
                 phone: "01512345678",
                 goal: "حفظ جزء عم",
                 notes: "سريعة الحفظ ومتحمسة جداً."
@@ -1360,7 +1350,7 @@
                 const control = label.parentElement.querySelector('input:not([type="hidden"]), select, textarea');
                 if (control?.id) label.htmlFor = control.id;
             });
-            ['studentPhoneInput', 'studentAgeInput', 'studentGoalInput'].forEach(id => byId(id).maxLength = id === 'studentGoalInput' ? 300 : 50);
+            ['studentPhoneInput', 'studentGoalInput'].forEach(id => byId(id).maxLength = id === 'studentGoalInput' ? 300 : 50);
             ['studentNotesInput', 'sessionNotesInput'].forEach(id => byId(id).maxLength = 1000);
             loadData();
             initSurahDropdowns();
@@ -1407,7 +1397,7 @@
                 const parts = s.completedJuz ?? 0;
                 if (typeof parts !== 'number' || !Number.isFinite(parts) || parts < 0 || parts > 30 || !Number.isInteger(parts * 4)) throw new Error('عدد الأجزاء يجب أن يكون من 0 إلى 30 بمضاعفات الربع.');
                 if (!QURAN_SURAHS.some(q => q.name === s.startSurah)) throw new Error('سورة بداية غير صحيحة.');
-                return { id: id(s.id), name: text(s.name, 120, true), startDate: date(s.startDate), startSurah: s.startSurah, completedJuz: parts, halaqa: text(s.halaqa, 100), age: text(s.age, 100), phone: text(s.phone, 50), goal: text(s.goal, 300), notes: text(s.notes, 2000) };
+                return { id: id(s.id), name: text(s.name, 120, true), startDate: date(s.startDate), startSurah: s.startSurah, completedJuz: parts, halaqa: text(s.halaqa, 100), phone: text(s.phone, 50), goal: text(s.goal, 300), notes: text(s.notes, 2000) };
             });
             const studentIds = new Set(cleanStudents.map(s => s.id));
             const cleanSessions = (data.sessions ?? []).map(s => {
@@ -1733,7 +1723,7 @@
                                 <span><i class="fa-solid fa-clock-rotate-left ml-1 text-purple-600"></i> آخر تسميع:</span>
                                 <span class="font-medium text-slate-700">${lastSession ? `سورة ${lastSession.surah}` : 'لم يسَمِّع بعد'}</span>
                             </div>
-                            <div class="flex items-center justify-between border-t border-slate-200 pt-2 mt-2"><span class="text-slate-600">الأجزاء المنجزة معنا</span><strong class="text-emerald-900">${formatNumber(st.completedJuz)} / ${formatNumber(30)}</strong></div>
+                            <div class="flex items-center justify-between border-t border-slate-200 pt-2 mt-2"><span class="text-slate-600">عدد الأجزاء المنجزة</span><strong class="text-emerald-900">${formatNumber(st.completedJuz)} / ${formatNumber(30)}</strong></div>
                             <div class="juz-progress" aria-hidden="true"><span style="width:${st.completedJuz / 30 * 100}%"></span></div>
                         </div>
                     </div>
@@ -1974,7 +1964,6 @@
             const record = {
                 id: editId || makeId('std'), name, startDate, startSurah, completedJuz,
                 halaqa: byId('studentHalaqaInput').value,
-                age: byId('studentAgeInput').value.trim(),
                 phone: byId('studentPhoneInput').value.trim(),
                 goal: byId('studentGoalInput').value.trim(),
                 notes: byId('studentNotesInput').value.trim()
@@ -1997,7 +1986,6 @@
             byId('studentStartDateInput').max = todayISO();
             document.getElementById('studentStartSurahInput').value = st.startSurah;
             document.getElementById('studentHalaqaInput').value = st.halaqa || 'حلقة المغرب';
-            document.getElementById('studentAgeInput').value = st.age || '';
             document.getElementById('studentPhoneInput').value = st.phone || '';
             document.getElementById('studentGoalInput').value = st.goal || '';
             document.getElementById('studentNotesInput').value = st.notes || '';
@@ -2178,7 +2166,7 @@
                 '*تقرير متابعة القرآن الكريم - تحت إشراف مسجد مبارك*',
                 `اسم الطالب: ${st.name}`,
                 `تاريخ الانضمام: ${formatDate(st.startDate)}`, `بدأ معنا من: سورة ${st.startSurah}`,
-                `الأجزاء المنجزة معنا: ${st.completedJuz} من 30`, `جلسات التسميع: ${stdSessions.length}`
+                `عدد الأجزاء المنجزة: ${st.completedJuz} من 30`, `جلسات التسميع: ${stdSessions.length}`
             ];
             if (lastSession) {
                 lines.push(`آخر تسميع: سورة ${lastSession.surah} (الآيات ${lastSession.fromAyah} - ${lastSession.toAyah})`, `التقييم: ${lastSession.grade} (${lastSession.score}/10)`);
@@ -2197,8 +2185,8 @@
                 const details = [
                     ['اسم الطالب', student.name],
                     ['تاريخ الانضمام معنا', formatDate(student.startDate)], ['بدأ معنا من', `سورة ${student.startSurah}`],
-                    ['الأجزاء المنجزة معنا', `${formatNumber(student.completedJuz)} من ${formatNumber(30)}`], ['الحلقة', student.halaqa || 'غير محددة'],
-                    ['هاتف ولي الأمر', student.phone || 'غير مسجل'], ['العمر / المرحلة', student.age || 'غير مسجل'],
+                    ['عدد الأجزاء المنجزة', `${formatNumber(student.completedJuz)} من ${formatNumber(30)}`], ['الحلقة', student.halaqa || 'غير محددة'],
+                    ['هاتف ولي الأمر', student.phone || 'غير مسجل'], ['الهدف المرحلي', student.goal || 'غير محدد'],
                     ['جلسات التسميع', formatNumber(records.length)], ['آخر سورة مسمعة', records[0] ? `سورة ${records[0].surah}` : 'لم يُسجّل تسميع']
                 ];
                 const info = document.createElement('div');
@@ -2335,7 +2323,7 @@
                 `تم بحمد الله تسجيل ${student.name} في حلقات تحفيظ القرآن الكريم بمسجد مبارك، وستبدأ متابعته بانتظام مع الأهل.`,
                 `تاريخ بدء المتابعة: ${formatDate(student.startDate)}`,
                 `يبدأ الحفظ من: سورة ${student.startSurah}`,
-                `الأجزاء المنجزة معنا حتى الآن: ${student.completedJuz} من 30`,
+                `عدد الأجزاء المنجزة حتى الآن: ${student.completedJuz} من 30`,
                 '',
                 'المتابعة تشمل: تسجيل التسميع مع المحفظ والدرجة والملاحظات، ومتابعة الحضور، وإرسال تقرير دوري لولي الأمر.',
                 'نسأل الله أن يبارك في حفظه وينفع به.'
@@ -2371,7 +2359,7 @@
         function updateExportSummary() {
             const descriptions = {
                 all: `${formatNumber(students.length)} طالب، ${formatNumber(sessions.length)} جلسة تسميع، وكشف ترتيب المتفوقين.`,
-                students: `${formatNumber(students.length)} طالب: تاريخ الانضمام، سورة البداية، والأجزاء المنجزة معنا.`,
+                students: `${formatNumber(students.length)} طالب: تاريخ الانضمام، سورة البداية، وعدد الأجزاء المنجزة.`,
                 sessions: `${formatNumber(sessions.length)} جلسة: الطالب والتاريخ والسورة والآيات والتقييم والملاحظات.`,
                 ranking: `ترتيب ${formatNumber(students.length)} طالب بالنقاط والدرجات والانتظام في الفترة المختارة.`
             };
@@ -2568,12 +2556,12 @@
             exportPdf(`مسجد_مبارك_${names[type]}_${todayISO()}.pdf`, stage => {
                 if (type === 'all' || type === 'ranking') addRankingTable(stage);
                 if (type === 'all' || type === 'students') {
-                    addTablePages(stage, 'سجل الطلاب وإنجازهم', `إجمالي الطلاب: ${formatNumber(students.length)}. الأجزاء المنجزة تخص فترة الطالب معنا وتُحدّث يدوياً.`,
-                        ['#', 'اسم الطالب', 'تاريخ الانضمام', 'سورة البداية', 'الأجزاء معنا', 'الحلقة', 'التسميعات'], [5, 28, 16, 14, 11, 16, 10],
+                    addTablePages(stage, 'سجل الطلاب وإنجازهم', `إجمالي الطلاب: ${formatNumber(students.length)}. عدد الأجزاء المنجزة يُحدَّث يدوياً.`,
+                        ['#', 'اسم الطالب', 'تاريخ الانضمام', 'سورة البداية', 'الأجزاء المنجزة', 'الحلقة', 'التسميعات'], [5, 28, 16, 14, 11, 16, 10],
                         students.map((s, i) => [formatNumber(i + 1), s.name, formatDate(s.startDate), s.startSurah, `${formatNumber(s.completedJuz)} / ${formatNumber(30)}`, s.halaqa || 'غير محددة', formatNumber(sessions.filter(r => r.studentId === s.id).length)]));
                     if (students.length) addTablePages(stage, 'بيانات التواصل وأهداف الطلاب', 'بيانات خاصة بالمتابعة. يُرجى مشاركتها مع المسؤولين المصرح لهم فقط.',
-                        ['#', 'اسم الطالب', 'العمر / المرحلة', 'هاتف ولي الأمر', 'الهدف المرحلي', 'ملاحظات المعلم'], [4, 18, 9, 15, 22, 32],
-                        students.map((s, i) => [formatNumber(i + 1), s.name, s.age || 'غير مسجل', s.phone || 'غير مسجل', s.goal || 'غير محدد', s.notes || 'لا توجد']));
+                        ['#', 'اسم الطالب', 'هاتف ولي الأمر', 'الهدف المرحلي', 'ملاحظات المعلم'], [5, 22, 17, 24, 32],
+                        students.map((s, i) => [formatNumber(i + 1), s.name, s.phone || 'غير مسجل', s.goal || 'غير محدد', s.notes || 'لا توجد']));
                 }
                 if (type === 'all' || type === 'sessions') addSessionReport(stage, sessions);
                 return [...stage.children];
