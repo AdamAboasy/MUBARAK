@@ -53,11 +53,15 @@
         button, label[for], select { cursor: pointer; }
         button:disabled { opacity: .45; cursor: not-allowed; }
         [id$="Modal"].hidden, .tab-content.hidden { display: none !important; }
-        :focus-visible { outline: 3px solid #c99b45; outline-offset: 3px; }
-        .tab-btn { white-space: nowrap; }
-        .tab-content:not(.hidden) { animation: section-in .28s ease-out; }
+        /* Soft, animated focus ring instead of the harsh gold outline. */
+        :focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(5,150,105,.30), 0 0 0 7px rgba(5,150,105,.10); border-radius: 12px; }
+        .field:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { box-shadow: 0 0 0 3px rgba(5,150,105,.18); border-color: #047857; }
+        .tab-btn { white-space: nowrap; transition: background-color .22s ease, color .22s ease, transform .15s ease, box-shadow .22s ease; }
+        .tab-btn:hover { transform: translateY(-1px); }
+        .tab-btn:active { transform: translateY(0) scale(.97); }
+        .tab-content:not(.hidden) { animation: section-in .32s cubic-bezier(.22,1,.36,1); }
         [role="dialog"] > div { max-height: 92dvh; overflow-y: auto; }
-        [role="dialog"]:not(.hidden) > div { animation: dialog-in .2s ease-out; }
+        [role="dialog"]:not(.hidden) > div { animation: dialog-in .24s cubic-bezier(.22,1,.36,1); }
         .field { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; color: #1e293b; font-size: 14px; }
         .field:focus { outline: 2px solid #a7d6c5; border-color: #047857; }
         .field-label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #334155; }
@@ -72,8 +76,20 @@
         .toast.error { background: #9f2939; }
         .toast.info { background: #334155; }
         .export-spinner { width: 20px; height: 20px; border: 2px solid #cbd5e1; border-top-color: #047857; border-radius: 50%; animation: spin .8s linear infinite; }
-        .surah-button { text-align: center; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
-        .surah-button:hover { transform: translateY(-2px); }
+        /* Pleasant, readable hover/focus motion for interactive cards. */
+        .surah-button { position: relative; overflow: hidden; text-align: center; border: 1px solid #e2e8f0; background: #fff; border-radius: 14px; padding: 14px 12px; transition: transform .24s cubic-bezier(.22,1,.36,1), box-shadow .24s ease, border-color .24s ease, background .24s ease; }
+        .surah-button::after { content: ''; position: absolute; inset: 0; background: linear-gradient(120deg, transparent 30%, rgba(245,158,11,.14) 50%, transparent 70%); transform: translateX(-120%); transition: transform .6s ease; pointer-events: none; }
+        .surah-button:hover, .surah-button:focus-visible { transform: translateY(-5px) scale(1.015); border-color: #34d399; background: linear-gradient(180deg, #ffffff, #f0fdf7); box-shadow: 0 16px 30px -12px rgba(4,120,87,.35); }
+        .surah-button:hover::after { transform: translateX(120%); }
+        .surah-button:active { transform: translateY(-1px) scale(.99); box-shadow: 0 6px 14px -8px rgba(4,120,87,.4); }
+        .surah-number { transition: transform .28s cubic-bezier(.34,1.56,.64,1), background-color .24s ease, color .24s ease; }
+        .surah-button:hover .surah-number, .surah-button:focus-visible .surah-number { transform: scale(1.22) rotate(-8deg); background: #d1fae5; color: #065f46; }
+        .student-card { transition: transform .24s cubic-bezier(.22,1,.36,1), box-shadow .24s ease, border-color .24s ease; }
+        .student-card:hover { transform: translateY(-4px); border-color: #6ee7b7; box-shadow: 0 18px 34px -16px rgba(4,120,87,.4); }
+        .student-card:active { transform: translateY(-1px) scale(.995); }
+        .score-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; padding: 3px 10px; border-radius: 999px; font-weight: 800; font-size: 12px; font-family: ui-monospace, 'Cairo', monospace; transition: transform .18s ease; }
+        .score-chip:hover { transform: scale(1.08); }
+        tbody tr { transition: background-color .18s ease; }
         .quran-ayah { font-family: 'Amiri', serif; font-size: 28px; line-height: 2.1; color: #123f32; }
         .tafsir-text { font-family: 'Amiri', serif; font-size: 20px; line-height: 2.1; color: #334155; white-space: pre-line; }
         .detail-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
@@ -289,7 +305,7 @@
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-xs font-semibold text-slate-500 uppercase">نسبة التميز (ممتاز)</span>
+                            <span class="text-xs font-semibold text-slate-500">نسبة الدرجات العالية (٩+)</span>
                             <h3 class="text-3xl font-black text-slate-800 mt-1" id="dashExcellentRate">0%</h3>
                             <span class="text-xs text-purple-600 font-medium flex items-center gap-1 mt-1">
                                 <i class="fa-solid fa-star"></i> إتقان وأحكام تجويد
@@ -361,7 +377,7 @@
                         </div>
                         <h4 class="text-lg font-bold text-slate-800">أبرز طلاب الحلقات إنجازاً</h4>
                     </div>
-                    <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">وفق عدد جلسات التسميع والتقييمات</span>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">وفق عدد جلسات التسميع والدرجات</span>
                 </div>
                 <div id="dashTopStudents" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <!-- Populated via JS -->
@@ -465,18 +481,6 @@
                     </select>
                 </div>
 
-                <div class="min-w-[140px]">
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">التقييم:</label>
-                    <select id="sessionFilterGrade" onchange="renderSessionsTable()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
-                        <option value="all">كل التقييمات</option>
-                        <option value="ممتاز مرتفع">ممتاز مرتفع ★★★</option>
-                        <option value="ممتاز">ممتاز</option>
-                        <option value="جيد جداً">جيد جداً</option>
-                        <option value="جيد">جيد</option>
-                        <option value="يحتاج إعادة">يحتاج إعادة</option>
-                    </select>
-                </div>
-
                 <div class="min-w-[150px]">
                     <label class="block text-xs font-semibold text-slate-500 mb-1">تاريخ محدد:</label>
                     <input type="date" id="sessionFilterDate" onchange="renderSessionsTable()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none text-xs">
@@ -500,8 +504,7 @@
                                 <th class="p-3.5">التاريخ</th>
                                 <th class="p-3.5">النوع</th>
                                 <th class="p-3.5">المقدار المسَمَّع (السورة والآيات)</th>
-                                <th class="p-3.5">التقييم</th>
-                                <th class="p-3.5">الدرجة</th>
+                                <th class="p-3.5">الدرجة من 10</th>
                                 <th class="p-3.5">ملاحظات المحفظ</th>
                                 <th class="p-3.5 text-center">إجراءات</th>
                             </tr>
@@ -553,7 +556,7 @@
                         <i class="fa-solid fa-ranking-star text-amber-500 text-2xl"></i>
                         <span>ترتيب الطلاب والمتفوقون</span>
                     </h3>
-                    <p class="text-xs text-slate-500 mt-1">المعيار: النقاط = مجموع الدرجات + نقطة لكل جلسة تسميع + نقطة لكل جلسة ممتاز، تشجيعاً للانتظام والإتقان.</p>
+                    <p class="text-xs text-slate-500 mt-1">المعيار: النقاط = مجموع الدرجات + نقطة لكل جلسة تسميع + نقطة لكل جلسة بدرجة ٩ فأكثر، تشجيعاً للانتظام والإتقان.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <select id="rankingPeriod" aria-label="فترة الترتيب" onchange="renderRanking()" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm font-semibold rounded-xl px-3 py-2.5 outline-none focus:border-emerald-600">
@@ -577,7 +580,7 @@
                     <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl"><i class="fa-solid fa-star"></i></div>
                 </div>
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex items-center justify-between">
-                    <div><span class="text-xs font-semibold text-slate-500">جلسات بتقدير ممتاز</span><h3 class="text-3xl font-black text-slate-800 mt-1" id="rankExcellentSessions">0</h3></div>
+                    <div><span class="text-xs font-semibold text-slate-500">جلسات بدرجة ٩ فأكثر</span><h3 class="text-3xl font-black text-slate-800 mt-1" id="rankExcellentSessions">0</h3></div>
                     <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl"><i class="fa-solid fa-award"></i></div>
                 </div>
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex items-center justify-between">
@@ -594,7 +597,7 @@
                         <thead class="bg-slate-100/80 text-slate-700 text-xs font-bold border-b border-slate-200">
                             <tr>
                                 <th class="p-3.5">#</th><th class="p-3.5">الطالب</th><th class="p-3.5">التسميعات</th>
-                                <th class="p-3.5">متوسط الدرجات</th><th class="p-3.5">ممتاز</th><th class="p-3.5">الانتظام</th>
+                                <th class="p-3.5">متوسط الدرجات</th><th class="p-3.5">درجة ٩+</th><th class="p-3.5">الانتظام</th>
                                 <th class="p-3.5">آخر تسميع</th><th class="p-3.5">النقاط</th><th class="p-3.5">الحالة</th>
                             </tr>
                         </thead>
@@ -608,7 +611,7 @@
 
             <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
                 <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-1"><i class="fa-solid fa-star text-amber-500"></i> أصحاب أعلى الدرجات</h4>
-                <p class="text-xs text-slate-500 mb-4">أعلى متوسط درجات في الفترة المختارة، مع عدد جلسات التقدير والدرجات العالية.</p>
+                <p class="text-xs text-slate-500 mb-4">أعلى متوسط درجات في الفترة المختارة، مع عدد الجلسات بدرجة ٩ فأكثر.</p>
                 <div id="rankingHighScores" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
             </section>
         </div>
@@ -816,25 +819,12 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">
-                            التقدير / المستوى <span class="text-red-500">*</span>
-                        </label>
-                        <select id="sessionGradeInput" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none font-bold">
-                            <option value="ممتاز مرتفع">ممتاز مرتفع ★★★ (10/10)</option>
-                            <option value="ممتاز" selected>ممتاز (9-10)</option>
-                            <option value="جيد جداً">جيد جداً (8-9)</option>
-                            <option value="جيد">جيد (7-8)</option>
-                            <option value="يحتاج إعادة">يحتاج إعادة تثبيت</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">
-                            الدرجة العددية (من 10)
-                        </label>
-                        <input type="number" id="sessionScoreInput" min="0" max="10" step="0.5" value="10" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none font-bold">
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">
+                        الدرجة (من 10) <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="sessionScoreInput" min="0" max="10" step="0.5" value="10" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-lg outline-none font-bold text-center text-emerald-900" aria-describedby="scoreHelp">
+                    <p id="scoreHelp" class="muted mt-1">التقييم بدرجة رقمية فقط من 0 إلى 10، وتقبل النصف درجة.</p>
                 </div>
 
                 <div>
@@ -982,7 +972,7 @@
 
             <div class="p-6 overflow-y-auto space-y-5 text-sm text-slate-700 leading-loose">
                 <div><h4 class="font-bold text-emerald-900">1. سجّل الطالب</h4><p>أدخل الاسم وتاريخ الانضمام والسورة التي بدأ منها وعدد الأجزاء التي أتمها معنا.</p></div>
-                <div><h4 class="font-bold text-emerald-900">2. تابع الحفظ</h4><p>سجّل كل جلسة تسميع بالسورة والآيات والتقييم والملاحظات، وحدّث عدد الأجزاء يدوياً عند اعتماد الإنجاز.</p></div>
+                <div><h4 class="font-bold text-emerald-900">2. تابع الحفظ</h4><p>سجّل كل جلسة تسميع بالسورة والآيات والدرجة الرقمية من 10 والملاحظات، وحدّث عدد الأجزاء يدوياً عند اعتماد الإنجاز.</p></div>
                 <div><h4 class="font-bold text-emerald-900">3. اقرأ معلومات السور والتفسير</h4><p>اضغط أي سورة في الفهرس، ثم اختر الآية والمفسر. تحتاج هذه الميزة إلى اتصال بالإنترنت.</p></div>
                 <div><h4 class="font-bold text-emerald-900">4. تابع الترتيب وأرسل رسالة ولي الأمر</h4><p>قسم «ترتيب الطلاب والمتفوقون» يرتّب الطلاب بالنقاط والدرجات والانتظام. وعند تسجيل طالب جديد تُجهَّز رسالة واتساب لولي الأمر بأن المتابعة ستبدأ معه، ويمكن إرسالها أيضاً من كشف الطالب في أي وقت.</p></div>
                 <div class="border-t border-slate-200 pt-4"><h4 class="font-bold text-amber-800">حافظ على بياناتك</h4><p>الحفظ محلي على هذا المتصفح. استخدم نسخة JSON لنقل البيانات واستعادتها؛ PDF للقراءة والطباعة فقط.</p></div>
@@ -1037,7 +1027,7 @@
                 <button onclick="closeModal('exportModal')" class="text-action" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-6 space-y-5">
-                <div><label for="exportType" class="field-label">محتوى ملف PDF</label><select id="exportType" onchange="updateExportSummary()" class="field"><option value="all">التقرير الشامل</option><option value="students">سجل الطلاب وإنجازهم</option><option value="sessions">سجل التسميع والمتابعة</option><option value="ranking">ترتيب الطلاب والمتفوقين</option></select></div>
+                <div><label for="exportType" class="field-label">محتوى ملف PDF</label><select id="exportType" onchange="updateExportSummary()" class="field"><option value="all">التقرير الشامل</option><option value="files">ملف كامل لكل طالب (صفحة مستقلة)</option><option value="students">سجل الطلاب وإنجازهم</option><option value="sessions">سجل التسميع والمتابعة</option><option value="ranking">ترتيب الطلاب والمتفوقين</option></select></div>
                 <p id="exportSummary" class="muted" aria-live="polite"></p>
                 <p class="muted">يشمل جميع البيانات المسجلة، ولا يتأثر بفلاتر العرض. يُجهز الملف داخل متصفحك دون رفع بيانات الطلاب إلى خادم.</p>
                 <button data-pdf-action onclick="downloadReport()" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold px-5 py-3 rounded-xl flex items-center justify-center gap-2"><i class="fa-regular fa-file-pdf"></i> تنزيل التقرير PDF</button>
@@ -1237,7 +1227,6 @@
                 surah: "النازعات",
                 fromAyah: 1,
                 toAyah: 20,
-                grade: "ممتاز مرتفع",
                 score: 10,
                 notes: "قراءة متقنة وخشوع ماشاء الله"
             },
@@ -1249,7 +1238,6 @@
                 surah: "الناس",
                 fromAyah: 1,
                 toAyah: 6,
-                grade: "ممتاز",
                 score: 9.5,
                 notes: "إتمام الحفظ مع ضبط مخارج الحروف"
             },
@@ -1261,7 +1249,6 @@
                 surah: "البقرة",
                 fromAyah: 1,
                 toAyah: 50,
-                grade: "ممتاز مرتفع",
                 score: 10,
                 notes: "تثبيت رائع للربع الأول والثاني"
             },
@@ -1273,7 +1260,6 @@
                 surah: "الشرح",
                 fromAyah: 1,
                 toAyah: 8,
-                grade: "ممتاز",
                 score: 9.5,
                 notes: "حفظ سليم وتطبيق أحكام الغنة"
             }
@@ -1282,7 +1268,7 @@
         const STORAGE_KEY = 'mb_mubarak_v2';
         const APP_NAME = 'Mosque-Mubarak-Quran-App';
         const SESSION_TYPES = ['حفظ جديد', 'مراجعة قريبة', 'مراجعة كبرى', 'تثبيت وتجويد'];
-        const SESSION_GRADES = ['ممتاز مرتفع', 'ممتاز', 'جيد جداً', 'جيد', 'يحتاج إعادة'];
+        const HIGH_SCORE = 9;
         const TAFSIR_EDITIONS = [
             ['ar.muyassar', 'التفسير الميسر'], ['ar.jalalayn', 'تفسير الجلالين'],
             ['ar.qurtubi', 'تفسير القرطبي'], ['ar.baghawi', 'تفسير البغوي'],
@@ -1407,8 +1393,8 @@
                 const toAyah = s.toAyah ?? surah?.ayahs;
                 const score = s.score ?? 10;
                 if (!surah || !Number.isInteger(fromAyah) || !Number.isInteger(toAyah) || fromAyah < 1 || toAyah < fromAyah || toAyah > surah.ayahs) throw new Error('نطاق آيات غير صحيح في إحدى الجلسات.');
-                if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 10 || !SESSION_TYPES.includes(s.type) || !SESSION_GRADES.includes(s.grade)) throw new Error('نوع تسميع أو تقييم غير صالح.');
-                return { id: id(s.id), studentId: s.studentId, date: date(s.date), type: s.type, surah: s.surah, fromAyah, toAyah, grade: s.grade, score, notes: text(s.notes, 2000), createdAt: text(s.createdAt, 50) };
+                if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 10 || !SESSION_TYPES.includes(s.type)) throw new Error('نوع تسميع أو درجة غير صالحة.');
+                return { id: id(s.id), studentId: s.studentId, date: date(s.date), type: s.type, surah: s.surah, fromAyah, toAyah, score, notes: text(s.notes, 2000), createdAt: text(s.createdAt, 50) };
             });
             return { students: cleanStudents, sessions: cleanSessions };
         }
@@ -1546,9 +1532,9 @@
             const todaySessions = sessions.filter(s => s.date === todayStr);
             document.getElementById('dashTodaySessions').textContent = todaySessions.length;
 
-            // Excellent rate
+            // High-score rate (9 or above)
             if (sessions.length > 0) {
-                const excellentCount = sessions.filter(s => s.grade.includes('ممتاز')).length;
+                const excellentCount = sessions.filter(s => (s.score ?? 0) >= HIGH_SCORE).length;
                 const rate = Math.round((excellentCount / sessions.length) * 100);
                 document.getElementById('dashExcellentRate').textContent = `${rate}%`;
             } else {
@@ -1584,9 +1570,7 @@
                             </div>
                         </div>
                         <div class="text-left">
-                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold ${getGradeBadgeClass(ses.grade)}">
-                                ${ses.grade}
-                            </span>
+                            <span class="score-chip ${scoreChipClass(ses.score)}">${formatNumber(ses.score ?? 0)} / 10</span>
                             <span class="block text-[11px] text-slate-400 mt-1">${ses.date}</span>
                         </div>
                     `;
@@ -1681,7 +1665,7 @@
                 const lastSession = stdSessions[0];
 
                 const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition-all flex flex-col justify-between";
+                card.className = "student-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between";
                 card.innerHTML = `
                     <div>
                         <div class="flex items-start justify-between gap-3 mb-3">
@@ -1750,15 +1734,13 @@
             const emptyState = document.getElementById('emptySessionsState');
             const studentFilter = document.getElementById('sessionFilterStudent').value;
             const typeFilter = document.getElementById('sessionFilterType').value;
-            const gradeFilter = document.getElementById('sessionFilterGrade').value;
             const dateFilter = document.getElementById('sessionFilterDate').value;
 
             let filtered = sessions.filter(ses => {
                 const matchesStudent = studentFilter === 'all' || ses.studentId === studentFilter;
                 const matchesType = typeFilter === 'all' || ses.type === typeFilter;
-                const matchesGrade = gradeFilter === 'all' || ses.grade === gradeFilter;
                 const matchesDate = !dateFilter || ses.date === dateFilter;
-                return matchesStudent && matchesType && matchesGrade && matchesDate;
+                return matchesStudent && matchesType && matchesDate;
             });
 
             // Newest first
@@ -1793,12 +1775,7 @@
                             </span>
                         </td>
                         <td class="p-3.5">
-                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold ${getGradeBadgeClass(ses.grade)}">
-                                ${ses.grade}
-                            </span>
-                        </td>
-                        <td class="p-3.5 font-bold font-mono text-slate-800">
-                            ${ses.score !== undefined ? `${ses.score} / 10` : '-'}
+                            <span class="score-chip ${scoreChipClass(ses.score)}">${formatNumber(ses.score ?? 0)}<span class="opacity-60 font-normal"> / 10</span></span>
                         </td>
                         <td class="p-3.5 text-xs text-slate-500 max-w-xs truncate" title="${escapeHtml(ses.notes || '')}">
                             ${ses.notes ? escapeHtml(ses.notes) : '<span class="text-slate-300">لا توجد</span>'}
@@ -1819,7 +1796,6 @@
         function resetSessionFilters() {
             document.getElementById('sessionFilterStudent').value = 'all';
             document.getElementById('sessionFilterType').value = 'all';
-            document.getElementById('sessionFilterGrade').value = 'all';
             document.getElementById('sessionFilterDate').value = '';
             renderSessionsTable();
         }
@@ -1839,12 +1815,12 @@
             filtered.forEach(s => {
                 const card = document.createElement('button');
                 card.type = 'button';
-                card.className = "surah-button bg-white p-3 rounded-xl border border-slate-200/80 hover:border-amber-400 hover:bg-amber-50/30 hover:shadow-sm group";
+                card.className = "surah-button group";
                 card.setAttribute('aria-label', `عرض معلومات وتفسير سورة ${s.name}`);
                 card.onclick = () => openSurahDetails(s.id);
                 card.innerHTML = `
                     <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-                        <span class="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 font-mono">${s.id}</span>
+                        <span class="surah-number w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 font-mono">${s.id}</span>
                         <span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">جزء ${s.juz}</span>
                     </div>
                     <h5 class="text-base font-bold text-slate-800 font-quran group-hover:text-amber-600 transition">${s.name}</h5>
@@ -2039,7 +2015,6 @@
             const surahInfo = QURAN_SURAHS.find(s => s.name === surah);
             const fromAyah = byId('sessionFromAyahInput').value === '' ? 1 : byId('sessionFromAyahInput').valueAsNumber;
             const toAyah = byId('sessionToAyahInput').value === '' ? surahInfo?.ayahs : byId('sessionToAyahInput').valueAsNumber;
-            const grade = document.getElementById('sessionGradeInput').value;
             const score = byId('sessionScoreInput').valueAsNumber;
             const notes = document.getElementById('sessionNotesInput').value.trim();
 
@@ -2057,7 +2032,6 @@
                 surah,
                 fromAyah,
                 toAyah,
-                grade,
                 score,
                 notes,
                 createdAt: new Date().toISOString()
@@ -2140,9 +2114,7 @@
                             <span class="block text-[11px] text-slate-400 font-mono mt-0.5">${ses.date}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded-full font-bold ${getGradeBadgeClass(ses.grade)} text-[11px]">
-                                ${ses.grade}
-                            </span>
+                            <span class="score-chip ${scoreChipClass(ses.score)}">${formatNumber(ses.score ?? 0)} / 10</span>
                             <button onclick="deleteSession('${ses.id}')" aria-label="حذف جلسة التسميع" class="text-slate-300 hover:text-red-500 p-1">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
@@ -2169,7 +2141,7 @@
                 `عدد الأجزاء المنجزة: ${st.completedJuz} من 30`, `جلسات التسميع: ${stdSessions.length}`
             ];
             if (lastSession) {
-                lines.push(`آخر تسميع: سورة ${lastSession.surah} (الآيات ${lastSession.fromAyah} - ${lastSession.toAyah})`, `التقييم: ${lastSession.grade} (${lastSession.score}/10)`);
+                lines.push(`آخر تسميع: سورة ${lastSession.surah} (الآيات ${lastSession.fromAyah} - ${lastSession.toAyah})`, `الدرجة: ${lastSession.score}/10`);
                 if (lastSession.notes) lines.push(`ملاحظات المحفظ: ${lastSession.notes}`);
             }
             lines.push('', 'بارك الله في جهودكم في تنشئة أهل القرآن.');
@@ -2179,34 +2151,14 @@
         function printStudentCard() {
             const student = students.find(s => s.id === activeStudentForProfile?.id);
             if (!student) return notify('اختر الطالب أولاً.', 'error');
-            const records = studentSessions(student.id);
-            exportPdf(`ملف_${safeFilename(student.name)}_${todayISO()}.pdf`, stage => {
-                const page = createReportPage(stage, 'ملف متابعة الطالب', `الطالب: ${student.name}`);
-                const details = [
-                    ['اسم الطالب', student.name],
-                    ['تاريخ الانضمام معنا', formatDate(student.startDate)], ['بدأ معنا من', `سورة ${student.startSurah}`],
-                    ['عدد الأجزاء المنجزة', `${formatNumber(student.completedJuz)} من ${formatNumber(30)}`], ['الحلقة', student.halaqa || 'غير محددة'],
-                    ['هاتف ولي الأمر', student.phone || 'غير مسجل'], ['الهدف المرحلي', student.goal || 'غير محدد'],
-                    ['جلسات التسميع', formatNumber(records.length)], ['آخر سورة مسمعة', records[0] ? `سورة ${records[0].surah}` : 'لم يُسجّل تسميع']
-                ];
-                const info = document.createElement('div');
-                info.className = 'report-profile';
-                info.innerHTML = details.map(([label, value]) => `<div><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></div>`).join('');
-                page.appendChild(info);
-                if (info.getBoundingClientRect().bottom > page.getBoundingClientRect().bottom - 78) {
-                    page.remove();
-                    addTablePages(stage, 'ملف متابعة الطالب', student.name, ['البيان', 'التفاصيل'], [25, 75], details);
-                }
-                addTablePages(stage, 'هدف الطالب وملاحظاته', student.name, ['البند', 'التفاصيل'], [18, 82], [
-                    ['الهدف المرحلي', student.goal || 'غير محدد'], ['ملاحظات المعلم', student.notes || 'لا توجد ملاحظات']
-                ]);
-                addSessionReport(stage, records, `سجل تسميع: ${student.name}`);
+            exportPdf(`ملف_${safeFilename(student.name)}_الكامل_${todayISO()}.pdf`, stage => {
+                addStudentFilePages(stage, student);
                 return [...stage.children];
             });
         }
 
         // ================== STUDENT RANKING ==================
-        // Points are deterministic and explained in the UI: total scores + one point per session + one per excellent session.
+        // Points are deterministic and explained in the UI: total scores + one point per session + one per high-score session (9+).
         function rankingRange(period) {
             if (period === 'all') return { start: null, days: null };
             const days = period === '7' ? 7 : 30;
@@ -2222,7 +2174,7 @@
                 const all = studentSessions(student.id);
                 const list = start ? all.filter(session => new Date(`${session.date}T00:00:00`) >= start) : all;
                 const totalScore = list.reduce((sum, session) => sum + session.score, 0);
-                const excellent = list.filter(session => session.grade.includes('ممتاز')).length;
+                const excellent = list.filter(session => session.score >= HIGH_SCORE).length;
                 const recitationDays = new Set(list.map(session => session.date)).size;
                 const average = list.length ? Math.round((totalScore / list.length) * 10) / 10 : 0;
                 const points = list.length ? Math.round((totalScore + list.length + excellent) * 10) / 10 : 0;
@@ -2301,7 +2253,7 @@
                 const item = document.createElement('div');
                 item.className = 'flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/70';
                 item.innerHTML = `
-                    <div><h5 class="text-sm font-bold text-slate-800">${escapeHtml(row.student.name)}</h5><p class="text-xs text-slate-500">${formatNumber(row.list.length)} تسميع • ${formatNumber(row.excellent)} جلسة ممتاز • مجموع ${formatNumber(row.totalScore)}</p></div>
+                    <div><h5 class="text-sm font-bold text-slate-800">${escapeHtml(row.student.name)}</h5><p class="text-xs text-slate-500">${formatNumber(row.list.length)} تسميع • ${formatNumber(row.excellent)} جلسة بدرجة ٩+ • مجموع ${formatNumber(row.totalScore)}</p></div>
                     <span class="status-chip bg-amber-100 text-amber-900">${formatNumber(row.average)} / ${formatNumber(10)}</span>
                 `;
                 scores.appendChild(item);
@@ -2350,8 +2302,8 @@
             requestConfirmation('تم تسجيل الطالب بنجاح', `هل ترسل رسالة واتساب لولي أمر ${student.name} على الرقم ${student.phone} بأن المتابعة ستبدأ معه بانتظام؟`, () => sendFollowUpMessage(student.id), 'إرسال رسالة واتساب');
         }
 
-        function exportData(type = 'all') {
-            byId('exportType').value = ['all', 'students', 'sessions', 'ranking'].includes(type) ? type : 'all';
+        function exportData(type = 'files') {
+            byId('exportType').value = ['all', 'students', 'sessions', 'ranking', 'files'].includes(type) ? type : 'files';
             updateExportSummary();
             openModal('exportModal');
         }
@@ -2360,7 +2312,8 @@
             const descriptions = {
                 all: `${formatNumber(students.length)} طالب، ${formatNumber(sessions.length)} جلسة تسميع، وكشف ترتيب المتفوقين.`,
                 students: `${formatNumber(students.length)} طالب: تاريخ الانضمام، سورة البداية، وعدد الأجزاء المنجزة.`,
-                sessions: `${formatNumber(sessions.length)} جلسة: الطالب والتاريخ والسورة والآيات والتقييم والملاحظات.`,
+                sessions: `${formatNumber(sessions.length)} جلسة: الطالب والتاريخ والسورة والآيات والدرجة والملاحظات.`,
+                files: `${formatNumber(students.length)} ملفاً كاملاً، صفحة (أو أكثر) مستقلة لكل طالب بكل تاريخ تسميعه ودرجاته وملاحظاته.`,
                 ranking: `ترتيب ${formatNumber(students.length)} طالب بالنقاط والدرجات والانتظام في الفترة المختارة.`
             };
             byId('exportSummary').textContent = descriptions[byId('exportType').value];
@@ -2529,18 +2482,94 @@
 
         function addSessionReport(stage, records, title = 'سجل التسميع والمتابعة') {
             addTablePages(stage, title, `إجمالي الجلسات: ${formatNumber(records.length)}. الملاحظات الطويلة تستكمل في صفوف تحمل كلمة «تابع».`,
-                ['#', 'الطالب', 'التاريخ', 'نوع التسميع', 'السورة والآيات', 'التقييم / الدرجة', 'ملاحظات المتابعة'], [4, 20, 12, 13, 18, 14, 19],
+                ['#', 'الطالب', 'التاريخ', 'نوع التسميع', 'السورة والآيات', 'الدرجة من 10', 'ملاحظات المتابعة'], [4, 20, 12, 13, 18, 11, 22],
                 sortedSessions(records).map((s, index) => {
                     const student = students.find(st => st.id === s.studentId);
-                    return [formatNumber(index + 1), student?.name || 'غير موجود', formatDate(s.date), s.type, `سورة ${s.surah}\nآية ${formatNumber(s.fromAyah)} إلى ${formatNumber(s.toAyah)}`, `${s.grade}\n${formatNumber(s.score)} / ${formatNumber(10)}`, s.notes || 'لا توجد'];
+                    return [formatNumber(index + 1), student?.name || 'غير موجود', formatDate(s.date), s.type, `سورة ${s.surah}\nآية ${formatNumber(s.fromAyah)} إلى ${formatNumber(s.toAyah)}`, formatNumber(s.score ?? 0), s.notes || 'لا توجد'];
                 }));
+        }
+
+        // A complete, standalone file for one student with every recitation date, score and note.
+        function addStudentFilePages(stage, student) {
+            const records = studentSessions(student.id).reverse(); // chronological: oldest first
+            const scores = records.map(r => r.score ?? 0);
+            const average = scores.length ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : 0;
+            const high = scores.filter(score => score >= HIGH_SCORE).length;
+            const shortNote = (student.notes || 'لا توجد').length > 380 ? `${student.notes.slice(0, 380)}…` : (student.notes || 'لا توجد');
+            const details = [
+                ['اسم الطالب', student.name], ['الحلقة', student.halaqa || 'غير محددة'],
+                ['تاريخ الانضمام', formatDate(student.startDate)], ['بدأ الحفظ من', `سورة ${student.startSurah}`],
+                ['عدد الأجزاء المنجزة', `${formatNumber(student.completedJuz)} من ${formatNumber(30)}`], ['هاتف ولي الأمر', student.phone || 'غير مسجل'],
+                ['جلسات التسميع', formatNumber(records.length)], ['متوسط الدرجة', records.length ? `${formatNumber(average)} / ${formatNumber(10)}` : 'لا توجد'],
+                ['جلسات بدرجة ٩+', formatNumber(high)], ['آخر تسميع', records.length ? formatDate(records[records.length - 1].date) : 'لا يوجد'],
+                ['الهدف المرحلي', student.goal || 'غير محدد'], ['ملاحظات عامة', shortNote]
+            ];
+            const title = `ملف الطالب الكامل: ${student.name}`;
+            const summary = `هذا الملف يحتوي على كامل تاريخ التسميع المسجل للطالب (${formatNumber(records.length)} جلسة) بكل التواريخ والدرجات والملاحظات.`;
+            const page = createReportPage(stage, title, summary);
+            const info = document.createElement('div');
+            info.className = 'report-profile';
+            info.innerHTML = details.map(([label, value]) => `<div><small>${escapeHtml(label)}</small><strong>${escapeHtml(String(value))}</strong></div>`).join('');
+            page.appendChild(info);
+
+            if (!records.length) {
+                const empty = document.createElement('p');
+                empty.className = 'report-summary';
+                empty.textContent = 'لم تُسجَّل أي جلسة تسميع لهذا الطالب بعد.';
+                page.appendChild(empty);
+                return;
+            }
+
+            const headings = ['#', 'تاريخ التسميع', 'نوع التسميع', 'السورة والآيات', 'الدرجة من 10', 'ملاحظات المحفظ'];
+            const widths = [5, 14, 13, 22, 11, 35];
+            const headingTitle = document.createElement('h3');
+            headingTitle.style.cssText = 'margin:14px 0 8px;color:#123f32;font-size:15px;font-weight:700';
+            headingTitle.textContent = `سجل التسميع الكامل (${formatNumber(records.length)} جلسة)`;
+            page.appendChild(headingTitle);
+
+            let table, tbody, currentPage = page, pageNumber = 1;
+            const buildTable = targetPage => {
+                table = document.createElement('table');
+                table.className = 'report-table';
+                table.innerHTML = `<colgroup>${widths.map(width => `<col style="width:${width}%">`).join('')}</colgroup><thead><tr>${headings.map(heading => `<th>${heading}</th>`).join('')}</tr></thead><tbody></tbody>`;
+                targetPage.appendChild(table);
+                tbody = table.querySelector('tbody');
+            };
+            buildTable(page);
+
+            records.forEach((session, index) => {
+                const values = [
+                    formatNumber(index + 1), formatDate(session.date), session.type,
+                    `سورة ${session.surah}\nآية ${formatNumber(session.fromAyah)} إلى ${formatNumber(session.toAyah)}`,
+                    formatNumber(session.score ?? 0), session.notes || 'لا توجد'
+                ];
+                const chunks = values.map((value, column) => splitReportText(value, Math.max(40, Math.floor(widths[column] * 5))));
+                const count = Math.max(...chunks.map(parts => parts.length));
+                for (let part = 0; part < count; part++) {
+                    const row = document.createElement('tr');
+                    if (part) row.className = 'report-continued';
+                    chunks.forEach((parts, column) => {
+                        const cell = row.insertCell();
+                        cell.textContent = parts.length === 1 ? parts[0] : (parts[part] || '');
+                        if (part && column === 0) cell.textContent += ' (تابع)';
+                    });
+                    tbody.appendChild(row);
+                    const limit = currentPage.getBoundingClientRect().bottom - 78;
+                    if (table.getBoundingClientRect().bottom > limit && tbody.children.length > 1) {
+                        row.remove();
+                        currentPage = createReportPage(stage, title, `${student.name} - استكمال سجل التسميع (صفحة ${formatNumber(++pageNumber)})`);
+                        buildTable(currentPage);
+                        tbody.appendChild(row);
+                    }
+                }
+            });
         }
 
         function addRankingTable(stage) {
             const rows = buildRanking();
             const periodLabel = { '7': 'آخر 7 أيام', '30': 'آخر 30 يوماً', all: 'كل الفترة' }[byId('rankingPeriod').value];
-            addTablePages(stage, 'ترتيب الطلاب والمتفوقين', `الفترة: ${periodLabel}. النقاط = مجموع الدرجات + نقطة لكل جلسة تسميع + نقطة لكل جلسة ممتاز.`,
-                ['#', 'اسم الطالب', 'التسميعات', 'مجموع الدرجات', 'متوسط الدرجة', 'جلسات ممتاز', 'أيام التسميع', 'الانتظام', 'آخر تسميع', 'النقاط'],
+            addTablePages(stage, 'ترتيب الطلاب والمتفوقين', `الفترة: ${periodLabel}. النقاط = مجموع الدرجات + نقطة لكل جلسة تسميع + نقطة لكل جلسة بدرجة 9 فأكثر.`,
+                ['#', 'اسم الطالب', 'التسميعات', 'مجموع الدرجات', 'متوسط الدرجة', 'جلسات ٩+', 'أيام التسميع', 'الانتظام', 'آخر تسميع', 'النقاط'],
                 [4, 21, 8, 10, 10, 8, 9, 9, 11, 10],
                 rows.map((row, index) => [
                     formatNumber(index + 1), row.student.name, formatNumber(row.list.length), formatNumber(row.totalScore),
@@ -2552,7 +2581,7 @@
 
         function downloadReport() {
             const type = byId('exportType').value;
-            const names = { all: 'التقرير_الشامل', students: 'سجل_الطلاب', sessions: 'سجل_التسميع', ranking: 'ترتيب_الطلاب' };
+            const names = { all: 'التقرير_الشامل', students: 'سجل_الطلاب', sessions: 'سجل_التسميع', ranking: 'ترتيب_الطلاب', files: 'ملفات_الطلاب_الكاملة' };
             exportPdf(`مسجد_مبارك_${names[type]}_${todayISO()}.pdf`, stage => {
                 if (type === 'all' || type === 'ranking') addRankingTable(stage);
                 if (type === 'all' || type === 'students') {
@@ -2564,6 +2593,9 @@
                         students.map((s, i) => [formatNumber(i + 1), s.name, s.phone || 'غير مسجل', s.goal || 'غير محدد', s.notes || 'لا توجد']));
                 }
                 if (type === 'all' || type === 'sessions') addSessionReport(stage, sessions);
+                if (type === 'all' || type === 'files') {
+                    [...students].sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(student => addStudentFilePages(stage, student));
+                }
                 return [...stage.children];
             });
         }
@@ -2707,15 +2739,15 @@
             else if (!event.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
         });
 
-        // BADGE COLOR HELPERS
-        function getGradeBadgeClass(grade) {
-            if (!grade) return 'bg-slate-100 text-slate-700';
-            if (grade.includes('ممتاز مرتفع')) return 'bg-amber-100 text-amber-900 border border-amber-300';
-            if (grade.includes('ممتاز')) return 'bg-emerald-100 text-emerald-800';
-            if (grade.includes('جيد جداً')) return 'bg-blue-100 text-blue-800';
-            if (grade.includes('جيد')) return 'bg-cyan-100 text-cyan-800';
-            if (grade.includes('إعادة')) return 'bg-rose-100 text-rose-800';
-            return 'bg-slate-100 text-slate-700';
+        // Numeric score chips only — no textual grades such as "good / very good".
+        function scoreChipClass(score) {
+            const value = Number(score ?? 0);
+            if (value >= 10) return 'bg-amber-100 text-amber-900 border border-amber-300';
+            if (value >= 9) return 'bg-emerald-100 text-emerald-800';
+            if (value >= 8) return 'bg-sky-100 text-sky-800';
+            if (value >= 7) return 'bg-cyan-100 text-cyan-800';
+            if (value >= 5) return 'bg-slate-100 text-slate-700';
+            return 'bg-rose-100 text-rose-800';
         }
 
         function getSessionTypeBadge(type) {
