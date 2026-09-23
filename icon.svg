@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="#064e3b"/>
+  <rect x="30" y="30" width="452" height="452" rx="92" fill="none" stroke="#f5a000" stroke-width="12"/>
+  <circle cx="256" cy="148" r="60" fill="#f5a000"/>
+  <circle cx="279" cy="135" r="48" fill="#064e3b"/>
+  <path d="M256 252c-32-21-72-27-112-21v148c40-6 80 0 112 21 32-21 72-27 112-21V231c-40-6-80 0-112 21z" fill="#ffffff"/>
+  <rect x="250" y="248" width="12" height="154" rx="4" fill="#f5a000"/>
+  <path d="M150 285c35-5 70-1 96 15M362 285c-35-5-70-1-96 15" stroke="#9db8ad" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <text x="256" y="452" text-anchor="middle" font-family="Cairo, Arial, sans-serif" font-size="54" font-weight="bold" fill="#f5a000">مبارك</text>
+</svg>
