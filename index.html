@@ -15,6 +15,8 @@
     <meta name="apple-mobile-web-app-title" content="حلقات مبارك">
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Supabase browser client for optional cross-device sync -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <!-- Google Fonts: Cairo, Amiri, Scheherazade New -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -132,6 +134,10 @@
         .rank-progress { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
         .rank-progress span { display: block; height: 100%; background: #047857; }
         .status-chip { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; }
+        .sync-dot.online { background: #34d399; box-shadow: 0 0 0 4px #34d39922; }
+        .sync-dot.error { background: #fb7185; }
+        .sync-code { direction: ltr; text-align: left; font-family: ui-monospace, monospace; font-size: 12px; }
         .pdf-stage { position: fixed; top: 0; left: -15000px; width: 1120px; pointer-events: none; }
         /* Report pages already render at the fixed paper size. */
         .report-page { box-sizing: border-box; position: relative; direction: rtl; width: 1120px; height: 792px; padding: 38px 44px 60px; background: #fff; color: #1e293b; font-family: 'Cairo', sans-serif; line-height: 1.5; overflow: hidden; }
@@ -222,6 +228,10 @@
                     <button id="installAppBtn" onclick="installPWA()" class="hidden bg-white/10 hover:bg-white/20 text-white border border-white/30 px-3 py-2.5 rounded-xl text-sm transition-all items-center gap-1.5 cursor-pointer" title="تثبيت التطبيق على الجهاز">
                         <i class="fa-solid fa-mobile-screen-button"></i>
                         <span>تثبيت التطبيق</span>
+                    </button>
+                    <button onclick="openSyncModal()" class="bg-sky-400/20 hover:bg-sky-400/30 text-sky-100 border border-sky-300/40 px-3 py-2.5 rounded-xl text-sm transition-all flex items-center gap-1.5 cursor-pointer" title="مزامنة البيانات بين الأجهزة">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span id="syncHeaderLabel">مزامنة الأجهزة</span>
                     </button>
                 </div>
             </div>
@@ -1128,6 +1138,48 @@
             </div>
         </div>
     </div>
+    <div id="syncModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
+        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 bg-sky-950 text-white flex items-center justify-between">
+                <div><h3 id="syncTitle" class="font-bold text-lg">مزامنة البيانات بين الأجهزة</h3><p class="text-xs text-sky-200 mt-1">استخدم نفس الحساب على الكمبيوتر والتليفون</p></div>
+                <button onclick="closeModal('syncModal')" class="w-9 h-9 rounded-lg hover:bg-white/10" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-5 max-h-[78dvh] overflow-y-auto">
+                <div id="syncStatusBox" class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start gap-3">
+                    <span id="syncStatusDot" class="sync-dot mt-1.5"></span><div><strong id="syncStatusTitle" class="block text-sm text-slate-800">المزامنة غير مفعلة</strong><p id="syncStatusText" class="muted mt-1">البيانات الحالية محفوظة على هذا الجهاز فقط.</p></div>
+                </div>
+                <div class="bg-amber-50 border-r-4 border-amber-500 p-4 rounded-xl text-xs text-amber-950 leading-loose"><strong class="block mb-1">مهم قبل البدء:</strong>تحتاج إلى مشروع Supabase مجاني. أنشئ جدول المزامنة من SQL Editor باستخدام كود الإعداد الموجود أسفل النموذج، ثم ضع رابط المشروع وPublishable/Anon Key هنا. لا تستخدم Service Role Key داخل المتصفح.</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label for="syncUrlInput" class="field-label">Supabase Project URL</label><input id="syncUrlInput" class="field sync-code" placeholder="https://xxxxx.supabase.co" autocomplete="url"></div>
+                    <div><label for="syncKeyInput" class="field-label">Publishable / Anon Key</label><input id="syncKeyInput" type="password" class="field sync-code" placeholder="eyJ..." autocomplete="off"></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label for="syncEmailInput" class="field-label">البريد الإلكتروني للحساب</label><input id="syncEmailInput" type="email" class="field" placeholder="name@example.com" autocomplete="email"></div>
+                    <div><label for="syncPasswordInput" class="field-label">كلمة المرور</label><input id="syncPasswordInput" type="password" class="field" placeholder="8 أحرف أو أكثر" autocomplete="current-password"></div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="connectCloudSync()" class="bg-sky-700 hover:bg-sky-800 text-white font-bold px-4 py-2.5 rounded-xl text-sm"><i class="fa-solid fa-plug ml-1"></i> حفظ الاتصال وتسجيل الدخول</button>
+                    <button onclick="createCloudAccount()" class="text-action border border-slate-200">إنشاء حساب جديد</button>
+                    <button onclick="pullCloudData()" class="text-action border border-slate-200">تنزيل من السحابة</button>
+                    <button onclick="pushCloudData()" class="text-action border border-slate-200">رفع بيانات هذا الجهاز</button>
+                    <button onclick="signOutCloud()" class="text-action danger border border-red-100">تسجيل الخروج</button>
+                </div>
+                <details class="border border-slate-200 rounded-xl p-4"><summary class="font-bold text-sm text-slate-700 cursor-pointer">كود إعداد جدول Supabase</summary><pre id="syncSqlCode" class="sync-code whitespace-pre-wrap text-[11px] bg-slate-950 text-slate-100 p-3 rounded-lg mt-3 overflow-x-auto">create table public.mubarak_app_data (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+alter table public.mubarak_app_data enable row level security;
+grant select, insert, update, delete on public.mubarak_app_data to authenticated;
+create policy "users manage own mubarak data"
+  on public.mubarak_app_data for all to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+alter publication supabase_realtime add table public.mubarak_app_data;</pre><button onclick="copySyncSql()" class="text-action mt-2">نسخ كود SQL</button></details>
+                <p class="muted">بعد تسجيل الدخول بنفس الحساب على جهازين، سيتم رفع أي تعديل تلقائياً والاستماع لتعديلات الجهاز الآخر. تعارض التعديل النادر يحسمه آخر حفظ يصل للسحابة.</p>
+            </div>
+        </div>
+    </div>
     <div id="weeklyPlanModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4" role="dialog" aria-modal="true" aria-labelledby="weeklyPlanTitle">
         <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden">
             <div class="px-6 py-5 bg-emerald-950 text-white flex items-center justify-between">
@@ -1442,7 +1494,7 @@
             completed: { label: 'تم التسميع', cls: 'bg-emerald-100 text-emerald-800' },
             needs_review: { label: 'يحتاج إعادة', cls: 'bg-rose-100 text-rose-800' }
         };
-        const MODAL_IDS = ['addStudentModal', 'addSessionModal', 'studentProfileModal', 'questionsModal', 'surahDetailsModal', 'exportModal', 'confirmModal', 'attendanceModal', 'weeklyPlanModal'];
+        const MODAL_IDS = ['addStudentModal', 'addSessionModal', 'studentProfileModal', 'questionsModal', 'surahDetailsModal', 'exportModal', 'confirmModal', 'attendanceModal', 'weeklyPlanModal', 'syncModal'];
         let students = [];
         let sessions = [];
         let activeStudentForProfile = null;
@@ -1456,6 +1508,14 @@
         const modalTriggers = new Map();
         const scriptLoads = new Map();
         const quranApiCache = new Map();
+        const SYNC_CONFIG_KEY = 'mb_supabase_config_v1';
+        let cloudClient = null;
+        let cloudUser = null;
+        let cloudChannel = null;
+        let cloudSyncReady = false;
+        let cloudApplying = false;
+        let cloudPushTimer = null;
+        let cloudLastWrite = '';
 
         function byId(id) { return document.getElementById(id); }
         function todayISO(daysAgo = 0) {
@@ -1483,6 +1543,163 @@
             toast.textContent = message;
             byId('toastRegion').appendChild(toast);
             setTimeout(() => toast.remove(), type === 'error' ? 8500 : 5000);
+        }
+
+        // ================== CLOUD SYNC ==================
+        // Supabase stores one protected JSON snapshot per signed-in user. The browser only uses the public key.
+        function getSyncConfig() {
+            try { return JSON.parse(localStorage.getItem(SYNC_CONFIG_KEY) || '{}'); } catch { return {}; }
+        }
+        function setSyncStatus(title, text, state = '') {
+            byId('syncStatusTitle').textContent = title;
+            byId('syncStatusText').textContent = text;
+            byId('syncStatusDot').className = `sync-dot ${state}`;
+            byId('syncHeaderLabel').textContent = state === 'online' ? 'متزامن' : state === 'error' ? 'مزامنة' : 'مزامنة الأجهزة';
+        }
+        function cloudSnapshot() {
+            return { app: APP_NAME, version: '4.0', exportDate: new Date().toISOString(), students, sessions, attendance: attendanceData() };
+        }
+        function initCloudClient() {
+            const config = getSyncConfig();
+            if (!config.url || !config.key || !window.supabase?.createClient) return null;
+            if (!cloudClient || cloudClient.__mubarakUrl !== config.url || cloudClient.__mubarakKey !== config.key) {
+                cloudClient = window.supabase.createClient(config.url, config.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+                cloudClient.__mubarakUrl = config.url;
+                cloudClient.__mubarakKey = config.key;
+            }
+            return cloudClient;
+        }
+        function fillSyncForm() {
+            const config = getSyncConfig();
+            byId('syncUrlInput').value = config.url || '';
+            byId('syncKeyInput').value = config.key || '';
+            setSyncStatus(cloudUser ? 'المزامنة تعمل' : config.url ? 'الاتصال محفوظ' : 'المزامنة غير مفعلة', cloudUser ? `الحساب: ${cloudUser.email || 'حساب المزامنة'}` : config.url ? 'أدخل البريد وكلمة المرور لتسجيل الدخول.' : 'البيانات الحالية محفوظة على هذا الجهاز فقط.', cloudUser ? 'online' : '');
+        }
+        function openSyncModal() { fillSyncForm(); openModal('syncModal'); }
+        async function connectCloudSync() {
+            const url = byId('syncUrlInput').value.trim().replace(/\/$/, '');
+            const key = byId('syncKeyInput').value.trim();
+            const email = byId('syncEmailInput').value.trim();
+            const password = byId('syncPasswordInput').value;
+            if (!/^https:\/\//.test(url) || key.length < 20 || !email || password.length < 6) return notify('أدخل رابط Supabase، المفتاح العام، البريد وكلمة المرور بشكل صحيح.', 'error');
+            localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify({ url, key }));
+            const client = initCloudClient();
+            if (!client) return notify('تعذر تحميل عميل Supabase. تحقق من الاتصال بالإنترنت.', 'error');
+            setSyncStatus('جارٍ تسجيل الدخول', 'نحاول فتح جلسة المزامنة...', '');
+            const { data, error } = await client.auth.signInWithPassword({ email, password });
+            if (error) {
+                setSyncStatus('تعذر تسجيل الدخول', error.message || 'راجع البريد وكلمة المرور.', 'error');
+                return notify('تعذر تسجيل الدخول إلى المزامنة.', 'error');
+            }
+            await finishCloudSync(data.user);
+        }
+        async function createCloudAccount() {
+            const url = byId('syncUrlInput').value.trim().replace(/\/$/, '');
+            const key = byId('syncKeyInput').value.trim();
+            const email = byId('syncEmailInput').value.trim();
+            const password = byId('syncPasswordInput').value;
+            if (!/^https:\/\//.test(url) || key.length < 20 || !email || password.length < 6) return notify('أدخل رابط Supabase، المفتاح العام، البريد وكلمة مرور لا تقل عن 6 أحرف.', 'error');
+            localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify({ url, key }));
+            const client = initCloudClient();
+            if (!client) return notify('تعذر تحميل عميل Supabase. تحقق من الاتصال بالإنترنت.', 'error');
+            const { data, error } = await client.auth.signUp({ email, password });
+            if (error) return notify(error.message || 'تعذر إنشاء الحساب.', 'error');
+            if (data.user && data.session) await finishCloudSync(data.user);
+            else notify('تم إنشاء الحساب. راجع بريدك الإلكتروني لتأكيد الحساب ثم اضغط تسجيل الدخول.', 'info');
+        }
+        async function initCloudSync() {
+            const client = initCloudClient();
+            if (!client) return;
+            client.auth.onAuthStateChange((event, session) => {
+                if (session?.user) finishCloudSync(session.user);
+                else {
+                    cloudUser = null;
+                    cloudSyncReady = false;
+                    setSyncStatus('المزامنة غير مفعلة', 'سجّل الدخول لتشغيل المزامنة بين الأجهزة.', '');
+                }
+            });
+            const { data } = await client.auth.getSession();
+            if (data.session?.user) await finishCloudSync(data.session.user);
+        }
+        async function finishCloudSync(user) {
+            if (!cloudClient || !user) return;
+            cloudUser = user;
+            cloudSyncReady = true;
+            setSyncStatus('المزامنة تعمل', `الحساب: ${user.email || 'حساب المزامنة'} — جاري تحميل بيانات السحابة...`, 'online');
+            await pullCloudData(true);
+            if (cloudChannel) cloudClient.removeChannel(cloudChannel);
+            cloudChannel = cloudClient.channel(`mubarak-data-${user.id}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'mubarak_app_data', filter: `user_id=eq.${user.id}` }, payload => {
+                    if (payload.new?.updated_at === cloudLastWrite) return;
+                    if (payload.new?.data) applyRemoteSnapshot(payload.new.data);
+                })
+                .subscribe();
+            setSyncStatus('المزامنة تعمل', `متصل بالحساب: ${user.email || 'حساب المزامنة'}`, 'online');
+        }
+        function scheduleCloudPush(next) {
+            if (!cloudSyncReady || !cloudClient || cloudApplying) return;
+            clearTimeout(cloudPushTimer);
+            cloudPushTimer = setTimeout(() => pushCloudData(next), 700);
+        }
+        async function pushCloudData(next = null) {
+            if (!cloudSyncReady || !cloudClient || !cloudUser) return false;
+            const snapshot = next ? { ...cloudSnapshot(), ...next } : cloudSnapshot();
+            const updatedAt = new Date().toISOString();
+            cloudLastWrite = updatedAt;
+            const { error } = await cloudClient.from('mubarak_app_data').upsert({ user_id: cloudUser.id, data: snapshot, updated_at: updatedAt }, { onConflict: 'user_id' });
+            if (error) {
+                setSyncStatus('خطأ في المزامنة', error.message || 'تعذر رفع البيانات.', 'error');
+                notify('تعذر رفع التعديل إلى السحابة. البيانات المحلية لم تتأثر.', 'error');
+                return false;
+            }
+            setSyncStatus('المزامنة تعمل', `آخر حفظ سحابي: ${new Date().toLocaleTimeString('ar-EG')}`, 'online');
+            return true;
+        }
+        async function pullCloudData(silent = false) {
+            if (!cloudClient || !cloudUser) return false;
+            const { data, error } = await cloudClient.from('mubarak_app_data').select('data,updated_at').eq('user_id', cloudUser.id).maybeSingle();
+            if (error) {
+                setSyncStatus('خطأ في قراءة السحابة', error.message || 'تحقق من إعداد الجدول والسياسات.', 'error');
+                if (!silent) notify('تعذر تنزيل البيانات من السحابة. تأكد من تنفيذ SQL الإعداد.', 'error');
+                return false;
+            }
+            if (!data) {
+                await pushCloudData();
+                return true;
+            }
+            applyRemoteSnapshot(data.data);
+            cloudLastWrite = data.updated_at || '';
+            if (!silent) notify('تم تنزيل أحدث نسخة من السحابة.');
+            return true;
+        }
+        function applyRemoteSnapshot(snapshot) {
+            try {
+                const clean = validateData(snapshot);
+                const attendance = validateAttendanceImport(snapshot.attendance || [], new Set(clean.students.map(student => student.id)));
+                cloudApplying = true;
+                students = clean.students;
+                sessions = clean.sessions;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', students, sessions }));
+                saveAttendance(attendance);
+                cloudApplying = false;
+                updateApp();
+                setSyncStatus('المزامنة تعمل', `تم تحديث البيانات من جهاز آخر: ${new Date().toLocaleTimeString('ar-EG')}`, 'online');
+            } catch (error) {
+                cloudApplying = false;
+                notify(`وصلت نسخة سحابية غير صالحة ولم تُطبّق: ${error.message}`, 'error');
+            }
+        }
+        async function signOutCloud() {
+            if (cloudClient) await cloudClient.auth.signOut();
+            cloudUser = null;
+            cloudSyncReady = false;
+            if (cloudChannel) { cloudClient?.removeChannel(cloudChannel); cloudChannel = null; }
+            fillSyncForm();
+            notify('تم تسجيل الخروج من المزامنة. البيانات المحلية ما زالت موجودة على هذا الجهاز.', 'info');
+        }
+        async function copySyncSql() {
+            try { await navigator.clipboard.writeText(byId('syncSqlCode').textContent); notify('تم نسخ كود SQL.'); }
+            catch { notify('انسخ الكود يدوياً من الصندوق.', 'info'); }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1513,6 +1730,7 @@
             updateApp();
             byId('studentStartDateInput').max = todayISO();
             byId('sessionDateInput').max = todayISO();
+            initCloudSync();
         });
 
         // Set date string
@@ -1527,7 +1745,7 @@
         function validateData(data) {
             if (!data || typeof data !== 'object' || !Array.isArray(data.students) || !Array.isArray(data.sessions ?? [])) throw new Error('بنية ملف البيانات غير صحيحة.');
             if (data.app && data.app !== APP_NAME) throw new Error('هذا الملف لا يخص منصة مسجد مبارك.');
-            if (data.version && !['1.0', '2.0', '2', 2, '3.0', '3', 3].includes(data.version)) throw new Error('إصدار النسخة الاحتياطية غير مدعوم.');
+            if (data.version && !['1.0', '2.0', '2', 2, '3.0', '3', 3, '4.0', '4', 4].includes(data.version)) throw new Error('إصدار النسخة الاحتياطية غير مدعوم.');
             if (data.students.length > 10000 || (data.sessions ?? []).length > 100000) throw new Error('حجم السجلات أكبر من الحد المسموح للاستيراد.');
             const text = (value, max, required = false) => {
                 if (value === undefined || value === null) value = '';
@@ -1610,7 +1828,8 @@
             }
             try {
                 // One atomic snapshot prevents a student deletion from leaving orphan sessions.
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '3.0', ...next }));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', ...next }));
+                scheduleCloudPush({ students: next.students, sessions: next.sessions });
                 loadFailed = false;
                 storageWarning = '';
                 return true;
@@ -3215,7 +3434,7 @@
             if (loadFailed) return notify('تعذر قراءة البيانات الأصلية؛ لن يتم تنزيل نسخة فارغة مضللة.', 'error');
             const data = {
                 app: APP_NAME,
-                version: '3.0',
+                version: '4.0',
                 exportDate: new Date().toISOString(),
                 students,
                 sessions,
@@ -3517,7 +3736,7 @@
                 offlineBar.classList.toggle('flex', !online);
             }
         }
-        window.addEventListener('online', () => { updateOnlineStatus(); try { notify('عاد الاتصال بالإنترنت'); } catch (e) {} });
+        window.addEventListener('online', () => { updateOnlineStatus(); try { notify('عاد الاتصال بالإنترنت'); if (typeof pushCloudData === 'function') pushCloudData(); } catch (e) {} });
         window.addEventListener('offline', () => { updateOnlineStatus(); try { notify('انقطع الاتصال — التطبيق يعمل محلياً وبياناتك محفوظة', 'info'); } catch (e) {} });
         updateOnlineStatus();
     })();
