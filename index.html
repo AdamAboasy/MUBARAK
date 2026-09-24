@@ -15,8 +15,10 @@
     <meta name="apple-mobile-web-app-title" content="حلقات مبارك">
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Supabase browser client for optional cross-device sync -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <!-- Firebase compat SDK for cross-device sync without a custom backend -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
     <!-- Google Fonts: Cairo, Amiri, Scheherazade New -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1148,11 +1150,14 @@
                 <div id="syncStatusBox" class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start gap-3">
                     <span id="syncStatusDot" class="sync-dot mt-1.5"></span><div><strong id="syncStatusTitle" class="block text-sm text-slate-800">المزامنة غير مفعلة</strong><p id="syncStatusText" class="muted mt-1">البيانات الحالية محفوظة على هذا الجهاز فقط.</p></div>
                 </div>
-                <div class="bg-amber-50 border-r-4 border-amber-500 p-4 rounded-xl text-xs text-amber-950 leading-loose"><strong class="block mb-1">مهم قبل البدء:</strong>تحتاج إلى مشروع Supabase مجاني. أنشئ جدول المزامنة من SQL Editor باستخدام كود الإعداد الموجود أسفل النموذج، ثم ضع رابط المشروع وPublishable/Anon Key هنا. لا تستخدم Service Role Key داخل المتصفح.</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div><label for="syncUrlInput" class="field-label">Supabase Project URL</label><input id="syncUrlInput" class="field sync-code" placeholder="https://xxxxx.supabase.co" autocomplete="url"></div>
-                    <div><label for="syncKeyInput" class="field-label">Publishable / Anon Key</label><input id="syncKeyInput" type="password" class="field sync-code" placeholder="eyJ..." autocomplete="off"></div>
-                </div>
+                <div class="bg-amber-50 border-r-4 border-amber-500 p-4 rounded-xl text-xs text-amber-950 leading-loose"><strong class="block mb-1">إعداد أبسط عبر Firebase:</strong>أنشئ مشروع Firebase، فعّل Email/Password وRealtime Database، ثم انسخ كامل Firebase config من Project Settings والصقه في خانة واحدة. لا تحتاج SQL أو مفاتيح سرية.</div>
+                <div><label for="syncFirebaseConfigInput" class="field-label">Firebase Configuration</label><textarea id="syncFirebaseConfigInput" rows="5" class="field sync-code" placeholder='{
+  "apiKey": "...",
+  "authDomain": "...",
+  "databaseURL": "https://...-default-rtdb.firebaseio.com",
+  "projectId": "...",
+  "appId": "..."
+}'></textarea></div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><label for="syncEmailInput" class="field-label">البريد الإلكتروني للحساب</label><input id="syncEmailInput" type="email" class="field" placeholder="name@example.com" autocomplete="email"></div>
                     <div><label for="syncPasswordInput" class="field-label">كلمة المرور</label><input id="syncPasswordInput" type="password" class="field" placeholder="8 أحرف أو أكثر" autocomplete="current-password"></div>
@@ -1164,18 +1169,16 @@
                     <button onclick="pushCloudData()" class="text-action border border-slate-200">رفع بيانات هذا الجهاز</button>
                     <button onclick="signOutCloud()" class="text-action danger border border-red-100">تسجيل الخروج</button>
                 </div>
-                <details class="border border-slate-200 rounded-xl p-4"><summary class="font-bold text-sm text-slate-700 cursor-pointer">كود إعداد جدول Supabase</summary><pre id="syncSqlCode" class="sync-code whitespace-pre-wrap text-[11px] bg-slate-950 text-slate-100 p-3 rounded-lg mt-3 overflow-x-auto">create table public.mubarak_app_data (
-  user_id uuid primary key references auth.users(id) on delete cascade,
-  data jsonb not null default '{}'::jsonb,
-  updated_at timestamptz not null default now()
-);
-alter table public.mubarak_app_data enable row level security;
-grant select, insert, update, delete on public.mubarak_app_data to authenticated;
-create policy "users manage own mubarak data"
-  on public.mubarak_app_data for all to authenticated
-  using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
-alter publication supabase_realtime add table public.mubarak_app_data;</pre><button onclick="copySyncSql()" class="text-action mt-2">نسخ كود SQL</button></details>
+                <details class="border border-slate-200 rounded-xl p-4"><summary class="font-bold text-sm text-slate-700 cursor-pointer">Firebase Realtime Database Rules</summary><pre id="syncRulesCode" class="sync-code whitespace-pre-wrap text-[11px] bg-slate-950 text-slate-100 p-3 rounded-lg mt-3 overflow-x-auto">{
+  "rules": {
+    "mubarak_app_data": {
+      "$uid": {
+        ".read": "auth != null &amp;&amp; auth.uid === $uid",
+        ".write": "auth != null &amp;&amp; auth.uid === $uid"
+      }
+    }
+  }
+}</pre><button onclick="copySyncRules()" class="text-action mt-2">نسخ Rules</button></details>
                 <p class="muted">بعد تسجيل الدخول بنفس الحساب على جهازين، سيتم رفع أي تعديل تلقائياً والاستماع لتعديلات الجهاز الآخر. تعارض التعديل النادر يحسمه آخر حفظ يصل للسحابة.</p>
             </div>
         </div>
@@ -1508,7 +1511,7 @@ alter publication supabase_realtime add table public.mubarak_app_data;</pre><but
         const modalTriggers = new Map();
         const scriptLoads = new Map();
         const quranApiCache = new Map();
-        const SYNC_CONFIG_KEY = 'mb_supabase_config_v1';
+        const SYNC_CONFIG_KEY = 'mb_firebase_config_v1';
         let cloudClient = null;
         let cloudUser = null;
         let cloudChannel = null;
@@ -1545,8 +1548,8 @@ alter publication supabase_realtime add table public.mubarak_app_data;</pre><but
             setTimeout(() => toast.remove(), type === 'error' ? 8500 : 5000);
         }
 
-        // ================== CLOUD SYNC ==================
-        // Supabase stores one protected JSON snapshot per signed-in user. The browser only uses the public key.
+        // ================== FIREBASE CLOUD SYNC ==================
+        // Firebase Realtime Database holds one protected snapshot per authenticated user.
         function getSyncConfig() {
             try { return JSON.parse(localStorage.getItem(SYNC_CONFIG_KEY) || '{}'); } catch { return {}; }
         }
@@ -1559,81 +1562,113 @@ alter publication supabase_realtime add table public.mubarak_app_data;</pre><but
         function cloudSnapshot() {
             return { app: APP_NAME, version: '4.0', exportDate: new Date().toISOString(), students, sessions, attendance: attendanceData() };
         }
+        function parseFirebaseConfig(raw) {
+            try {
+                // Accept either pure JSON or the `const firebaseConfig = { ... }` snippet from Firebase Console.
+                let normalized = String(raw || '').trim();
+                const firstBrace = normalized.indexOf('{');
+                const lastBrace = normalized.lastIndexOf('}');
+                if (firstBrace !== -1 && lastBrace > firstBrace) normalized = normalized.slice(firstBrace, lastBrace + 1);
+                normalized = normalized
+                    .replace(/([{,]\s*)([A-Za-z_$][\w$]*)\s*:/g, '$1"$2":')
+                    .replace(/'/g, '"')
+                    .replace(/,\s*}/g, '}');
+                const config = JSON.parse(normalized);
+                if (!config.apiKey || !config.authDomain || !config.databaseURL || !config.projectId || !config.appId) throw new Error('config ناقص');
+                return config;
+            } catch { throw new Error('الصق Firebase config كاملاً بصيغة JSON صحيحة.'); }
+        }
         function initCloudClient() {
             const config = getSyncConfig();
-            if (!config.url || !config.key || !window.supabase?.createClient) return null;
-            if (!cloudClient || cloudClient.__mubarakUrl !== config.url || cloudClient.__mubarakKey !== config.key) {
-                cloudClient = window.supabase.createClient(config.url, config.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-                cloudClient.__mubarakUrl = config.url;
-                cloudClient.__mubarakKey = config.key;
+            if (!config.apiKey || !config.databaseURL || !window.firebase?.initializeApp) return null;
+            const appName = `mubarak-${String(config.projectId).replace(/[^a-zA-Z0-9_-]/g, '')}`;
+            const app = window.firebase.apps.find(item => item.name === appName) || window.firebase.initializeApp(config, appName);
+            if (!cloudClient || cloudClient.app.name !== appName) {
+                cloudClient = { app, auth: app.auth(), db: app.database(), config };
             }
             return cloudClient;
         }
         function fillSyncForm() {
             const config = getSyncConfig();
-            byId('syncUrlInput').value = config.url || '';
-            byId('syncKeyInput').value = config.key || '';
-            setSyncStatus(cloudUser ? 'المزامنة تعمل' : config.url ? 'الاتصال محفوظ' : 'المزامنة غير مفعلة', cloudUser ? `الحساب: ${cloudUser.email || 'حساب المزامنة'}` : config.url ? 'أدخل البريد وكلمة المرور لتسجيل الدخول.' : 'البيانات الحالية محفوظة على هذا الجهاز فقط.', cloudUser ? 'online' : '');
+            byId('syncFirebaseConfigInput').value = config.apiKey ? JSON.stringify(config, null, 2) : '';
+            setSyncStatus(cloudUser ? 'المزامنة تعمل' : config.apiKey ? 'إعداد Firebase محفوظ' : 'المزامنة غير مفعلة', cloudUser ? `الحساب: ${cloudUser.email || 'حساب المزامنة'}` : config.apiKey ? 'أدخل البريد وكلمة المرور لتسجيل الدخول.' : 'البيانات الحالية محفوظة على هذا الجهاز فقط.', cloudUser ? 'online' : '');
         }
         function openSyncModal() { fillSyncForm(); openModal('syncModal'); }
+        function firebaseAuthErrorMessage(error) {
+            const code = String(error?.code || '');
+            if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) return 'البريد أو كلمة المرور غير صحيحين، أو لم تُنشئ الحساب بعد. اضغط «إنشاء حساب جديد» إذا كانت هذه أول مرة.';
+            if (code.includes('email-already-in-use')) return 'هذا البريد لديه حساب بالفعل. استخدم «حفظ الاتصال وتسجيل الدخول». ';
+            if (code.includes('operation-not-allowed')) return 'فعّل Email/Password من Firebase Console: Authentication ثم Sign-in method.';
+            if (code.includes('weak-password')) return 'كلمة المرور ضعيفة. استخدم 6 أحرف على الأقل.';
+            if (code.includes('invalid-email')) return 'البريد الإلكتروني غير صحيح.';
+            if (code.includes('network-request-failed')) return 'تعذر الاتصال بالإنترنت أو بـ Firebase.';
+            return `تعذر تسجيل الدخول: ${error?.message || 'خطأ غير معروف'}`;
+        }
+        function saveFirebaseConfigFromForm() {
+            const config = parseFirebaseConfig(byId('syncFirebaseConfigInput').value.trim());
+            localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(config));
+            cloudClient = null;
+            return config;
+        }
         async function connectCloudSync() {
-            const url = byId('syncUrlInput').value.trim().replace(/\/$/, '');
-            const key = byId('syncKeyInput').value.trim();
-            const email = byId('syncEmailInput').value.trim();
+            const email = byId('syncEmailInput').value.trim().toLowerCase();
             const password = byId('syncPasswordInput').value;
-            if (!/^https:\/\//.test(url) || key.length < 20 || !email || password.length < 6) return notify('أدخل رابط Supabase، المفتاح العام، البريد وكلمة المرور بشكل صحيح.', 'error');
-            localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify({ url, key }));
+            if (!email || password.length < 6) return notify('أدخل البريد وكلمة المرور بشكل صحيح.', 'error');
+            try { saveFirebaseConfigFromForm(); } catch (error) { return notify(error.message, 'error'); }
             const client = initCloudClient();
-            if (!client) return notify('تعذر تحميل عميل Supabase. تحقق من الاتصال بالإنترنت.', 'error');
-            setSyncStatus('جارٍ تسجيل الدخول', 'نحاول فتح جلسة المزامنة...', '');
-            const { data, error } = await client.auth.signInWithPassword({ email, password });
-            if (error) {
-                setSyncStatus('تعذر تسجيل الدخول', error.message || 'راجع البريد وكلمة المرور.', 'error');
-                return notify('تعذر تسجيل الدخول إلى المزامنة.', 'error');
+            if (!client) return notify('تعذر تهيئة Firebase. راجع config واتصال الإنترنت.', 'error');
+            setSyncStatus('جارٍ تسجيل الدخول', 'نحاول فتح جلسة Firebase...', '');
+            try {
+                const result = await client.auth.signInWithEmailAndPassword(email, password);
+                await finishCloudSync(result.user);
+            } catch (error) {
+                const message = firebaseAuthErrorMessage(error);
+                setSyncStatus('تعذر تسجيل الدخول', message, 'error');
+                notify(message, 'error');
             }
-            await finishCloudSync(data.user);
         }
         async function createCloudAccount() {
-            const url = byId('syncUrlInput').value.trim().replace(/\/$/, '');
-            const key = byId('syncKeyInput').value.trim();
-            const email = byId('syncEmailInput').value.trim();
+            const email = byId('syncEmailInput').value.trim().toLowerCase();
             const password = byId('syncPasswordInput').value;
-            if (!/^https:\/\//.test(url) || key.length < 20 || !email || password.length < 6) return notify('أدخل رابط Supabase، المفتاح العام، البريد وكلمة مرور لا تقل عن 6 أحرف.', 'error');
-            localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify({ url, key }));
+            if (!email || password.length < 6) return notify('أدخل البريد وكلمة مرور لا تقل عن 6 أحرف.', 'error');
+            try { saveFirebaseConfigFromForm(); } catch (error) { return notify(error.message, 'error'); }
             const client = initCloudClient();
-            if (!client) return notify('تعذر تحميل عميل Supabase. تحقق من الاتصال بالإنترنت.', 'error');
-            const { data, error } = await client.auth.signUp({ email, password });
-            if (error) return notify(error.message || 'تعذر إنشاء الحساب.', 'error');
-            if (data.user && data.session) await finishCloudSync(data.user);
-            else notify('تم إنشاء الحساب. راجع بريدك الإلكتروني لتأكيد الحساب ثم اضغط تسجيل الدخول.', 'info');
+            if (!client) return notify('تعذر تهيئة Firebase. راجع config واتصال الإنترنت.', 'error');
+            try {
+                const result = await client.auth.createUserWithEmailAndPassword(email, password);
+                await finishCloudSync(result.user);
+                notify('تم إنشاء الحساب وتشغيل المزامنة مباشرة.');
+            } catch (error) { notify(firebaseAuthErrorMessage(error), 'error'); }
         }
         async function initCloudSync() {
             const client = initCloudClient();
             if (!client) return;
-            client.auth.onAuthStateChange((event, session) => {
-                if (session?.user) finishCloudSync(session.user);
+            client.auth.onAuthStateChanged(user => {
+                if (user) finishCloudSync(user);
                 else {
                     cloudUser = null;
                     cloudSyncReady = false;
                     setSyncStatus('المزامنة غير مفعلة', 'سجّل الدخول لتشغيل المزامنة بين الأجهزة.', '');
                 }
             });
-            const { data } = await client.auth.getSession();
-            if (data.session?.user) await finishCloudSync(data.session.user);
         }
         async function finishCloudSync(user) {
             if (!cloudClient || !user) return;
             cloudUser = user;
             cloudSyncReady = true;
-            setSyncStatus('المزامنة تعمل', `الحساب: ${user.email || 'حساب المزامنة'} — جاري تحميل بيانات السحابة...`, 'online');
+            setSyncStatus('المزامنة تعمل', `الحساب: ${user.email || 'حساب المزامنة'} — جاري تحميل بيانات Firebase...`, 'online');
             await pullCloudData(true);
-            if (cloudChannel) cloudClient.removeChannel(cloudChannel);
-            cloudChannel = cloudClient.channel(`mubarak-data-${user.id}`)
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'mubarak_app_data', filter: `user_id=eq.${user.id}` }, payload => {
-                    if (payload.new?.updated_at === cloudLastWrite) return;
-                    if (payload.new?.data) applyRemoteSnapshot(payload.new.data);
-                })
-                .subscribe();
+            const path = `mubarak_app_data/${user.uid}`;
+            if (cloudChannel?.ref) cloudChannel.ref.off('value', cloudChannel.handler);
+            const ref = cloudClient.db.ref(path);
+            const handler = snapshot => {
+                const value = snapshot.val();
+                if (!value || value.updated_at === cloudLastWrite || !value.data) return;
+                applyRemoteSnapshot(value.data);
+                cloudLastWrite = value.updated_at || '';
+            };
+            ref.on('value', handler);
+            cloudChannel = { ref, handler };
             setSyncStatus('المزامنة تعمل', `متصل بالحساب: ${user.email || 'حساب المزامنة'}`, 'online');
         }
         function scheduleCloudPush(next) {
@@ -1643,34 +1678,34 @@ alter publication supabase_realtime add table public.mubarak_app_data;</pre><but
         }
         async function pushCloudData(next = null) {
             if (!cloudSyncReady || !cloudClient || !cloudUser) return false;
-            const snapshot = next ? { ...cloudSnapshot(), ...next } : cloudSnapshot();
             const updatedAt = new Date().toISOString();
+            const snapshot = next ? { ...cloudSnapshot(), ...next } : cloudSnapshot();
             cloudLastWrite = updatedAt;
-            const { error } = await cloudClient.from('mubarak_app_data').upsert({ user_id: cloudUser.id, data: snapshot, updated_at: updatedAt }, { onConflict: 'user_id' });
-            if (error) {
+            try {
+                await cloudClient.db.ref(`mubarak_app_data/${cloudUser.uid}`).set({ data: snapshot, updated_at: updatedAt });
+                setSyncStatus('المزامنة تعمل', `آخر حفظ سحابي: ${new Date().toLocaleTimeString('ar-EG')}`, 'online');
+                return true;
+            } catch (error) {
                 setSyncStatus('خطأ في المزامنة', error.message || 'تعذر رفع البيانات.', 'error');
-                notify('تعذر رفع التعديل إلى السحابة. البيانات المحلية لم تتأثر.', 'error');
+                notify('تعذر رفع التعديل إلى Firebase. البيانات المحلية لم تتأثر.', 'error');
                 return false;
             }
-            setSyncStatus('المزامنة تعمل', `آخر حفظ سحابي: ${new Date().toLocaleTimeString('ar-EG')}`, 'online');
-            return true;
         }
         async function pullCloudData(silent = false) {
             if (!cloudClient || !cloudUser) return false;
-            const { data, error } = await cloudClient.from('mubarak_app_data').select('data,updated_at').eq('user_id', cloudUser.id).maybeSingle();
-            if (error) {
-                setSyncStatus('خطأ في قراءة السحابة', error.message || 'تحقق من إعداد الجدول والسياسات.', 'error');
-                if (!silent) notify('تعذر تنزيل البيانات من السحابة. تأكد من تنفيذ SQL الإعداد.', 'error');
+            try {
+                const snapshot = await cloudClient.db.ref(`mubarak_app_data/${cloudUser.uid}`).once('value');
+                const value = snapshot.val();
+                if (!value) { await pushCloudData(); return true; }
+                applyRemoteSnapshot(value.data);
+                cloudLastWrite = value.updated_at || '';
+                if (!silent) notify('تم تنزيل أحدث نسخة من Firebase.');
+                return true;
+            } catch (error) {
+                setSyncStatus('خطأ في قراءة السحابة', error.message || 'تحقق من Realtime Database Rules.', 'error');
+                if (!silent) notify('تعذر تنزيل البيانات من Firebase. تأكد من تفعيل Realtime Database والـ Rules.', 'error');
                 return false;
             }
-            if (!data) {
-                await pushCloudData();
-                return true;
-            }
-            applyRemoteSnapshot(data.data);
-            cloudLastWrite = data.updated_at || '';
-            if (!silent) notify('تم تنزيل أحدث نسخة من السحابة.');
-            return true;
         }
         function applyRemoteSnapshot(snapshot) {
             try {
@@ -1690,16 +1725,17 @@ alter publication supabase_realtime add table public.mubarak_app_data;</pre><but
             }
         }
         async function signOutCloud() {
+            if (cloudChannel?.ref) cloudChannel.ref.off('value', cloudChannel.handler);
             if (cloudClient) await cloudClient.auth.signOut();
             cloudUser = null;
             cloudSyncReady = false;
-            if (cloudChannel) { cloudClient?.removeChannel(cloudChannel); cloudChannel = null; }
+            cloudChannel = null;
             fillSyncForm();
             notify('تم تسجيل الخروج من المزامنة. البيانات المحلية ما زالت موجودة على هذا الجهاز.', 'info');
         }
-        async function copySyncSql() {
-            try { await navigator.clipboard.writeText(byId('syncSqlCode').textContent); notify('تم نسخ كود SQL.'); }
-            catch { notify('انسخ الكود يدوياً من الصندوق.', 'info'); }
+        async function copySyncRules() {
+            try { await navigator.clipboard.writeText(byId('syncRulesCode').textContent.replaceAll('&amp;&amp;', '&&')); notify('تم نسخ Firebase Rules.'); }
+            catch { notify('انسخ Rules يدوياً من الصندوق.', 'info'); }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -2666,7 +2702,10 @@ alter publication supabase_realtime add table public.mubarak_app_data;</pre><but
             try { return JSON.parse(localStorage.getItem('mb_attendance') || '[]'); } catch { return []; }
         }
         function saveAttendance(records) {
-            try { localStorage.setItem('mb_attendance', JSON.stringify(records)); } catch { notify('تعذر حفظ سجل الحضور.', 'error'); }
+            try {
+                localStorage.setItem('mb_attendance', JSON.stringify(records));
+                scheduleCloudPush();
+            } catch { notify('تعذر حفظ سجل الحضور.', 'error'); }
         }
         function openAttendance() {
             if (!students.length) return notify('سجّل طالباً أولاً قبل تسجيل الحضور.', 'info');
