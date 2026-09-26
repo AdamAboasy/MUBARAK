@@ -114,6 +114,70 @@
         .trend-up { background: #d1fae5; color: #065f46; }
         .trend-down { background: #fee2e2; color: #991b1b; }
         .trend-flat { background: #e2e8f0; color: #334155; }
+        /* ===== AI Assistant (المساعد الذكي) ===== */
+        #aiFab { position: fixed; bottom: 22px; left: 22px; z-index: 4000; width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #7c3aed, #4f46e5 55%, #047857); box-shadow: 0 12px 30px -8px rgba(79,70,229,.55); transition: transform .2s ease, box-shadow .2s ease; }
+        #aiFab:hover { transform: scale(1.07) rotate(-4deg); box-shadow: 0 16px 36px -8px rgba(79,70,229,.65); }
+        #aiFab::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid rgba(124,58,237,.45); animation: ai-ping 2.2s ease-out infinite; pointer-events: none; }
+        #aiFab .ai-fab-badge { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 999px; background: #f59e0b; color: #451a03; font-size: 11px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
+        @keyframes ai-ping { 0% { transform: scale(.92); opacity: 1; } 70%, 100% { transform: scale(1.18); opacity: 0; } }
+        #aiPanel { position: fixed; bottom: 92px; left: 22px; z-index: 4001; width: min(400px, calc(100vw - 32px)); height: min(600px, calc(100dvh - 130px)); display: flex; flex-direction: column; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 24px 60px -12px rgba(2,44,34,.45); border: 1px solid #e2e8f0; transform-origin: bottom left; animation: ai-panel-in .28s cubic-bezier(.22,1,.36,1); }
+        #aiPanel.hidden { display: none; }
+        @keyframes ai-panel-in { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .ai-head { background: linear-gradient(135deg, #4c1d95, #4338ca 55%, #065f46); color: #fff; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+        .ai-avatar { width: 40px; height: 40px; border-radius: 14px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .ai-head-btn { width: 30px; height: 30px; border-radius: 9px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.12); color: #fff; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: background .15s; flex-shrink: 0; }
+        .ai-head-btn:hover { background: rgba(255,255,255,.25); }
+        .ai-head-btn.active { background: #f59e0b; border-color: #f59e0b; color: #451a03; }
+        #aiMessages { flex: 1; overflow-y: auto; padding: 14px 12px; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(180deg, #f8fafc, #f1f5f9); }
+        .ai-msg { max-width: 88%; padding: 10px 13px; border-radius: 16px; font-size: 13px; line-height: 1.9; animation: ai-msg-in .25s ease-out; overflow-wrap: anywhere; }
+        @keyframes ai-msg-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .ai-msg.user { align-self: flex-start; background: #047857; color: #fff; border-bottom-left-radius: 5px; }
+        .ai-msg.bot { align-self: flex-end; background: #fff; color: #1e293b; border: 1px solid #e2e8f0; border-bottom-right-radius: 5px; box-shadow: 0 2px 8px -2px rgba(2,44,34,.12); }
+        .ai-msg.bot b { color: #065f46; }
+        .ai-typing { display: inline-flex; gap: 5px; padding: 6px 2px; }
+        .ai-typing span { width: 8px; height: 8px; border-radius: 50%; background: #7c3aed; animation: ai-blink 1.1s infinite; }
+        .ai-typing span:nth-child(2) { animation-delay: .18s; } .ai-typing span:nth-child(3) { animation-delay: .36s; }
+        @keyframes ai-blink { 0%, 60%, 100% { opacity: .25; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
+        #aiChips { display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px; background: #fff; border-top: 1px solid #f1f5f9; }
+        #aiChips:empty { display: none; }
+        .ai-chip { flex-shrink: 0; font-size: 12px; font-weight: 700; color: #4338ca; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 999px; padding: 6px 12px; cursor: pointer; transition: all .15s; }
+        .ai-chip:hover { background: #4338ca; color: #fff; transform: translateY(-1px); }
+        .ai-chip.amber { color: #92400e; background: #fef3c7; border-color: #fcd34d; }
+        .ai-chip.amber:hover { background: #f59e0b; color: #451a03; }
+        .ai-chip.green { color: #065f46; background: #d1fae5; border-color: #6ee7b7; }
+        .ai-chip.green:hover { background: #047857; color: #fff; }
+        .ai-inputbar { display: flex; gap: 8px; padding: 10px 12px 12px; background: #fff; border-top: 1px solid #e2e8f0; }
+        #aiInput { flex: 1; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 10px 14px; font-size: 13px; outline: none; resize: none; max-height: 90px; font-family: 'Cairo', sans-serif; }
+        #aiInput:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
+        .ai-send { width: 44px; height: 44px; border-radius: 14px; border: none; cursor: pointer; color: #fff; font-size: 16px; background: linear-gradient(135deg, #7c3aed, #4f46e5); transition: transform .15s; flex-shrink: 0; }
+        .ai-send:hover { transform: scale(1.06); }
+        .ai-mic { width: 44px; height: 44px; border-radius: 14px; border: 1.5px solid #cbd5e1; background: #fff; color: #64748b; cursor: pointer; font-size: 15px; transition: all .15s; flex-shrink: 0; }
+        .ai-mic:hover { border-color: #7c3aed; color: #7c3aed; }
+        .ai-mic.listening { background: #fee2e2; border-color: #ef4444; color: #b91c1c; animation: ai-blink 1s infinite; }
+        .ai-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; margin-top: 8px; font-size: 12px; }
+        .ai-card .row { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dashed #e2e8f0; }
+        .ai-card .row:last-child { border-bottom: none; }
+        .ai-card .k { color: #64748b; } .ai-card .v { font-weight: 800; color: #0f172a; text-align: left; }
+        .ai-card .v.miss { color: #b45309; } .ai-card .v.ok { color: #047857; }
+        .ai-dup { border-right: 4px solid #ef4444; background: #fef2f2; }
+        .ai-dup.warn { border-color: #f59e0b; background: #fffbeb; }
+        .ai-analysis { margin-top: 8px; border: 1px dashed #c4b5fd; background: #faf9ff; border-radius: 10px; padding: 8px 10px; font-size: 11px; color: #4c1d95; }
+        .ai-analysis summary { cursor: pointer; font-weight: 800; }
+        .ai-conf { height: 6px; background: #ede9fe; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+        .ai-conf span { display: block; height: 100%; background: linear-gradient(90deg, #7c3aed, #047857); border-radius: 3px; transition: width .4s ease; }
+        .ai-ent { display: inline-block; background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; border-radius: 999px; padding: 1px 8px; margin: 2px 0 2px 4px; font-weight: 700; }
+        .ai-fb { display: flex; gap: 6px; margin-top: 6px; }
+        .ai-fb button { border: 1px solid #e2e8f0; background: #fff; border-radius: 8px; width: 28px; height: 24px; font-size: 12px; cursor: pointer; color: #94a3b8; transition: all .15s; }
+        .ai-fb button:hover { border-color: #7c3aed; color: #7c3aed; transform: scale(1.1); }
+        .ai-fb button.picked-up { background: #d1fae5; border-color: #047857; color: #047857; }
+        .ai-fb button.picked-down { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+        .ai-brain-bar { height: 8px; background: rgba(255,255,255,.2); border-radius: 4px; overflow: hidden; margin-top: 3px; }
+        .ai-brain-bar span { display: block; height: 100%; background: linear-gradient(90deg, #fbbf24, #34d399); border-radius: 4px; transition: width .5s ease; }
+        #studentNameDupHint { font-size: 12px; margin-top: 6px; border-radius: 10px; padding: 8px 10px; display: none; line-height: 1.8; }
+        #studentNameDupHint.show { display: block; animation: ai-msg-in .25s ease-out; }
+        #studentNameDupHint.danger { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+        #studentNameDupHint.warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+        #studentNameDupHint.safe { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
         @keyframes section-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes dialog-in { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -213,6 +277,10 @@
                     <button onclick="openModal('addStudentModal')" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-emerald-950 font-bold px-4 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer text-sm">
                         <i class="fa-solid fa-user-plus text-base"></i>
                         <span>تسجيل طالب جديد</span>
+                    </button>
+                    <button onclick="toggleAiPanel(true)" class="bg-gradient-to-l from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 active:scale-95 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer text-sm" title="سجّل بالكلام العادي — المساعد يفهمك ويتأكد من عدم التكرار">
+                        <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
+                        <span>المساعد الذكي</span>
                     </button>
                     <button onclick="exportData()" title="تنزيل التقارير بصيغة PDF" class="bg-emerald-800/70 hover:bg-emerald-700 text-emerald-100 px-3 py-2.5 rounded-xl text-sm transition-all border border-emerald-600/50 flex items-center gap-1.5 cursor-pointer">
                         <i class="fa-regular fa-file-pdf"></i>
@@ -747,7 +815,8 @@
                     </label>
                     <div class="relative">
                         <i class="fa-solid fa-user absolute right-3.5 top-3.5 text-slate-400 text-sm"></i>
-                        <input type="text" id="studentNameInput" required maxlength="120" placeholder="مثال: أحمد محمد علي إبراهيم" class="w-full pr-10 pl-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none">
+                        <input type="text" id="studentNameInput" required maxlength="120" placeholder="مثال: أحمد محمد علي إبراهيم" class="w-full pr-10 pl-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none" oninput="aiLiveDuplicateHint()">
+                        <div id="studentNameDupHint" role="status" aria-live="polite"></div>
                     </div>
                 </div>
 
@@ -1259,6 +1328,32 @@
                 <button id="cancelConfirmButton" onclick="closeModal('confirmModal')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold">إلغاء</button>
                 <button id="confirmActionButton" onclick="runConfirmedAction()" class="px-5 py-2.5 bg-red-700 hover:bg-red-800 text-white rounded-xl text-sm font-bold">تأكيد الحذف</button>
             </div>
+        </div>
+    </div>
+    <!-- AI Assistant (المساعد الذكي للتسجيل بالكلام العادي) -->
+    <button id="aiFab" onclick="toggleAiPanel()" title="المساعد الذكي — سجّل طالب بالكلام العادي" aria-label="فتح المساعد الذكي" class="no-print">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span class="ai-fab-badge" id="aiFabBadge" style="display:none">1</span>
+    </button>
+    <div id="aiPanel" class="hidden no-print" role="dialog" aria-label="المساعد الذكي">
+        <div class="ai-head">
+            <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
+            <div style="flex:1;min-width:0">
+                <div style="font-weight:900;font-size:14px">مساعد مسجد مبارك الذكي</div>
+                <div id="aiBrainLevel" style="font-size:11px;opacity:.9">مستوى التعلم: مبتدئ 🌱</div>
+                <div class="ai-brain-bar"><span id="aiBrainBar" style="width:8%"></span></div>
+            </div>
+            <button class="ai-head-btn" id="aiAnalysisBtn" onclick="aiToggleAnalysis()" title="إظهار/إخفاء تحليل الفهم"><i class="fa-solid fa-magnifying-glass-chart"></i></button>
+            <button class="ai-head-btn" onclick="aiShowBrain()" title="ماذا تعلم المساعد؟"><i class="fa-solid fa-brain"></i></button>
+            <button class="ai-head-btn" onclick="aiResetChat()" title="محادثة جديدة"><i class="fa-solid fa-rotate-right"></i></button>
+            <button class="ai-head-btn" onclick="toggleAiPanel(false)" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="aiMessages" aria-live="polite"></div>
+        <div id="aiChips"></div>
+        <div class="ai-inputbar">
+            <button class="ai-mic" id="aiMicBtn" onclick="aiToggleMic()" title="إدخال صوتي"><i class="fa-solid fa-microphone"></i></button>
+            <textarea id="aiInput" rows="1" placeholder="اكتب بأي طريقة… مثال: سجل أحمد محمد هيبدأ من البقرة" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend();}"></textarea>
+            <button class="ai-send" onclick="aiSend()" title="إرسال"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
     <div id="offlineBar" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg items-center gap-2 no-print" style="z-index:2050">
@@ -2368,6 +2463,11 @@
             const completedJuz = byId('studentCompletedJuzInput').valueAsNumber;
             if (name.length < 2 || name.length > 120 || !startDate || startDate > todayISO() || !QURAN_SURAHS.some(s => s.name === startSurah)) return notify('راجع الاسم وتاريخ الانضمام وسورة البداية. لا يمكن تسجيل بداية في المستقبل.', 'error');
             if (!Number.isFinite(completedJuz) || completedJuz < 0 || completedJuz > 30 || !Number.isInteger(completedJuz * 4)) return notify('عدد الأجزاء من 0 إلى 30، بمضاعفات الربع.', 'error');
+            if (!editId && typeof aiFindDuplicates === 'function' && window._aiDupOverrideName !== name) {
+                const dups = aiFindDuplicates(name, null, 0.80);
+                if (dups.length && dups[0].score >= 0.92) { aiHandleManualDuplicate(name, dups); return; }
+            }
+            window._aiDupOverrideName = '';
             if (editId && !students.some(s => s.id === editId)) return notify('لم يعد هذا الطالب موجوداً.', 'error');
             if (editId && sessions.some(s => s.studentId === editId && s.date < startDate)) return notify('تاريخ الانضمام لا يمكن أن يكون بعد جلسة تسميع مسجلة للطالب.', 'error');
             const existing = editId ? students.find(item => item.id === editId) : null;
@@ -2852,8 +2952,8 @@
                     <td class="p-3.5"><button onclick="viewStudentProfile('${student.id}')" class="font-bold text-slate-900 hover:text-emerald-700">${escapeHtml(student.name)}</button><span class="block text-[11px] text-slate-500">${studentTitle(student)}</span></td>
                     <td class="p-3.5 text-xs text-slate-600">${escapeHtml(student.halaqa || 'حلقة عامة')}</td>
                     <td class="p-3.5"><strong class="text-emerald-950">${planDescription(plan)}</strong>${plan.isSuggested ? '<span class="block text-[10px] text-amber-700 mt-1">اقتراح تلقائي - راجعه قبل الإرسال</span>' : ''}</td>
-                    <td class="p-3.5 text-xs text-slate-600">${plan.newDay}</td>
-                    <td class="p-3.5 text-xs text-slate-600">${plan.reciteDay}</td>
+                    <td class="p-3.5 text-xs text-slate-600">${escapeHtml(plan.newDay)}</td>
+                    <td class="p-3.5 text-xs text-slate-600">${escapeHtml(plan.reciteDay)}</td>
                     <td class="p-3.5"><span class="status-chip ${status.cls}">${status.label}</span></td>
                     <td class="p-3.5"><div class="flex items-center justify-center gap-1"><button onclick="openWeeklyPlanModal('${student.id}')" class="text-action">تعديل</button><button onclick="sendWeeklyPlanMessage('${student.id}')" class="text-action"><i class="fa-brands fa-whatsapp ml-1"></i> إرسال</button></div></td>
                 `;
@@ -3637,6 +3737,964 @@
         }
     </script>
 
+    <!-- AI Assistant Engine: NLU + duplicate guard + slot-filling + self-learning -->
+    <script>
+    /* ============================================================
+       المساعد الذكي — مسجد مبارك
+       - فهم عربي حر بدون جمل ثابتة (NLU)
+       - منع تكرار الأسماء بتشابه ضبابي
+       - حوار تكميلي: يسأل هيبدأ منين وامتى...
+       - تعلم ذاتي: مرادفات + تصحيحات + أوزان نوايا
+       ============================================================ */
+    const AI_BRAIN_KEY = 'mb_ai_brain_v2';
+    const AI_HALAQAS = ['حلقة الفجر', 'حلقة العصر', 'حلقة المغرب', 'حلقة البراعم'];
+    const AI_SURAH_ALIASES_DEFAULT = {
+        'جزء عم': 'النبأ', 'جزء عمه': 'النبأ', 'عم يتساءلون': 'النبأ', 'النبا': 'النبأ',
+        'تبارك': 'الملك', 'تبارك الذي': 'الملك', 'ياسين': 'يس', 'البقره': 'البقرة',
+        'ال عمران': 'آل عمران', 'الفاتحه': 'الفاتحة', 'الاخلاص': 'الإخلاص',
+        'الضحي': 'الضحى', 'الواقعه': 'الواقعة', 'الرحمن': 'الرحمن', 'السجده': 'السجدة',
+        'الزلزله': 'الزلزلة', 'القارعه': 'القارعة', 'الهمزه': 'الهمزة', 'الفيل': 'الفيل'
+    };
+    const AI_INTENTS = {
+        add_student: { w: 1.3, base: ['سجل', 'سجلي', 'سجلهولي', 'ضيف', 'اضافه', 'اضاف', 'طالب جديد', 'طالبه جديده', 'دخل', 'قيد', 'اشترك', 'عايز اسجل', 'عاوز اسجل', 'سجل طالب', 'اضف طالب', 'تسجيل'] },
+        search: { w: 1.1, base: ['دور', 'ابحث', 'بحث', 'فين', 'موجود', 'عندك', 'استعلم', 'معلومات عن', 'هات', 'اعرض'] },
+        stats: { w: 1.1, base: ['كام', 'عدد', 'احصائ', 'تقرير', 'متفوق', 'ترتيب', 'ملخص'] },
+        help: { w: 1.0, base: ['مساعده', 'ساعدني', 'ازاي', 'بتعمل ايه', 'تقدر تعمل ايه', 'شرح', 'ايه ده', 'مش فاهم'] },
+        greeting: { w: 1.0, base: ['سلام', 'اهلا', 'اهلين', 'صباح', 'مساء', 'هاي', 'هلا', 'ازيك'] },
+        confirm: { w: 1.2, base: ['ايوه', 'ايوا', 'تمام', 'اكيد', 'نعم', 'ماشي', 'موافق', 'صح', 'مظبوط', 'احفظ', 'سجل', 'اي', 'اوك'] },
+        deny: { w: 1.2, base: ['لا', 'لأ', 'الغي', 'بلاش', 'مش عايز', 'غلط', 'استني', 'اصبر'] },
+        thanks: { w: 1.0, base: ['شكرا', 'تسلم', 'جزاك', 'برافو', 'ممتاز شغل'] }
+    };
+    const AI_STOP = new Set('سجل سجلي سجللي سجلهولي ضيف ضيفلي اضافه اضاف طالب طالبه الطالب الطالبه جديد جديده اسم اسمه اسمها باسم دخل قيد اشترك اشتراك في ف من الي الي سورة سوره صوره البدا البدايه بادئ بادي هيبدا هيبدأ يبدا يبدأ بدا حلقه الفجر العصر المغرب البراعم تاريخ يوم امبارح النهارده اليوم اسبوع شهر سنه رقم تليفون موبايل هاتف واتس واتساب ذكر انثي بنت ولد جزء اجزاء اللي اللى كام ايه ده دي وهل لو سمحت عايز عاوز ممكن'.split(' ').map(aiNormWord));
+
+    let aiBrain = aiLoadBrain();
+    const aiState = { open: false, step: 'idle', slots: {}, dups: [], checkedName: '', dupDismissed: '', pendingAlias: null, awaitingCorrection: null, editField: null, msgSeq: 0, msgAnalysis: {}, chipActions: [], greeted: false, lastAnalysis: null };
+
+    function aiLoadBrain() {
+        const def = { version: 2, intentWeights: {}, synonyms: {}, surahAliases: {}, corrections: [], stats: { messages: 0, understood: 0, registered: 0, duplicatesBlocked: 0, feedbackUp: 0, feedbackDown: 0 }, showAnalysis: true, createdAt: Date.now() };
+        try {
+            const b = JSON.parse(localStorage.getItem(AI_BRAIN_KEY) || 'null');
+            if (b && b.version === 2) { b.stats = Object.assign({}, def.stats, b.stats || {}); return Object.assign({}, def, b); }
+        } catch (e) {}
+        return JSON.parse(JSON.stringify(def));
+    }
+    function aiSaveBrain() { try { localStorage.setItem(AI_BRAIN_KEY, JSON.stringify(aiBrain)); } catch (e) {} }
+    function aiNormWord(w) {
+        return String(w || '').replace(/[ً-ٰٟـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim();
+    }
+    function aiNorm(s) {
+        return String(s || '').replace(/[ً-ٰٟـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
+            .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[^\u0600-\u06FF0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+    function aiTokens(s) { return aiNorm(s).split(' ').filter(w => w && !AI_STOP.has(w)); }
+    function aiLev(a, b) {
+        a = aiNorm(a); b = aiNorm(b);
+        if (a === b) return 0;
+        const m = a.length, n = b.length;
+        if (!m) return n; if (!n) return m;
+        let prev = Array.from({ length: n + 1 }, (_, j) => j);
+        for (let i = 1; i <= m; i++) {
+            const cur = [i];
+            for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+            prev = cur;
+        }
+        return prev[n];
+    }
+    function aiTokSim(a, b) {
+        a = aiNorm(a); b = aiNorm(b);
+        if (!a || !b) return 0;
+        if (a === b) return 1;
+        const m = Math.max(a.length, b.length);
+        return Math.max(0, 1 - aiLev(a, b) / m);
+    }
+    /* ---- تشابه الأسماء (ترتيب حر + أخطاء إملائية) ---- */
+    function aiNameSimilarity(a, b) {
+        const na = aiNorm(a), nb = aiNorm(b);
+        if (!na || !nb) return 0;
+        if (na === nb) return 1;
+        const ta = na.split(' ').filter(w => w.length > 1), tb = nb.split(' ').filter(w => w.length > 1);
+        if (!ta.length || !tb.length) return aiTokSim(na, nb) * 0.5;
+        const used = new Set(); let sum = 0, strong = 0;
+        ta.forEach(t => {
+            let best = 0, bi = -1;
+            tb.forEach((u, j) => { if (used.has(j)) return; const s = aiTokSim(t, u); if (s > best) { best = s; bi = j; } });
+            if (bi >= 0 && best > 0.35) { used.add(bi); sum += best; if (best >= 0.8) strong++; }
+        });
+        const mx = Math.max(ta.length, tb.length);
+        let score = 0.62 * (sum / mx) + 0.38 * (strong / mx);
+        if ((na.includes(nb) || nb.includes(na)) && Math.min(na.length, nb.length) >= 6) score = Math.max(score, 0.9);
+        if (ta[0] && tb[0] && aiTokSim(ta[0], tb[0]) < 0.4) score *= 0.75;
+        return Math.min(1, Math.max(0, score));
+    }
+    function aiFindDuplicates(name, excludeId, threshold) {
+        threshold = threshold == null ? 0.55 : threshold;
+        return (typeof students !== 'undefined' ? students : [])
+            .filter(s => s.id !== excludeId)
+            .map(s => ({ student: s, score: aiNameSimilarity(name, s.name) }))
+            .filter(r => r.score >= threshold)
+            .sort((x, y) => y.score - x.score).slice(0, 3);
+    }
+    /* ---- السور ---- */
+    let aiSurahCache = null;
+    function aiSurahIndex() {
+        if (aiSurahCache) return aiSurahCache;
+        aiSurahCache = (typeof QURAN_SURAHS !== 'undefined' ? QURAN_SURAHS : []).map(s => ({ name: s.name, norm: aiNorm(s.name), short: aiNorm(s.name).replace(/^ال/, '') }));
+        return aiSurahCache;
+    }
+    function aiSurahAliasMap() {
+        const map = {};
+        Object.entries(AI_SURAH_ALIASES_DEFAULT).forEach(([k, v]) => { map[aiNorm(k)] = v; });
+        Object.entries(aiBrain.surahAliases || {}).forEach(([k, v]) => { map[k] = v; });
+        return map;
+    }
+    function aiExtractSurah(text) {
+        const norm = ' ' + aiNorm(text) + ' ';
+        const toks = aiNorm(text).split(' ');
+        const aliases = aiSurahAliasMap();
+        const aKeys = Object.keys(aliases).sort((a, b) => b.length - a.length);
+        for (const k of aKeys) {
+            if (!k) continue;
+            if (k.includes(' ') ? norm.includes(' ' + k + ' ') : toks.includes(k)) return { name: aliases[k], conf: 0.95, via: 'alias' };
+        }
+        const idx = aiSurahIndex().slice().sort((a, b) => b.norm.length - a.norm.length);
+        for (const s of idx) {
+            if (s.norm && norm.includes(' ' + s.norm + ' ')) return { name: s.name, conf: 0.97, via: 'exact' };
+        }
+        for (const s of idx) {
+            if (s.short && s.short.length >= 3 && toks.includes(s.short)) return { name: s.name, conf: 0.85, via: 'short' };
+        }
+        let best = null;
+        toks.forEach(t => {
+            if (t.length < 3) return;
+            idx.forEach(s => {
+                const sim = aiTokSim(t, s.norm);
+                if (sim >= 0.82 && (!best || sim > best.conf)) best = { name: s.name, conf: sim * 0.9, via: 'fuzzy' };
+            });
+        });
+        return best;
+    }
+    /* ---- التاريخ ---- */
+    const AI_MONTHS = { 'يناير': 1, 'فبراير': 2, 'مارس': 3, 'ابريل': 4, 'مايو': 5, 'يونيو': 6, 'يوليو': 7, 'يوليوز': 7, 'اغسطس': 8, 'سبتمبر': 9, 'اكتوبر': 10, 'نوفمبر': 11, 'ديسمبر': 12 };
+    const AI_WEEKDAYS = { 'الاحد': 0, 'حد': 0, 'الاثنين': 1, 'الاتنين': 1, 'الثلاثاء': 2, 'التلات': 2, 'الاربعاء': 3, 'الخميس': 4, 'الجمعه': 5, 'السبت': 6 };
+    function aiShiftISO(days) { const d = new Date(); d.setDate(d.getDate() + days); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function aiExtractDate(text) {
+        const raw = String(text || '');
+        const norm = aiNorm(raw);
+        const rel = [
+            [/النهارده|النهارده|اليوم|نهارده/, 0], [/اول امبارح|أول امس/, -2], [/امبارح|امس|البارح/, -1],
+            [/من\s+(\d+)\s+ايام?/, null], [/من\s+(\d+)\s+اسابيع?/, null], [/من\s+(\d+)\s+شهور?/, null], [/من\s+(\d+)\s+سن[هة]/, null],
+            [/من\s+اسبوع/, -7], [/من\s+شهر/, -30], [/من\s+سنه|من\s+سنة/, -365]
+        ];
+        for (const [re, off] of rel) {
+            const m = norm.match(re);
+            if (m) {
+                if (off !== null) return { iso: aiShiftISO(off), label: aiFmtDate(aiShiftISO(off)) };
+                const n = parseInt(m[1], 10);
+                if (/ايام?/.test(re.source)) return { iso: aiShiftISO(-n), label: aiFmtDate(aiShiftISO(-n)) };
+                if (/اسابيع?/.test(re.source)) return { iso: aiShiftISO(-7 * n), label: aiFmtDate(aiShiftISO(-7 * n)) };
+                if (/شهور?/.test(re.source)) return { iso: aiShiftISO(-30 * n), label: aiFmtDate(aiShiftISO(-30 * n)) };
+                return { iso: aiShiftISO(-365 * n), label: aiFmtDate(aiShiftISO(-365 * n)) };
+            }
+        }
+        const wdMatch = norm.match(/(السبت|الاحد|الاثنين|الاتنين|الثلاثاء|التلات|الاربعاء|الخميس|الجمعه)\s*(اللي فات|الماضي|اللي فاتت|الجاي|القادم|الجايه)?/);
+        if (wdMatch) {
+            const target = AI_WEEKDAYS[wdMatch[1]]; const today = new Date().getDay();
+            const isNext = /الجاي|القادم|الجايه/.test(wdMatch[2] || '');
+            let diff = isNext ? (target - today + 7) % 7 : (today - target + 7) % 7;
+            if (diff === 0) diff = 7;
+            const iso = aiShiftISO(isNext ? diff : -diff);
+            if (!isNext || iso <= todayISO()) return { iso, label: aiFmtDate(iso) };
+            return { iso, label: aiFmtDate(iso), future: true };
+        }
+        let m = norm.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (m) { const iso = `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`; return { iso, label: aiFmtDate(iso), future: iso > todayISO() }; }
+        m = norm.match(/(\d{1,2})\s*[\/\-.]\s*(\d{1,2})(?:\s*[\/\-.]\s*(\d{2,4}))?/);
+        if (m) {
+            let d = +m[1], mo = +m[2], y = m[3] ? +m[3] : new Date().getFullYear();
+            if (y < 100) y += 2000;
+            if (mo > 12 && d <= 12) { const t = d; d = mo; mo = t; }
+            if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) {
+                const iso = `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                return { iso, label: aiFmtDate(iso), future: iso > todayISO() };
+            }
+        }
+        m = norm.match(/(\d{1,2})\s+(يناير|فبراير|مارس|ابريل|مايو|يونيو|يوليو|يوليوز|اغسطس|سبتمبر|اكتوبر|نوفمبر|ديسمبر)(?:\s+(\d{4}))?/);
+        if (m) {
+            const y = m[3] ? +m[3] : new Date().getFullYear();
+            const iso = `${y}-${String(AI_MONTHS[m[2]]).padStart(2, '0')}-${String(+m[1]).padStart(2, '0')}`;
+            return { iso, label: aiFmtDate(iso), future: iso > todayISO() };
+        }
+        return null;
+    }
+    function aiFmtDate(iso) { try { return formatDate(iso); } catch (e) { return iso; } }
+    /* ---- حلقة / نوع / هاتف ---- */
+    function aiExtractHalaqa(text) {
+        const norm = aiNorm(text);
+        const map = [['الفجر', 'حلقة الفجر'], ['العصر', 'حلقة العصر'], ['المغرب', 'حلقة المغرب'], ['البراعم', 'حلقة البراعم']];
+        for (const [k, v] of map) if (norm.includes(k)) return v;
+        return null;
+    }
+    function aiExtractGender(text) {
+        const norm = ' ' + aiNorm(text) + ' ';
+        if (/(بنت|طالبه|انثي|فتاه|البنت)/.test(norm)) return 'female';
+        if (/(ولد|طالب(?!\ه)|ذكر|شاب)/.test(norm)) return 'male';
+        return null;
+    }
+    function aiExtractPhone(text) {
+        const digits = String(text || '').replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[\s\-()]/g, '');
+        const m = digits.match(/(?:\+?2)?(01\d{9})/) || digits.match(/(\d{8,15})/);
+        return m ? m[1] : null;
+    }
+    /* ---- الاسم ---- */
+    function aiCleanNameCandidate(raw) {
+        if (!raw) return null;
+        let words = String(raw).split(/[\n،,؛;.]+/)[0].split(/\s+/).filter(Boolean);
+        const leadDrop = new Set(['سجل', 'سجلي', 'سجللي', 'ضيف', 'دخل', 'قيد', 'طالب', 'طالبه', 'الطالب', 'الطالبه', 'جديد', 'جديده', 'اسم', 'اسمه', 'اسمها', 'باسم', 'اللي', 'اللى', 'ان', 'انه', 'الي', 'هو', 'هي']);
+        while (words.length && (leadDrop.has(aiNorm(words[0])) || /^\d+$/.test(words[0]))) words.shift();
+        const out = [];
+        for (const w of words) {
+            const n = aiNorm(w);
+            if (!n || AI_STOP.has(n) || /^\d+$/.test(w)) break;
+            if (n.length < 2) continue;
+            out.push(w.trim());
+            if (out.length >= 5) break;
+        }
+        const name = out.join(' ').replace(/\s+/g, ' ').trim();
+        if (out.length < 2 || out.length > 5 || name.length < 5 || name.length > 60) return null;
+        if (!/^[\u0600-\u06FF\s]+$/.test(name)) return null;
+        return name;
+    }
+    function aiExtractName(text) {
+        const t = String(text || '').trim();
+        let m = t.match(/(?:اسمه?|اسمها|باسم|الطالب|الطالبه)\s*[:\-]?\s*([^\n،,؛;.]{3,60})/);
+        if (m) { const c = aiCleanNameCandidate(m[1]); if (c) return { name: c, conf: 0.95 }; }
+        m = t.match(/(?:سجل(?:ي|لي|ه|ها)?|سجلي|ضيف(?:لي)?|دخل|قيد|اشترك)\s+([^\n،,؛;.]{3,60})/);
+        if (m) { const c = aiCleanNameCandidate(m[1]); if (c) return { name: c, conf: 0.88 }; }
+        return null;
+    }
+    function aiLooksLikeBareName(text) {
+        const words = String(text || '').trim().split(/\s+/);
+        if (words.length < 2 || words.length > 4) return null;
+        if (!/^[\u0600-\u06FF\s]+$/.test(text.trim())) return null;
+        if (words.some(w => AI_STOP.has(aiNorm(w)) || aiNorm(w).length < 2)) return null;
+        if (aiExtractSurah(text) || aiExtractDate(text) || aiExtractPhone(text)) return null;
+        return text.trim().replace(/\s+/g, ' ');
+    }
+    /* ---- تصنيف النية ---- */
+    function aiClassify(text) {
+        const norm = ' ' + aiNorm(text) + ' ';
+        const toks = new Set(norm.trim().split(' ').filter(Boolean));
+        const aiKwHit = k => {
+            if (!k) return false;
+            if (k.includes(' ') || k.length > 3) return norm.includes(k);
+            return toks.has(k);
+        };
+        let best = { intent: 'unknown', score: 0, hits: [] };
+        Object.entries(AI_INTENTS).forEach(([intent, cfg]) => {
+            let s = 0; const hits = [];
+            cfg.base.forEach(kw => {
+                const k = aiNorm(kw);
+                if (k && aiKwHit(k)) { const w = (aiBrain.intentWeights[intent] && aiBrain.intentWeights[intent][k]) || 1; s += w * cfg.w; hits.push(kw); }
+            });
+            if (s > best.score) best = { intent, score: s, hits };
+        });
+        Object.entries(aiBrain.synonyms || {}).forEach(([phrase, info]) => {
+            if (phrase && norm.includes(phrase)) {
+                if (!AI_INTENTS[info.intent]) return;
+                const boost = 1.4 * Math.min(info.count || 1, 5);
+                if (info.intent === best.intent) best.score += boost;
+                else if (boost > best.score) best = { intent: info.intent, score: boost, hits: ['تعلّم ذاتي: ' + phrase] };
+            }
+        });
+        best.confidence = best.score <= 0 ? 0 : Math.min(0.99, best.score / (best.score + 2.2));
+        if (best.score <= 0) best.intent = 'unknown';
+        return best;
+    }
+    function aiAnalyze(text) {
+        const cls = aiClassify(text);
+        return {
+            text, norm: aiNorm(text), intent: cls.intent, confidence: cls.confidence, hits: cls.hits,
+            name: aiExtractName(text), surah: aiExtractSurah(text), date: aiExtractDate(text),
+            halaqa: aiExtractHalaqa(text), gender: aiExtractGender(text), phone: aiExtractPhone(text)
+        };
+    }
+    /* ---- التعلم الذاتي ---- */
+    function aiReinforce(intent, hits) {
+        if (!intent || intent === 'unknown') return;
+        aiBrain.intentWeights[intent] = aiBrain.intentWeights[intent] || {};
+        (hits || []).slice(0, 6).forEach(h => {
+            const k = aiNorm(String(h).replace(/^تعلّم ذاتي:\s*/, ''));
+            if (!k) return;
+            aiBrain.intentWeights[intent][k] = Math.min(3, (aiBrain.intentWeights[intent][k] || 1) + 0.25);
+        });
+        aiSaveBrain();
+    }
+    function aiLearnPhrase(text, intent) {
+        if (!intent || intent === 'unknown') return;
+        aiTokens(text).filter(t => t.length >= 3).slice(0, 8).forEach(t => {
+            const cur = aiBrain.synonyms[t] || { intent, count: 0 };
+            cur.intent = intent; cur.count = Math.min(9, (cur.count || 0) + 1);
+            aiBrain.synonyms[t] = cur;
+        });
+        const keys = Object.keys(aiBrain.synonyms);
+        if (keys.length > 300) keys.slice(0, keys.length - 300).forEach(k => delete aiBrain.synonyms[k]);
+        aiSaveBrain();
+    }
+    function aiLearnCorrection(field, fromVal, toVal) {
+        aiBrain.corrections.unshift({ field, from: String(fromVal || '').slice(0, 60), to: String(toVal || '').slice(0, 60), at: new Date().toISOString() });
+        aiBrain.corrections = aiBrain.corrections.slice(0, 50);
+        aiSaveBrain();
+    }
+    function aiLearnAlias(phrase, surahName) {
+        const k = aiNorm(phrase);
+        if (k && k.length >= 2 && k.length <= 30 && surahName) { aiBrain.surahAliases[k] = surahName; aiSaveBrain(); return true; }
+        return false;
+    }
+    function aiBrainScore() {
+        const s = aiBrain.stats;
+        return Math.min(100, Math.round(8 + s.messages * 1.2 + s.registered * 9 + Object.keys(aiBrain.synonyms || {}).length * 0.8 + (aiBrain.corrections || []).length * 3 + s.feedbackUp * 2));
+    }
+    function aiBrainLabel() {
+        const v = aiBrainScore();
+        if (v >= 80) return 'خبير 🚀'; if (v >= 55) return 'ذكي 🌟'; if (v >= 30) return 'يتعلم بسرعة 🌿'; return 'مبتدئ 🌱';
+    }
+    function aiRenderBrain() {
+        const bar = byId('aiBrainBar'), lvl = byId('aiBrainLevel');
+        if (bar) bar.style.width = aiBrainScore() + '%';
+        if (lvl) lvl.textContent = 'مستوى التعلم: ' + aiBrainLabel();
+    }
+    </script>
+    <script>
+    /* ===== المساعد الذكي — واجهة المحادثة وإدارة الحوار ===== */
+    function toggleAiPanel(force) {
+        const p = byId('aiPanel');
+        const show = force !== undefined ? force : p.classList.contains('hidden');
+        p.classList.toggle('hidden', !show);
+        aiState.open = show;
+        if (show) {
+            byId('aiFabBadge').style.display = 'none';
+            byId('aiAnalysisBtn').classList.toggle('active', !!aiBrain.showAnalysis);
+            aiRenderBrain();
+            if (!aiState.greeted) { aiState.greeted = true; aiGreet(); }
+            setTimeout(() => byId('aiInput').focus(), 150);
+        }
+    }
+    function aiGreet() {
+        aiAddMsg('bot', 'أهلاً بيك في <b>مساعد مسجد مبارك الذكي</b> 🤖<br>اكتب بأي طريقة عادية وأنا هفهمك — مش لازم صيغة ثابتة.<br>مثال: <b>سجل عمر خالد هيبدأ من البقرة امبارح حلقة الفجر</b><br>وأنا هتأكد إن الاسم <b>مش متسجل قبل كده</b>، ولو ناقصني حاجة هسألك عنها 🙂');
+        aiSetChips([
+            { t: '➕ تسجيل طالب جديد', q: 'عايز أسجل طالب جديد' },
+            { t: '🔍 دور على طالب', q: 'دور على طالب' },
+            { t: '📊 إحصائيات', q: 'كام طالب عندنا؟' },
+            { t: '🧠 ماذا تعلمت؟', act: 'brain' }
+        ]);
+        aiRenderBrain();
+    }
+    function aiAddMsg(role, html, opts) {
+        opts = opts || {};
+        const box = byId('aiMessages');
+        const id = 'ai-m' + (++aiState.msgSeq);
+        const div = document.createElement('div');
+        div.className = 'ai-msg ' + role;
+        div.id = id;
+        div.innerHTML = html;
+        if (role === 'bot' && aiBrain.showAnalysis && opts.analysis) div.appendChild(aiAnalysisEl(opts.analysis));
+        if (role === 'bot' && opts.feedback !== false) {
+            const fb = document.createElement('div');
+            fb.className = 'ai-fb';
+            fb.innerHTML = `<button onclick="aiFeedback('${id}',1)" title="رد مفيد">👍</button><button onclick="aiFeedback('${id}',-1)" title="رد غير دقيق">👎</button>`;
+            div.appendChild(fb);
+            if (opts.analysis) aiState.msgAnalysis[id] = opts.analysis;
+        }
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+        return id;
+    }
+    function aiAnalysisEl(a) {
+        const d = document.createElement('details');
+        d.className = 'ai-analysis';
+        const pct = Math.round((a.confidence || 0) * 100);
+        const ent = [];
+        if (a.entities.name) ent.push(`<span class="ai-ent">👤 ${escapeHtml(a.entities.name)}</span>`);
+        if (a.entities.surah) ent.push(`<span class="ai-ent">📖 ${escapeHtml(a.entities.surah)}</span>`);
+        if (a.entities.date) ent.push(`<span class="ai-ent">📅 ${escapeHtml(a.entities.date)}</span>`);
+        if (a.entities.halaqa) ent.push(`<span class="ai-ent">🕌 ${escapeHtml(a.entities.halaqa)}</span>`);
+        if (a.entities.gender) ent.push(`<span class="ai-ent">${a.entities.gender === 'female' ? '👧 طالبة' : '👦 طالب'}</span>`);
+        if (a.entities.phone) ent.push(`<span class="ai-ent">📱 ${escapeHtml(a.entities.phone)}</span>`);
+        d.innerHTML = `<summary>🔍 تحليل فهمي — ${escapeHtml(aiIntentLabel(a.intent))} (${pct}%)</summary>
+            <div class="ai-conf"><span style="width:${pct}%"></span></div>
+            <div style="margin-top:6px">${ent.length ? ent.join('') : '<span style="color:#94a3b8">لم أستخرج بيانات بعد من هذه الجملة</span>'}</div>
+            ${a.hits && a.hits.length ? `<div style="margin-top:4px;color:#64748b">كلمات دلالية: ${a.hits.map(escapeHtml).join('، ')}</div>` : ''}`;
+        return d;
+    }
+    function aiIntentLabel(i) {
+        return { add_student: 'تسجيل طالب', search: 'بحث', stats: 'إحصائيات', help: 'مساعدة', greeting: 'تحية', confirm: 'تأكيد', deny: 'رفض', thanks: 'شكر', unknown: 'غير مؤكد' }[i] || i;
+    }
+    function aiSetChips(list) {
+        aiState.chipActions = list || [];
+        const box = byId('aiChips');
+        box.innerHTML = '';
+        (list || []).forEach((c, i) => {
+            const b = document.createElement('button');
+            b.className = 'ai-chip ' + (c.cls || '');
+            b.textContent = c.t;
+            b.setAttribute('data-chip', i);
+            box.appendChild(b);
+        });
+    }
+    document.getElementById('aiChips').addEventListener('click', e => {
+        const b = e.target.closest('[data-chip]');
+        if (!b) return;
+        const a = aiState.chipActions[+b.getAttribute('data-chip')];
+        if (!a) return;
+        if (a.act) aiDoAction(a);
+        else aiSend(a.q || a.t);
+    });
+    function aiDoAction(a) {
+        if (a.act === 'brain') return aiShowBrain();
+        if (a.act === 'confirm-save') return aiSaveFromSlots();
+        if (a.act === 'edit-menu') return aiAskEditField();
+        if (a.act === 'open-profile') { toggleAiPanel(false); viewStudentProfile(a.id); return; }
+        if (a.act === 'dup-same' && aiState.dups[0]) { toggleAiPanel(false); viewStudentProfile(aiState.dups[0].student.id); aiResetFlow(); return; }
+        if (a.act === 'dup-different') { aiState.dupDismissed = aiState.slots.name; aiState.step = 'flow'; aiAddMsg('bot', 'تمام، هعتبره طالب مختلف ✅ هكمّل التسجيل.'); aiLearnCorrection('duplicate', 'اعتبرته مكرر', 'طالب مختلف — أكمل'); return aiContinueFlow(); }
+        if (a.act === 'dup-edit') {
+            if (aiState.step === 'manual-dup') {
+                aiResetFlow(); toggleAiPanel(false);
+                setTimeout(() => { const i = byId('studentNameInput'); if (i) { i.focus(); i.select(); } }, 300);
+                return;
+            }
+            aiState.slots.name = null; aiState.checkedName = ''; aiState.step = 'flow';
+            aiAddMsg('bot', 'تمام، ابعتلي <b>الاسم الصحيح</b> ✏️'); return aiSetChips([]);
+        }
+        if (a.act === 'force-save') {
+            window._aiDupOverrideName = byId('studentNameInput') ? byId('studentNameInput').value.trim() : '';
+            aiLearnCorrection('duplicate', 'منع الحفظ', 'المستخدم أكد أنه مختلف');
+            aiAddMsg('bot', 'تمام، هحفظه رغم التشابه ✅', { feedback: false });
+            aiResetFlow(); toggleAiPanel(false);
+            setTimeout(() => { const f = byId('addStudentForm'); if (f) f.requestSubmit(); }, 350);
+            return;
+        }
+        if (a.act === 'notify-parent' && a.id) { toggleAiPanel(false); setTimeout(() => askToNotifyParent(students.find(s => s.id === a.id)), 300); return; }
+        if (a.act === 'reset-brain') { aiBrain = JSON.parse(JSON.stringify({ version: 2, intentWeights: {}, synonyms: {}, surahAliases: {}, corrections: [], stats: { messages: aiBrain.stats.messages, understood: 0, registered: aiBrain.stats.registered, duplicatesBlocked: 0, feedbackUp: 0, feedbackDown: 0 }, showAnalysis: aiBrain.showAnalysis, createdAt: Date.now() })); aiSaveBrain(); aiRenderBrain(); return aiAddMsg('bot', 'مسحت اللي اتعلمته وبدأت من جديد 🧹'); }
+        if (a.act === 'skip') { aiSkipSlot(); return; }
+    }
+    function aiToggleAnalysis() {
+        aiBrain.showAnalysis = !aiBrain.showAnalysis;
+        aiSaveBrain();
+        byId('aiAnalysisBtn').classList.toggle('active', aiBrain.showAnalysis);
+        aiAddMsg('bot', aiBrain.showAnalysis ? 'هعرضلك <b>تحليل فهمي</b> تحت كل رد 🔍' : 'خفيت تحليل الفهم 👍', { feedback: false });
+    }
+    function aiResetChat() {
+        byId('aiMessages').innerHTML = '';
+        aiResetFlow();
+        aiGreet();
+    }
+    function aiResetFlow() {
+        aiState.step = 'idle'; aiState.slots = {}; aiState.dups = []; aiState.checkedName = '';
+        aiState.dupDismissed = ''; aiState.pendingAlias = null; aiState.awaitingCorrection = null; aiState.editField = null;
+    }
+    function aiSend(prefill) {
+        const inp = byId('aiInput');
+        const text = (prefill !== undefined ? prefill : inp.value).trim();
+        if (!text) return;
+        inp.value = '';
+        aiState.chipActions = []; byId('aiChips').innerHTML = '';
+        aiAddMsg('user', escapeHtml(text), { feedback: false });
+        aiBrain.stats.messages++; aiSaveBrain(); aiRenderBrain();
+        const t = document.createElement('div');
+        t.className = 'ai-msg bot'; t.id = 'ai-typing';
+        t.innerHTML = '<span class="ai-typing"><span></span><span></span><span></span></span>';
+        byId('aiMessages').appendChild(t);
+        byId('aiMessages').scrollTop = byId('aiMessages').scrollHeight;
+        setTimeout(() => { const el = byId('ai-typing'); if (el) el.remove(); aiRespond(text); }, 450 + Math.random() * 350);
+    }
+    function aiShowBrain() {
+        const s = aiBrain.stats;
+        const aliases = Object.keys(aiBrain.surahAliases || {}).length + Object.keys(AI_SURAH_ALIASES_DEFAULT).length;
+        const rate = s.messages ? Math.round((s.understood / s.messages) * 100) : 0;
+        aiAddMsg('bot', `🧠 <b>عقلي بيتطور مع كل محادثة:</b>
+            <div class="ai-card">
+                <div class="row"><span class="k">مستوى التعلم</span><span class="v ok">${aiBrainLabel()} (${aiBrainScore()}%)</span></div>
+                <div class="row"><span class="k">رسائل حللتها</span><span class="v">${s.messages}</span></div>
+                <div class="row"><span class="k">نسبة الفهم</span><span class="v ok">%${rate}</span></div>
+                <div class="row"><span class="k">طلاب سجلتهم</span><span class="v">${s.registered}</span></div>
+                <div class="row"><span class="k">تكرار منعته</span><span class="v">${s.duplicatesBlocked}</span></div>
+                <div class="row"><span class="k">مرادفات اتعلمتها</span><span class="v">${Object.keys(aiBrain.synonyms || {}).length}</span></div>
+                <div class="row"><span class="k">أسماء سور بديلة أعرفها</span><span class="v">${aliases}</span></div>
+                <div class="row"><span class="k">تصحيحات اتعلمت منها</span><span class="v">${(aiBrain.corrections || []).length}</span></div>
+            </div>
+            <div style="font-size:11px;color:#64748b;margin-top:6px">كل 👍 بتقوّي فهمي، وكل 👎 بتخليني أسألك عن الصح وأتعلمه.</div>`, { feedback: false });
+        aiSetChips([{ t: '🗑️ إعادة ضبط التعلم', act: 'reset-brain', cls: 'amber' }, { t: '➕ تسجيل طالب', q: 'عايز أسجل طالب جديد' }]);
+    }
+    function aiFeedback(msgId, val) {
+        const box = document.getElementById(msgId);
+        if (!box) return;
+        const btns = box.querySelectorAll('.ai-fb button');
+        btns.forEach(b => b.classList.remove('picked-up', 'picked-down'));
+        if (val > 0) {
+            btns[0].classList.add('picked-up');
+            aiBrain.stats.feedbackUp++;
+            const an = aiState.msgAnalysis[msgId];
+            if (an) { aiReinforce(an.intent, an.hits); aiLearnPhrase(an.rawText || '', an.intent); }
+            aiAddMsg('bot', 'شكراً! 🙏 ثبّت المعلومة دي في ذاكرتي.', { feedback: false });
+        } else {
+            btns[1].classList.add('picked-down');
+            aiBrain.stats.feedbackDown++;
+            aiState.awaitingCorrection = aiState.msgAnalysis[msgId] || { intent: 'unknown' };
+            aiAddMsg('bot', 'آسف إني فهمت غلط 🙏 <b>قولي الصح إيه؟</b><br>مثال: <i>الاسم الصح: أحمد محمد علي</i> أو <i>السورة الصح: الكهف</i>', { feedback: false });
+        }
+        aiSaveBrain(); aiRenderBrain();
+    }
+    /* ---- الميكروفون ---- */
+    let aiRec = null, aiListening = false;
+    function aiToggleMic() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) return notify('المتصفح لا يدعم الإدخال الصوتي.', 'info');
+        if (aiListening && aiRec) { aiRec.stop(); return; }
+        aiRec = new SR();
+        aiRec.lang = 'ar-EG';
+        aiRec.interimResults = false;
+        aiRec.onstart = () => { aiListening = true; byId('aiMicBtn').classList.add('listening'); };
+        aiRec.onend = () => { aiListening = false; byId('aiMicBtn').classList.remove('listening'); };
+        aiRec.onresult = e => {
+            const txt = e.results[0][0].transcript || '';
+            byId('aiInput').value = txt;
+            aiSend(txt);
+        };
+        aiRec.onerror = () => { aiListening = false; byId('aiMicBtn').classList.remove('listening'); };
+        try { aiRec.start(); } catch (e) {}
+    }
+    </script>
+    <script>
+    /* ===== المساعد الذكي — إدارة الحوار والتسجيل ===== */
+    function aiRespond(rawText) {
+        const text = String(rawText || '').trim();
+        if (!text) return;
+        if (aiState.awaitingCorrection) return aiApplyCorrection(text);
+        const analysis = aiAnalyze(text);
+        analysis.rawText = text;
+        const E = {
+            name: analysis.name ? analysis.name.name : null,
+            surah: analysis.surah ? analysis.surah.name : null,
+            date: analysis.date ? analysis.date.iso : null,
+            dateLabel: analysis.date ? analysis.date.label : null,
+            dateFuture: !!(analysis.date && analysis.date.future),
+            halaqa: analysis.halaqa, gender: analysis.gender, phone: analysis.phone
+        };
+        const simple = { intent: analysis.intent, confidence: analysis.confidence, hits: analysis.hits, entities: { name: E.name, surah: E.surah, date: E.dateLabel, halaqa: E.halaqa, gender: E.gender, phone: E.phone } };
+        if (analysis.intent !== 'unknown') { aiBrain.stats.understood++; aiSaveBrain(); }
+
+        if (text === '__AI_FORCE_SAVE__') return aiDoAction({ act: 'force-save' });
+        if (aiState.step === 'manual-dup') return aiHandleManualDupReply(text, analysis, simple);
+        if (aiState.step === 'dup_resolve') return aiHandleDupReply(text, analysis, simple);
+        if (aiState.editField) {
+            const EE = { name: analysis.name, surah: analysis.surah, date: analysis.date, halaqa: analysis.halaqa, gender: analysis.gender, phone: analysis.phone };
+            return aiHandleEditReply(text, analysis, simple, EE);
+        }
+        if (aiState.step === 'confirm') return aiHandleConfirmReply(text, analysis, simple);
+
+        if (analysis.intent === 'greeting' && aiState.step === 'idle' && !E.name) {
+            aiAddMsg('bot', 'أهلاً بيك 👋 أنا مساعد مسجد مبارك. اكتبلي اسم الطالب بأي طريقة وأنا هسجلهولك وأتأكد إنه مش متكرر.', { analysis: simple });
+            return aiSetChips([{ t: '➕ تسجيل طالب جديد', q: 'عايز أسجل طالب جديد' }, { t: '🔍 دور على طالب', q: 'دور على طالب' }]);
+        }
+        if (analysis.intent === 'help') return aiAnswerHelp(simple);
+        if (analysis.intent === 'thanks') { aiAddMsg('bot', 'العفو! 🌷 بالتوفيق لأهل القرآن.', { analysis: simple }); return aiSetChips([]); }
+        if (analysis.intent === 'stats') return aiAnswerStats(simple);
+        if (analysis.intent === 'search') return aiAnswerSearch(text, simple);
+        if (analysis.intent === 'deny' && aiState.step !== 'idle') {
+            aiResetFlow();
+            aiAddMsg('bot', 'تمام، لغيت العملية 👍 لو حابب تبدأ من جديد ابعتلي اسم الطالب.', { analysis: simple });
+            return aiSetChips([{ t: '➕ تسجيل طالب جديد', q: 'عايز أسجل طالب جديد' }]);
+        }
+
+        ['name', 'halaqa', 'gender', 'phone'].forEach(k => { if (E[k] && !aiState.slots[k]) aiState.slots[k] = k === 'name' ? analysis.name.name : E[k]; });
+        if (E.name && aiState.slots.name && aiNameSimilarity(E.name.name, aiState.slots.name) < 0.7) {
+            aiLearnCorrection('name', aiState.slots.name, E.name.name);
+            aiState.slots.name = E.name.name; aiState.checkedName = '';
+            aiAddMsg('bot', `تمام، غيّرت الاسم لـ <b>${escapeHtml(E.name.name)}</b> ✏️ وهتأكد إنه مش متكرر.`, { analysis: simple });
+        }
+        if (E.surah && !aiState.slots.startSurah) {
+            aiState.slots.startSurah = E.surah;
+            if (aiState.pendingAlias) {
+                if (aiLearnAlias(aiState.pendingAlias, E.surah)) aiState.slots._aliasLearned = aiState.pendingAlias;
+                aiState.pendingAlias = null;
+            }
+        }
+        if (E.date && !aiState.slots.startDate && !E.dateFuture) aiState.slots.startDate = E.date;
+        if (E.dateFuture && !aiState.slots.startDate) {
+            aiAddMsg('bot', `التاريخ اللي فهمته (<b>${escapeHtml(E.dateLabel)}</b>) في المستقبل 📅<br>ابعتلي تاريخ البداية الصح (مثال: امبارح، أو 2024/5/10).`, { analysis: simple });
+            return aiSetChips([{ t: '📅 النهاردة', q: 'النهاردة' }, { t: 'امبارح', q: 'امبارح' }]);
+        }
+        if (aiState.step === 'idle') {
+            if (analysis.intent === 'add_student' || E.name || E.surah || E.phone) {
+                aiState.step = 'flow';
+                if (!E.name) {
+                    const bare = aiLooksLikeBareName(text);
+                    if (bare) aiState.slots.name = bare;
+                }
+            } else if (analysis.intent === 'confirm') {
+                aiAddMsg('bot', 'تأكيد على إيه بالظبط؟ 🙂<br>لو عايز تسجل طالب جديد ابعتلي اسمه.', { analysis: simple });
+                return aiSetChips([{ t: '➕ تسجيل طالب جديد', q: 'عايز أسجل طالب جديد' }]);
+            } else {
+                const bare = aiLooksLikeBareName(text);
+                if (bare) { aiState.step = 'flow'; aiState.slots.name = bare; }
+                else {
+                    aiAddMsg('bot', 'مش متأكد فهمت قصدك 🤔<br>ممكن تسجل طالب كده: <b>سجل أحمد محمد هيبدأ من البقرة امبارح</b><br>أو اختار من تحت:', { analysis: simple });
+                    return aiSetChips([{ t: '➕ تسجيل طالب جديد', q: 'عايز أسجل طالب جديد' }, { t: '🔍 دور على طالب', q: 'دور على طالب' }, { t: '❓ مساعدة', q: 'بتعمل ايه؟' }]);
+                }
+            }
+        }
+        aiLearnPhrase(text, aiState.step === 'flow' ? 'add_student' : analysis.intent);
+        if (aiState.step === 'flow' && aiState.slots.name && !aiState.slots.startSurah && !E.surah) {
+            const n = aiNorm(text);
+            if (/من الاول|من البدايه/.test(n)) {
+                aiAddMsg('bot', 'قصدك يبدأ من <b>أول المصحف</b> ولا <b>أول جزء عم</b>؟ 🤔', { analysis: simple });
+                return aiSetChips([{ t: '📖 من البقرة (أول المصحف)', q: 'سورة البقرة' }, { t: '📖 من الناس (جزء عم)', q: 'سورة الناس' }]);
+            }
+            if (/(سور|صور|جزء|من|تبارك|يبدا|هيبدا)/.test(n) && text.trim().length <= 30) {
+                aiState.pendingAlias = text.trim();
+                aiAddMsg('bot', `مش متأكد إن «<b>${escapeHtml(text.trim())}</b>» سورة 🤔<br>اختار السورة الصح من دول وأنا <b>هتعلمها</b> لما تكتبها تاني:`, { analysis: simple });
+                return aiSetChips([{ t: 'الناس', q: 'سورة الناس' }, { t: 'الفاتحة', q: 'سورة الفاتحة' }, { t: 'البقرة', q: 'سورة البقرة' }, { t: 'النبأ', q: 'سورة النبأ' }, { t: 'الملك', q: 'سورة الملك' }]);
+            }
+        }
+        return aiContinueFlow(simple);
+    }
+    function aiContinueFlow(prevAnalysis) {
+        const s = aiState.slots;
+        if (!s.name) {
+            aiAddMsg('bot', 'تمام 👍 <b>اسم الطالب إيه؟</b><br><span style="font-size:12px;color:#64748b">(الاسم الثلاثي أو الرباعي أفضل عشان أتأكد إنه مش متكرر)</span>', { analysis: prevAnalysis });
+            return aiSetChips([]);
+        }
+        if (s.name !== aiState.checkedName && s.name !== aiState.dupDismissed) {
+            const dups = aiFindDuplicates(s.name, null, 0.62);
+            aiState.checkedName = s.name;
+            if (dups.length && dups[0].score >= 0.92) {
+                aiState.dups = dups; aiState.step = 'dup_resolve';
+                aiBrain.stats.duplicatesBlocked++; aiSaveBrain();
+                const d = dups[0], pct = Math.round(d.score * 100);
+                aiAddMsg('bot', `⛔ <b>استنى! الاسم ده شبه مسجل قبل كده بنسبة ${pct}%</b>
+                    <div class="ai-card ai-dup">
+                        <div class="row"><span class="k">الاسم الموجود</span><span class="v">${escapeHtml(d.student.name)}</span></div>
+                        <div class="row"><span class="k">يبدأ من</span><span class="v">سورة ${escapeHtml(d.student.startSurah || '—')}</span></div>
+                        <div class="row"><span class="k">الحلقة</span><span class="v">${escapeHtml(d.student.halaqa || '—')}</span></div>
+                    </div>
+                    تحب أعمل إيه؟`, { analysis: prevAnalysis });
+                return aiSetChips([
+                    { t: '👤 ده هو — افتح ملفه', act: 'dup-same', cls: 'green' },
+                    { t: '✅ لا، طالب مختلف — كمّل', act: 'dup-different' },
+                    { t: '✏️ عدّل الاسم', act: 'dup-edit', cls: 'amber' }
+                ]);
+            }
+            if (dups.length && dups[0].score >= 0.70) {
+                const d = dups[0];
+                aiAddMsg('bot', `⚠️ ملحوظة: الاسم قريب من <b>${escapeHtml(d.student.name)}</b> (${Math.round(d.score * 100)}%).<br>لو ده نفس الشخص قولي <b>«ده هو»</b>، ولو مختلف هكمّل عادي.`, { analysis: prevAnalysis });
+                aiState.dups = dups;
+            }
+        }
+        if (!s.startSurah) {
+            aiAddMsg('bot', `تمام، <b>${escapeHtml(s.name)}</b> ✅<br>🎯 <b>هيبدأ منين؟</b> يعني هيبدأ الحفظ من سورة إيه؟`, { analysis: prevAnalysis });
+            return aiSetChips([
+                { t: 'الناس', q: 'سورة الناس' }, { t: 'الفاتحة', q: 'سورة الفاتحة' }, { t: 'البقرة', q: 'سورة البقرة' },
+                { t: 'جزء عم', q: 'جزء عم' }, { t: 'تبارك', q: 'تبارك' }
+            ]);
+        }
+        if (s._aliasLearned) { const a = s._aliasLearned; delete s._aliasLearned; aiAddMsg('bot', `📌 اتعلمت إن «<b>${escapeHtml(a)}</b>» معناها سورة <b>${escapeHtml(s.startSurah)}</b> — هستخدمها بعد كده تلقائياً 👍`, { feedback: false }); }
+        if (!s.startDate) {
+            aiAddMsg('bot', `حلو، هيبدأ من سورة <b>${escapeHtml(s.startSurah)}</b> 📖<br>📅 <b>وبدأ امتى؟</b> (تاريخ أول يوم ليه في الحلقة)`, { analysis: prevAnalysis });
+            return aiSetChips([{ t: '📅 النهاردة', q: 'النهاردة' }, { t: 'امبارح', q: 'امبارح' }, { t: 'من أسبوع', q: 'من أسبوع' }]);
+        }
+        if (!s.halaqa) {
+            aiAddMsg('bot', `🕌 <b>في أنهي حلقة؟</b>`, { analysis: prevAnalysis });
+            return aiSetChips([{ t: 'حلقة الفجر', q: 'حلقة الفجر' }, { t: 'حلقة العصر', q: 'حلقة العصر' }, { t: 'حلقة المغرب', q: 'حلقة المغرب' }, { t: 'حلقة البراعم', q: 'حلقة البراعم' }, { t: 'تخطي', act: 'skip', cls: 'amber' }]);
+        }
+        if (!s.gender) {
+            aiAddMsg('bot', `👦👧 <b>طالب ولا طالبة؟</b>`, { analysis: prevAnalysis });
+            return aiSetChips([{ t: '👦 ذكر', q: 'ذكر' }, { t: '👧 أنثى', q: 'بنت' }, { t: 'تخطي', act: 'skip', cls: 'amber' }]);
+        }
+        if (s.phone === undefined) {
+            aiAddMsg('bot', `📱 <b>رقم واتساب ولي الأمر؟</b> (عشان نبعتله المتابعة)<br><span style="font-size:12px;color:#64748b">لو مش معاك دلوقتي دوس تخطي</span>`, { analysis: prevAnalysis });
+            return aiSetChips([{ t: 'تخطي', act: 'skip', cls: 'amber' }]);
+        }
+        return aiShowConfirm(prevAnalysis);
+    }
+    function aiSkipSlot() {
+        const s = aiState.slots;
+        if (!s.halaqa) s.halaqa = 'حلقة المغرب';
+        else if (!s.gender) s.gender = 'male';
+        else if (s.phone === undefined) s.phone = '';
+        return aiContinueFlow();
+    }
+    function aiShowConfirm(prevAnalysis) {
+        aiState.step = 'confirm';
+        const s = aiState.slots;
+        aiAddMsg('bot', `📋 <b>راجع البيانات قبل التسجيل:</b>
+            <div class="ai-card">
+                <div class="row"><span class="k">👤 الاسم</span><span class="v ok">${escapeHtml(s.name)}</span></div>
+                <div class="row"><span class="k">📖 هيبدأ منين</span><span class="v ok">سورة ${escapeHtml(s.startSurah)}</span></div>
+                <div class="row"><span class="k">📅 تاريخ البداية</span><span class="v ok">${escapeHtml(aiFmtDate(s.startDate))}</span></div>
+                <div class="row"><span class="k">🕌 الحلقة</span><span class="v">${escapeHtml(s.halaqa)}</span></div>
+                <div class="row"><span class="k">النوع</span><span class="v">${s.gender === 'female' ? '👧 طالبة' : '👦 طالب'}</span></div>
+                <div class="row"><span class="k">📱 الهاتف</span><span class="v ${s.phone ? 'ok' : 'miss'}">${s.phone ? escapeHtml(s.phone) : 'بدون رقم'}</span></div>
+            </div>
+            كله تمام؟`, { analysis: prevAnalysis });
+        return aiSetChips([{ t: '✅ تأكيد التسجيل', act: 'confirm-save', cls: 'green' }, { t: '✏️ تعديل حاجة', act: 'edit-menu', cls: 'amber' }, { t: '❌ إلغاء', q: 'لا بلاش' }]);
+    }
+    function aiHandleConfirmReply(text, analysis, simple) {
+        const norm = aiNorm(text);
+        if (/عدل|غير|تعديل/.test(norm)) {
+            let f = null;
+            if (/اسم/.test(norm)) f = 'name';
+            else if (/سور|صور|يبدا|هيبدا|منين|جزء|تبارك/.test(norm)) f = 'startSurah';
+            else if (/تاريخ|امتي|امتى|يوم|بدا|امبارح|النهارده/.test(norm)) f = 'startDate';
+            else if (/حلقه|الفجر|العصر|المغرب|البراعم/.test(norm)) f = 'halaqa';
+            else if (/هاتف|رقم|تليفون|موبايل|واتس/.test(norm)) f = 'phone';
+            else if (/نوع|ذكر|انثي|بنت|ولد|طالبه/.test(norm)) f = 'gender';
+            if (f) {
+                aiState.editField = f;
+                const q = { name: 'ابعتلي <b>الاسم الجديد</b> ✏️', startSurah: 'هيبدأ من سورة إيه؟ 📖', startDate: 'تاريخ البداية الجديد امتى؟ 📅', halaqa: 'الحلقة الجديدة إيه؟ 🕌', phone: 'رقم الهاتف الجديد؟ 📱', gender: 'طالب ولا طالبة؟ 👦👧' }[f];
+                aiAddMsg('bot', q, { analysis: simple });
+                if (f === 'startSurah') return aiSetChips([{ t: 'الناس', q: 'سورة الناس' }, { t: 'الفاتحة', q: 'سورة الفاتحة' }, { t: 'البقرة', q: 'سورة البقرة' }, { t: 'النبأ', q: 'سورة النبأ' }, { t: 'الملك', q: 'سورة الملك' }]);
+                if (f === 'halaqa') return aiSetChips([{ t: 'حلقة الفجر', q: 'حلقة الفجر' }, { t: 'حلقة العصر', q: 'حلقة العصر' }, { t: 'حلقة المغرب', q: 'حلقة المغرب' }, { t: 'حلقة البراعم', q: 'حلقة البراعم' }]);
+                if (f === 'gender') return aiSetChips([{ t: '👦 ذكر', q: 'ذكر' }, { t: '👧 أنثى', q: 'بنت' }]);
+                if (f === 'startDate') return aiSetChips([{ t: '📅 النهاردة', q: 'النهاردة' }, { t: 'امبارح', q: 'امبارح' }]);
+                return aiSetChips([]);
+            }
+        }
+        if (analysis.intent === 'confirm' || /^(تمام|ماشي|سجل|احفظ|اكيد)/.test(norm)) return aiSaveFromSlots();
+        if (analysis.intent === 'deny') { aiResetFlow(); aiAddMsg('bot', 'لغيت التسجيل 👍', { analysis: simple }); return aiSetChips([]); }
+        const E = { name: analysis.name, surah: analysis.surah, date: analysis.date, halaqa: analysis.halaqa, gender: analysis.gender, phone: analysis.phone };
+        let changed = [];
+        if (E.name) { aiLearnCorrection('name', aiState.slots.name, E.name.name); aiState.slots.name = E.name.name; aiState.checkedName = ''; changed.push('الاسم'); }
+        if (E.surah) { aiLearnCorrection('startSurah', aiState.slots.startSurah, E.surah.name); aiState.slots.startSurah = E.surah.name; changed.push('السورة'); }
+        if (E.date && !E.date.future) { aiLearnCorrection('startDate', aiState.slots.startDate, E.date.iso); aiState.slots.startDate = E.date.iso; changed.push('التاريخ'); }
+        if (E.halaqa) { aiState.slots.halaqa = E.halaqa; changed.push('الحلقة'); }
+        if (E.gender) { aiState.slots.gender = E.gender; changed.push('النوع'); }
+        if (E.phone) { aiState.slots.phone = E.phone; changed.push('الهاتف'); }
+        if (changed.length) {
+            aiAddMsg('bot', `عدّلت: <b>${changed.join('، ')}</b> ✏️ واتعلمت من التصحيح ده.`, { analysis: simple });
+            aiState.step = 'flow';
+            return aiContinueFlow();
+        }
+        aiAddMsg('bot', 'دوس <b>تأكيد التسجيل</b> ✅ أو قولي إيه اللي عايز تعدّله (مثال: <i>غير السورة للكهف</i>).', { analysis: simple });
+        return aiSetChips([{ t: '✅ تأكيد التسجيل', act: 'confirm-save', cls: 'green' }, { t: '✏️ تعديل حاجة', act: 'edit-menu', cls: 'amber' }]);
+    }
+    function aiAskEditField() {
+        aiAddMsg('bot', 'عايز تعدّل إيه؟ اختار:', { feedback: false });
+        return aiSetChips([
+            { t: '👤 الاسم', q: 'عدل الاسم' }, { t: '📖 السورة', q: 'عدل السورة' }, { t: '📅 التاريخ', q: 'عدل التاريخ' },
+            { t: '🕌 الحلقة', q: 'عدل الحلقة' }, { t: '👦👧 النوع', q: 'عدل النوع' }, { t: '📱 الهاتف', q: 'عدل الهاتف' }
+        ]);
+    }
+    function aiHandleEditReply(text, analysis, simple, E) {
+        const f = aiState.editField;
+        if (!f) { aiState.step = 'confirm'; return aiShowConfirm(simple); }
+        if (f === 'name' && (E.name || aiLooksLikeBareName(text))) {
+            const v = E.name ? E.name.name : aiLooksLikeBareName(text);
+            aiLearnCorrection('name', aiState.slots.name, v);
+            aiState.slots.name = v; aiState.checkedName = '';
+        }
+        else if (f === 'startSurah' && E.surah) { aiLearnCorrection('startSurah', aiState.slots.startSurah, E.surah.name); aiState.slots.startSurah = E.surah.name; }
+        else if (f === 'startDate' && E.date && !E.date.future) { aiLearnCorrection('startDate', aiState.slots.startDate, E.date.iso); aiState.slots.startDate = E.date.iso; }
+        else if (f === 'halaqa' && E.halaqa) aiState.slots.halaqa = E.halaqa;
+        else if (f === 'phone' && E.phone) aiState.slots.phone = E.phone;
+        else if (f === 'gender' && E.gender) aiState.slots.gender = E.gender;
+        else {
+            const norm = aiNorm(text);
+            if (f === 'startSurah') {
+                const s = aiExtractSurah(text);
+                if (s) { aiState.slots.startSurah = s.name; if (aiState.pendingAlias) { aiLearnAlias(aiState.pendingAlias, s.name); aiState.pendingAlias = null; } }
+                else { aiState.pendingAlias = text.trim(); aiAddMsg('bot', `مش متأكد إن «<b>${escapeHtml(text.trim())}</b>» سورة 🤔<br>اختار السورة الصح من دول وأنا هتعلمها:`, { analysis: simple }); return aiSetChips([{ t: 'الناس', q: 'سورة الناس' }, { t: 'الفاتحة', q: 'سورة الفاتحة' }, { t: 'البقرة', q: 'سورة البقرة' }, { t: 'النبأ', q: 'سورة النبأ' }, { t: 'الملك', q: 'سورة الملك' }]); }
+            }
+            else if (f === 'name') { aiState.slots.name = text.trim().slice(0, 60); aiState.checkedName = ''; }
+            else return aiShowConfirm(simple);
+        }
+        aiState.editField = null; aiState.step = 'confirm';
+        return aiShowConfirm(simple);
+    }
+    function aiHandleDupReply(text, analysis, simple) {
+        const norm = aiNorm(text);
+        if (/افتح|ملف|هو ده|نفسه|ايوه هو|اي هو/.test(norm)) {
+            const id = aiState.dups[0] && aiState.dups[0].student.id;
+            aiResetFlow();
+            if (id) { toggleAiPanel(false); viewStudentProfile(id); }
+            return;
+        }
+        if (analysis.intent === 'confirm' || /كمل|مختلف|جديد|غيره|مش هو|لا ده/.test(norm)) {
+            aiState.dupDismissed = aiState.slots.name;
+            aiState.step = 'flow';
+            aiLearnCorrection('duplicate', 'اعتبرته مكرر', 'طالب مختلف — أكمل');
+            aiAddMsg('bot', 'تمام، هكمّل تسجيله كطالب مختلف ✅', { analysis: simple });
+            return aiContinueFlow();
+        }
+        if (/عدل|غير الاسم|اسم تاني/.test(norm)) {
+            aiState.slots.name = null; aiState.checkedName = ''; aiState.step = 'flow';
+            aiAddMsg('bot', 'ابعتلي <b>الاسم الصحيح</b> ✏️', { analysis: simple });
+            return aiSetChips([]);
+        }
+        const nm = (analysis.name && analysis.name.name) || aiLooksLikeBareName(text);
+        if (nm) {
+            aiLearnCorrection('name', aiState.slots.name, nm);
+            aiState.slots.name = nm; aiState.checkedName = ''; aiState.step = 'flow';
+            return aiContinueFlow(simple);
+        }
+        aiAddMsg('bot', 'اختار من فضلك: <b>ده هو</b> (أفتح ملفه) ولا <b>طالب مختلف</b> (أكمّل) ولا <b>عدّل الاسم</b>؟', { analysis: simple });
+        return aiSetChips([{ t: '👤 ده هو', act: 'dup-same', cls: 'green' }, { t: '✅ مختلف — كمّل', act: 'dup-different' }, { t: '✏️ عدّل الاسم', act: 'dup-edit', cls: 'amber' }]);
+    }
+    function aiApplyCorrection(text) {
+        const ctx = aiState.awaitingCorrection;
+        aiState.awaitingCorrection = null;
+        const analysis = aiAnalyze(text);
+        const E = { name: analysis.name, surah: analysis.surah, date: analysis.date, halaqa: analysis.halaqa, gender: analysis.gender, phone: analysis.phone };
+        const applied = [];
+        if (E.name) { aiLearnCorrection('name', aiState.slots.name || '', E.name.name); aiState.slots.name = E.name.name; aiState.checkedName = ''; applied.push('الاسم'); }
+        if (E.surah) { aiLearnCorrection('startSurah', aiState.slots.startSurah || '', E.surah.name); aiState.slots.startSurah = E.surah.name; applied.push('السورة'); }
+        if (E.date && !E.date.future) { aiState.slots.startDate = E.date.iso; applied.push('التاريخ'); }
+        if (E.halaqa) { aiState.slots.halaqa = E.halaqa; applied.push('الحلقة'); }
+        if (E.gender) { aiState.slots.gender = E.gender; applied.push('النوع'); }
+        if (E.phone) { aiState.slots.phone = E.phone; applied.push('الهاتف'); }
+        if (!applied.length && text.trim().length >= 2 && text.trim().length <= 30 && !aiState.slots.startSurah) {
+            aiState.pendingAlias = text.trim();
+            aiAddMsg('bot', `سجلت ملاحظتك 📝<br>لو «<b>${escapeHtml(text.trim())}</b>» تقصد بيها سورة معينة، اختارها من دول وأنا هتعلمها على طول:`, {});
+            return aiSetChips([{ t: 'الناس', q: 'سورة الناس' }, { t: 'الفاتحة', q: 'سورة الفاتحة' }, { t: 'البقرة', q: 'سورة البقرة' }, { t: 'النبأ', q: 'سورة النبأ' }]);
+        }
+        if (applied.length) {
+            aiReinforce('add_student', ['تصحيح']);
+            aiAddMsg('bot', `شكراً! اتعلمت التصحيح ✅ (عدّلت: <b>${applied.join('، ')}</b>) وهاخد بالي بعد كده.`, {});
+            if (aiState.step !== 'idle') return aiContinueFlow();
+            return aiSetChips([{ t: '➕ تسجيل طالب جديد', q: 'عايز أسجل طالب جديد' }]);
+        }
+        aiAddMsg('bot', 'تمام، سجلت ملاحظتك وهحاول أكون أدق 🙏<br>لو بتسجل طالب ابعتلي اسمه.', {});
+        return aiSetChips([{ t: '➕ تسجيل طالب جديد', q: 'عايز أسجل طالب جديد' }]);
+    }
+    function aiSaveFromSlots() {
+        const s = aiState.slots;
+        if (!s.name || !s.startSurah || !s.startDate) { aiState.step = 'flow'; return aiContinueFlow(); }
+        const dups = aiFindDuplicates(s.name, null, 0.85);
+        if (dups.length && dups[0].score >= 0.92 && s.name !== aiState.dupDismissed) {
+            aiState.dups = dups; aiState.step = 'dup_resolve';
+            aiBrain.stats.duplicatesBlocked++; aiSaveBrain();
+            const dd = dups[0], pp = Math.round(dd.score * 100);
+            aiAddMsg('bot', `⛔ <b>لحظة! قبل الحفظ:</b> الاسم شبه مسجل قبل كده بنسبة <b>${pp}%</b>
+                <div class="ai-card ai-dup">
+                    <div class="row"><span class="k">الاسم الموجود</span><span class="v">${escapeHtml(dd.student.name)}</span></div>
+                    <div class="row"><span class="k">يبدأ من</span><span class="v">سورة ${escapeHtml(dd.student.startSurah || '—')}</span></div>
+                </div>`, { feedback: false });
+            return aiSetChips([
+                { t: '👤 ده هو — افتح ملفه', act: 'dup-same', cls: 'green' },
+                { t: '✅ لا، طالب مختلف — كمّل', act: 'dup-different' },
+                { t: '✏️ عدّل الاسم', act: 'dup-edit', cls: 'amber' }
+            ]);
+        }
+        const record = {
+            id: makeId('std'), name: s.name, startDate: s.startDate, startSurah: s.startSurah, completedJuz: 0,
+            gender: s.gender || 'male', halaqa: s.halaqa || 'حلقة المغرب', phone: s.phone || '',
+            goal: '', notes: 'مسجل عبر المساعد الذكي', weeklyPlan: null
+        };
+        if (!commitData({ students: [...students, record] })) return;
+        aiBrain.stats.registered++;
+        aiReinforce('add_student', ['تسجيل']);
+        aiSaveBrain(); aiRenderBrain();
+        const savedId = record.id;
+        aiResetFlow();
+        aiAddMsg('bot', `🎉 <b>تم تسجيل ${escapeHtml(record.name)} بنجاح!</b><br>📖 من سورة ${escapeHtml(record.startSurah)} — 📅 ${escapeHtml(aiFmtDate(record.startDate))}`, { feedback: false });
+        aiSetChips([
+            { t: '👤 فتح ملفه', act: 'open-profile', id: savedId, cls: 'green' },
+            { t: '📩 رسالة الترحيب لولي الأمر', act: 'notify-parent', id: savedId },
+            { t: '➕ تسجيل طالب تاني', q: 'عايز أسجل طالب جديد' }
+        ]);
+    }
+    function aiAnswerHelp(simple) {
+        aiAddMsg('bot', `أنا بفهم <b>الكلام العادي</b> مش لازم صيغة ثابتة 💬<br>
+            <div class="ai-card">
+                <div class="row"><span class="k">➕ تسجيل</span><span class="v">«سجل أحمد محمد من البقرة امبارح»</span></div>
+                <div class="row"><span class="k">🔍 بحث</span><span class="v">«دور على عمر»</span></div>
+                <div class="row"><span class="k">📊 إحصائيات</span><span class="v">«كام طالب عندنا؟»</span></div>
+                <div class="row"><span class="k">🛡️ تكرار</span><span class="v">بمنع تسجيل نفس الاسم مرتين</span></div>
+                <div class="row"><span class="k">🧠 تعلم</span><span class="v">صححلي وأنا أتعلم منك</span></div>
+            </div>`, { analysis: simple });
+        return aiSetChips([{ t: '➕ تسجيل طالب جديد', q: 'عايز أسجل طالب جديد' }, { t: '🔍 دور على طالب', q: 'دور على طالب' }]);
+    }
+    function aiAnswerStats(simple) {
+        const total = students.length;
+        const withSessions = new Set(sessions.map(x => x.studentId)).size;
+        aiAddMsg('bot', `📊 <b>إحصائيات سريعة:</b>
+            <div class="ai-card">
+                <div class="row"><span class="k">إجمالي الطلاب</span><span class="v ok">${total}</span></div>
+                <div class="row"><span class="k">عندهم تسميع</span><span class="v">${withSessions}</span></div>
+                <div class="row"><span class="k">جلسات التسميع</span><span class="v">${sessions.length}</span></div>
+            </div>`, { analysis: simple });
+        return aiSetChips([{ t: '➕ تسجيل طالب جديد', q: 'عايز أسجل طالب جديد' }]);
+    }
+    function aiAnswerSearch(text, simple) {
+        const q = aiNorm(text).replace(/دور|ابحث|بحث|فين|موجود|عندك|استعلم|معلومات|عن|على|طالب|طالبه|لو|سمحت/g, ' ').trim();
+        if (q.length < 2) { aiAddMsg('bot', 'دور على مين؟ ابعتلي <b>اسم الطالب</b> 🔍', { analysis: simple }); return aiSetChips([]); }
+        const res = aiFindDuplicates(q, null, 0.35).slice(0, 3);
+        if (!res.length) {
+            aiAddMsg('bot', `مش لاقي حد بالاسم ده 🤷<br>تحب أسجله كطالب جديد؟`, { analysis: simple });
+            return aiSetChips([{ t: '➕ أيوه سجله', q: 'عايز أسجل طالب جديد' }]);
+        }
+        let html = `لقيت <b>${res.length}</b> نتيجة 🔍<div class="ai-card">`;
+        res.forEach(r => { html += `<div class="row"><span class="k">${escapeHtml(r.student.name)}</span><span class="v">${Math.round(r.score * 100)}%</span></div>`; });
+        html += '</div>';
+        aiAddMsg('bot', html, { analysis: simple });
+        return aiSetChips(res.map(r => ({ t: '👤 ' + r.student.name.split(' ').slice(0, 2).join(' '), act: 'open-profile', id: r.student.id })));
+    }
+    /* ---- فحص التكرار الحي في نموذج التسجيل ---- */
+    function aiLiveDuplicateHint() {
+        const inp = byId('studentNameInput'), hint = byId('studentNameDupHint');
+        if (!inp || !hint) return;
+        const v = inp.value.trim();
+        const editId = byId('studentEditId').value || null;
+        if (v.length < 3) { hint.className = ''; hint.innerHTML = ''; return; }
+        const dups = aiFindDuplicates(v, editId, 0.55);
+        if (!dups.length) { hint.className = 'show safe'; hint.innerHTML = '✅ الاسم جديد ومش متكرر.'; return; }
+        const d = dups[0], pct = Math.round(d.score * 100);
+        if (d.score >= 0.92) { hint.className = 'show danger'; hint.innerHTML = `⛔ <b>تحذير تكرار (${pct}%)</b> — الاسم شبه مسجل: <b>${escapeHtml(d.student.name)}</b> (يبدأ من سورة ${escapeHtml(d.student.startSurah || '—')}). الحفظ هيتوقف للتأكيد.`; }
+        else if (d.score >= 0.70) { hint.className = 'show warn'; hint.innerHTML = `⚠️ تشابه (${pct}%) مع: <b>${escapeHtml(d.student.name)}</b> — تأكد إنه مش نفس الشخص قبل الحفظ.`; }
+        else { hint.className = 'show safe'; hint.innerHTML = `✅ لا يوجد تكرار واضح (أقرب اسم: ${escapeHtml(d.student.name)} ${pct}%).`; }
+    }
+    function aiHandleManualDuplicate(name, dups) {
+        aiBrain.stats.duplicatesBlocked++; aiSaveBrain(); aiRenderBrain();
+        const d = dups[0], pct = Math.round(d.score * 100);
+        notify(`الاسم مكرر بنسبة ${pct}% — راجع التنبيه قبل الحفظ.`, 'error');
+        toggleAiPanel(true);
+        aiState.step = 'idle'; aiState.slots = { name }; aiState.dups = dups; aiState.checkedName = name;
+        aiAddMsg('bot', `⛔ <b>منعت حفظ مكرر!</b><br>الاسم «<b>${escapeHtml(name)}</b>» شبه مسجل قبل كده بنسبة <b>${pct}%</b>:
+            <div class="ai-card ai-dup">
+                <div class="row"><span class="k">الموجود</span><span class="v">${escapeHtml(d.student.name)}</span></div>
+                <div class="row"><span class="k">يبدأ من</span><span class="v">سورة ${escapeHtml(d.student.startSurah || '—')}</span></div>
+                <div class="row"><span class="k">الحلقة</span><span class="v">${escapeHtml(d.student.halaqa || '—')}</span></div>
+            </div>`, { feedback: false });
+        aiSetChips([
+            { t: '👤 ده هو — افتح ملفه', act: 'open-profile', id: d.student.id, cls: 'green' },
+            { t: '✅ مختلف — احفظ رغم كده', act: 'force-save' },
+            { t: '✏️ هعدّل الاسم بنفسي', act: 'dup-edit', cls: 'amber' }
+        ]);
+        aiState.step = 'manual-dup';
+        aiState.slots.pendingName = name;
+    }
+    function aiHandleManualDupReply(text, analysis, simple) {
+        const nm = (analysis.name && analysis.name.name) || aiLooksLikeBareName(text);
+        if (nm) {
+            byId('studentNameInput').value = nm;
+            aiLiveDuplicateHint();
+            const d2 = aiFindDuplicates(nm, null, 0.62);
+            if (d2.length && d2[0].score >= 0.92) {
+                aiState.slots.pendingName = nm; aiState.dups = d2;
+                aiAddMsg('bot', `لسه شبه مسجل (${Math.round(d2[0].score * 100)}%): <b>${escapeHtml(d2[0].student.name)}</b><br>عدّل أكتر، أو احفظ رغم التشابه لو متأكد.`, { analysis: simple });
+                return aiSetChips([
+                    { t: '✅ احفظ رغم التشابه', act: 'force-save' },
+                    { t: '👤 ده هو — افتح ملفه', act: 'open-profile', id: d2[0].student.id, cls: 'green' }
+                ]);
+            }
+            aiAddMsg('bot', `تمام، حدّثت الاسم في النموذج لـ <b>${escapeHtml(nm)}</b> ✅<br>دوس <b>حفظ الطالب</b> من النموذج عشان تكمّل.`, { analysis: simple });
+            aiResetFlow(); toggleAiPanel(false);
+            setTimeout(() => { const i = byId('studentNameInput'); if (i) i.focus(); }, 300);
+            return;
+        }
+        aiAddMsg('bot', 'ابعتلي <b>الاسم الجديد</b> وأنا هحدّثه في النموذج فوراً ✏️', { analysis: simple });
+        return aiSetChips([]);
+    }
+    </script>
     <!-- PWA: dynamic PNG icons + manifest, service worker, install prompt, offline indicator, deep links -->
     <script>
     (function () {
