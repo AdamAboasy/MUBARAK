@@ -15,10 +15,7 @@
     <meta name="apple-mobile-web-app-title" content="حلقات مبارك">
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Firebase compat SDK for cross-device sync without a custom backend -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+    <!-- التطبيق يعمل محلياً بالكامل بدون سيرفر -->
     <!-- Google Fonts: Cairo, Amiri, Scheherazade New -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -114,70 +111,8 @@
         .trend-up { background: #d1fae5; color: #065f46; }
         .trend-down { background: #fee2e2; color: #991b1b; }
         .trend-flat { background: #e2e8f0; color: #334155; }
-        /* ===== AI Assistant (المساعد الذكي) ===== */
-        #aiFab { position: fixed; bottom: 22px; left: 22px; z-index: 4000; width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #7c3aed, #4f46e5 55%, #047857); box-shadow: 0 12px 30px -8px rgba(79,70,229,.55); transition: transform .2s ease, box-shadow .2s ease; }
-        #aiFab:hover { transform: scale(1.07) rotate(-4deg); box-shadow: 0 16px 36px -8px rgba(79,70,229,.65); }
-        #aiFab::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid rgba(124,58,237,.45); animation: ai-ping 2.2s ease-out infinite; pointer-events: none; }
-        #aiFab .ai-fab-badge { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 999px; background: #f59e0b; color: #451a03; font-size: 11px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
-        @keyframes ai-ping { 0% { transform: scale(.92); opacity: 1; } 70%, 100% { transform: scale(1.18); opacity: 0; } }
-        #aiPanel { position: fixed; bottom: 92px; left: 22px; z-index: 4001; width: min(400px, calc(100vw - 32px)); height: min(600px, calc(100dvh - 130px)); display: flex; flex-direction: column; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 24px 60px -12px rgba(2,44,34,.45); border: 1px solid #e2e8f0; transform-origin: bottom left; animation: ai-panel-in .28s cubic-bezier(.22,1,.36,1); }
-        #aiPanel.hidden { display: none; }
-        @keyframes ai-panel-in { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .ai-head { background: linear-gradient(135deg, #4c1d95, #4338ca 55%, #065f46); color: #fff; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
-        .ai-avatar { width: 40px; height: 40px; border-radius: 14px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-        .ai-head-btn { width: 30px; height: 30px; border-radius: 9px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.12); color: #fff; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: background .15s; flex-shrink: 0; }
-        .ai-head-btn:hover { background: rgba(255,255,255,.25); }
-        .ai-head-btn.active { background: #f59e0b; border-color: #f59e0b; color: #451a03; }
-        #aiMessages { flex: 1; overflow-y: auto; padding: 14px 12px; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(180deg, #f8fafc, #f1f5f9); }
-        .ai-msg { max-width: 88%; padding: 10px 13px; border-radius: 16px; font-size: 13px; line-height: 1.9; animation: ai-msg-in .25s ease-out; overflow-wrap: anywhere; }
-        @keyframes ai-msg-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .ai-msg.user { align-self: flex-start; background: #047857; color: #fff; border-bottom-left-radius: 5px; }
-        .ai-msg.bot { align-self: flex-end; background: #fff; color: #1e293b; border: 1px solid #e2e8f0; border-bottom-right-radius: 5px; box-shadow: 0 2px 8px -2px rgba(2,44,34,.12); }
-        .ai-msg.bot b { color: #065f46; }
-        .ai-typing { display: inline-flex; gap: 5px; padding: 6px 2px; }
-        .ai-typing span { width: 8px; height: 8px; border-radius: 50%; background: #7c3aed; animation: ai-blink 1.1s infinite; }
-        .ai-typing span:nth-child(2) { animation-delay: .18s; } .ai-typing span:nth-child(3) { animation-delay: .36s; }
-        @keyframes ai-blink { 0%, 60%, 100% { opacity: .25; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
-        #aiChips { display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px; background: #fff; border-top: 1px solid #f1f5f9; }
-        #aiChips:empty { display: none; }
-        .ai-chip { flex-shrink: 0; font-size: 12px; font-weight: 700; color: #4338ca; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 999px; padding: 6px 12px; cursor: pointer; transition: all .15s; }
-        .ai-chip:hover { background: #4338ca; color: #fff; transform: translateY(-1px); }
-        .ai-chip.amber { color: #92400e; background: #fef3c7; border-color: #fcd34d; }
-        .ai-chip.amber:hover { background: #f59e0b; color: #451a03; }
-        .ai-chip.green { color: #065f46; background: #d1fae5; border-color: #6ee7b7; }
-        .ai-chip.green:hover { background: #047857; color: #fff; }
-        .ai-inputbar { display: flex; gap: 8px; padding: 10px 12px 12px; background: #fff; border-top: 1px solid #e2e8f0; }
-        #aiInput { flex: 1; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 10px 14px; font-size: 13px; outline: none; resize: none; max-height: 90px; font-family: 'Cairo', sans-serif; }
-        #aiInput:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
-        .ai-send { width: 44px; height: 44px; border-radius: 14px; border: none; cursor: pointer; color: #fff; font-size: 16px; background: linear-gradient(135deg, #7c3aed, #4f46e5); transition: transform .15s; flex-shrink: 0; }
-        .ai-send:hover { transform: scale(1.06); }
-        .ai-mic { width: 44px; height: 44px; border-radius: 14px; border: 1.5px solid #cbd5e1; background: #fff; color: #64748b; cursor: pointer; font-size: 15px; transition: all .15s; flex-shrink: 0; }
-        .ai-mic:hover { border-color: #7c3aed; color: #7c3aed; }
-        .ai-mic.listening { background: #fee2e2; border-color: #ef4444; color: #b91c1c; animation: ai-blink 1s infinite; }
-        .ai-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; margin-top: 8px; font-size: 12px; }
-        .ai-card .row { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dashed #e2e8f0; }
-        .ai-card .row:last-child { border-bottom: none; }
-        .ai-card .k { color: #64748b; } .ai-card .v { font-weight: 800; color: #0f172a; text-align: left; }
-        .ai-card .v.miss { color: #b45309; } .ai-card .v.ok { color: #047857; }
-        .ai-dup { border-right: 4px solid #ef4444; background: #fef2f2; }
-        .ai-dup.warn { border-color: #f59e0b; background: #fffbeb; }
-        .ai-analysis { margin-top: 8px; border: 1px dashed #c4b5fd; background: #faf9ff; border-radius: 10px; padding: 8px 10px; font-size: 11px; color: #4c1d95; }
-        .ai-analysis summary { cursor: pointer; font-weight: 800; }
-        .ai-conf { height: 6px; background: #ede9fe; border-radius: 3px; overflow: hidden; margin-top: 4px; }
-        .ai-conf span { display: block; height: 100%; background: linear-gradient(90deg, #7c3aed, #047857); border-radius: 3px; transition: width .4s ease; }
-        .ai-ent { display: inline-block; background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; border-radius: 999px; padding: 1px 8px; margin: 2px 0 2px 4px; font-weight: 700; }
-        .ai-fb { display: flex; gap: 6px; margin-top: 6px; }
-        .ai-fb button { border: 1px solid #e2e8f0; background: #fff; border-radius: 8px; width: 28px; height: 24px; font-size: 12px; cursor: pointer; color: #94a3b8; transition: all .15s; }
-        .ai-fb button:hover { border-color: #7c3aed; color: #7c3aed; transform: scale(1.1); }
-        .ai-fb button.picked-up { background: #d1fae5; border-color: #047857; color: #047857; }
-        .ai-fb button.picked-down { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
-        .ai-brain-bar { height: 8px; background: rgba(255,255,255,.2); border-radius: 4px; overflow: hidden; margin-top: 3px; }
-        .ai-brain-bar span { display: block; height: 100%; background: linear-gradient(90deg, #fbbf24, #34d399); border-radius: 4px; transition: width .5s ease; }
-        #studentNameDupHint { font-size: 12px; margin-top: 6px; border-radius: 10px; padding: 8px 10px; display: none; line-height: 1.8; }
-        #studentNameDupHint.show { display: block; animation: ai-msg-in .25s ease-out; }
-        #studentNameDupHint.danger { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
-        #studentNameDupHint.warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-        #studentNameDupHint.safe { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+        /* صفوف السور المتعددة في نافذة التسميع */
+        .passage-row button:disabled { opacity: .3; cursor: not-allowed; }
         @keyframes section-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes dialog-in { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -278,10 +213,7 @@
                         <i class="fa-solid fa-user-plus text-base"></i>
                         <span>تسجيل طالب جديد</span>
                     </button>
-                    <button onclick="toggleAiPanel(true)" class="bg-gradient-to-l from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 active:scale-95 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer text-sm" title="سجّل بالكلام العادي — المساعد يفهمك ويتأكد من عدم التكرار">
-                        <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
-                        <span>المساعد الذكي</span>
-                    </button>
+                    <!-- تم إلغاء المساعد الذكي -->
                     <button onclick="exportData()" title="تنزيل التقارير بصيغة PDF" class="bg-emerald-800/70 hover:bg-emerald-700 text-emerald-100 px-3 py-2.5 rounded-xl text-sm transition-all border border-emerald-600/50 flex items-center gap-1.5 cursor-pointer">
                         <i class="fa-regular fa-file-pdf"></i>
                         <span>تصدير PDF</span>
@@ -299,10 +231,7 @@
                         <i class="fa-solid fa-mobile-screen-button"></i>
                         <span>تثبيت التطبيق</span>
                     </button>
-                    <button onclick="openSyncModal()" class="bg-sky-400/20 hover:bg-sky-400/30 text-sky-100 border border-sky-300/40 px-3 py-2.5 rounded-xl text-sm transition-all flex items-center gap-1.5 cursor-pointer" title="مزامنة البيانات بين الأجهزة">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                        <span id="syncHeaderLabel">مزامنة الأجهزة</span>
-                    </button>
+                    <!-- تمت إزالة المزامنة السحابية — يعمل أوفلاين -->
                 </div>
             </div>
 
@@ -649,6 +578,7 @@
                     <button onclick="sendWeeklyPlansToAll()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl flex items-center gap-2">
                         <i class="fa-brands fa-whatsapp"></i> إرسال الخطط للأهالي
                     </button>
+                    <span id="planManualHint" class="text-xs text-amber-800 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl">الخطط يدوية بالكامل: حدد لكل طالب السورة ونطاق الآيات بنفسك.</span>
                 </div>
             </div>
 
@@ -815,8 +745,7 @@
                     </label>
                     <div class="relative">
                         <i class="fa-solid fa-user absolute right-3.5 top-3.5 text-slate-400 text-sm"></i>
-                        <input type="text" id="studentNameInput" required maxlength="120" placeholder="مثال: أحمد محمد علي إبراهيم" class="w-full pr-10 pl-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none" oninput="aiLiveDuplicateHint()">
-                        <div id="studentNameDupHint" role="status" aria-live="polite"></div>
+                        <input type="text" id="studentNameInput" required maxlength="120" placeholder="مثال: أحمد محمد علي إبراهيم" class="w-full pr-10 pl-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none">
                     </div>
                 </div>
 
@@ -957,27 +886,18 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div class="sm:col-span-1">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">
-                            السورة <span class="text-red-500">*</span>
-                        </label>
-                        <select id="sessionSurahInput" onchange="setAyahLimits()" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-xs outline-none">
-                            <!-- Populated with 114 Surahs -->
-                        </select>
+                <div>
+                    <div class="grid grid-cols-2 gap-3 mb-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="sessionSurahCount">عدد السور المسمعة <span class="text-red-500">*</span></label>
+                            <input type="number" id="sessionSurahCount" min="1" max="20" value="1" onchange="setSessionPassageCount()" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none font-bold text-center">
+                        </div>
+                        <div class="flex items-end justify-end">
+                            <button type="button" onclick="addPassageRow('sessionPassages','session');syncSessionPassageCount()" class="text-action"><i class="fa-solid fa-plus ml-1"></i> إضافة سورة</button>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">
-                            من آية
-                        </label>
-                        <input type="number" id="sessionFromAyahInput" min="1" placeholder="1" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">
-                            إلى آية
-                        </label>
-                        <input type="number" id="sessionToAyahInput" min="1" placeholder="30" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none">
-                    </div>
+                    <div id="sessionPassages" class="space-y-2"></div>
+                    <p class="muted mt-2">حدد عدد السور أولاً ثم املأ كل سورة وآياتها — تُسجَّل كلها في جلسة واحدة وبدرجة واحدة.</p>
                 </div>
 
                 <div>
@@ -1095,18 +1015,21 @@
                         </button>
                     </div>
 
-                    <div id="profileSessionsList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    <div id="profileSessionsList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
                         <!-- Populated via JS -->
                     </div>
+                    <p class="text-[11px] text-slate-500 mt-2">اضغط <i class="fa-brands fa-whatsapp text-emerald-600"></i> بجانب أي جلسة لإرسال درجتها فوراً لولي الأمر.</p>
                 </div>
             </div>
 
             <!-- Profile Footer -->
             <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap gap-2 items-center justify-between">
+                <div class="flex flex-wrap gap-2">
                 <button onclick="shareWhatsAppReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow">
                     <i class="fa-brands fa-whatsapp text-sm"></i>
-                    <span>إرسال تقرير PDF لولي الأمر (واتساب)</span>
+                    <span>كل الدرجات + PDF (إن وجد)</span>
                 </button>
+                </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <button onclick="editActiveStudent()" class="text-action">تعديل</button>
                     <button onclick="deleteActiveStudent()" class="text-action danger">حذف الطالب</button>
@@ -1209,49 +1132,6 @@
             </div>
         </div>
     </div>
-    <div id="syncModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
-        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden">
-            <div class="px-6 py-5 bg-sky-950 text-white flex items-center justify-between">
-                <div><h3 id="syncTitle" class="font-bold text-lg">مزامنة البيانات بين الأجهزة</h3><p class="text-xs text-sky-200 mt-1">استخدم نفس الحساب على الكمبيوتر والتليفون</p></div>
-                <button onclick="closeModal('syncModal')" class="w-9 h-9 rounded-lg hover:bg-white/10" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="p-6 space-y-5 max-h-[78dvh] overflow-y-auto">
-                <div id="syncStatusBox" class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start gap-3">
-                    <span id="syncStatusDot" class="sync-dot mt-1.5"></span><div><strong id="syncStatusTitle" class="block text-sm text-slate-800">المزامنة غير مفعلة</strong><p id="syncStatusText" class="muted mt-1">البيانات الحالية محفوظة على هذا الجهاز فقط.</p></div>
-                </div>
-                <div class="bg-amber-50 border-r-4 border-amber-500 p-4 rounded-xl text-xs text-amber-950 leading-loose"><strong class="block mb-1">إعداد أبسط عبر Firebase:</strong>أنشئ مشروع Firebase، فعّل Email/Password وRealtime Database، ثم انسخ كامل Firebase config من Project Settings والصقه في خانة واحدة. لا تحتاج SQL أو مفاتيح سرية.</div>
-                <div><label for="syncFirebaseConfigInput" class="field-label">Firebase Configuration</label><textarea id="syncFirebaseConfigInput" rows="5" class="field sync-code" placeholder='{
-  "apiKey": "...",
-  "authDomain": "...",
-  "databaseURL": "https://...-default-rtdb.firebaseio.com",
-  "projectId": "...",
-  "appId": "..."
-}'></textarea></div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div><label for="syncEmailInput" class="field-label">البريد الإلكتروني للحساب</label><input id="syncEmailInput" type="email" class="field" placeholder="name@example.com" autocomplete="email"></div>
-                    <div><label for="syncPasswordInput" class="field-label">كلمة المرور</label><input id="syncPasswordInput" type="password" class="field" placeholder="8 أحرف أو أكثر" autocomplete="current-password"></div>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="connectCloudSync()" class="bg-sky-700 hover:bg-sky-800 text-white font-bold px-4 py-2.5 rounded-xl text-sm"><i class="fa-solid fa-plug ml-1"></i> حفظ الاتصال وتسجيل الدخول</button>
-                    <button onclick="createCloudAccount()" class="text-action border border-slate-200">إنشاء حساب جديد</button>
-                    <button onclick="pullCloudData()" class="text-action border border-slate-200">تنزيل من السحابة</button>
-                    <button onclick="pushCloudData()" class="text-action border border-slate-200">رفع بيانات هذا الجهاز</button>
-                    <button onclick="signOutCloud()" class="text-action danger border border-red-100">تسجيل الخروج</button>
-                </div>
-                <details class="border border-slate-200 rounded-xl p-4"><summary class="font-bold text-sm text-slate-700 cursor-pointer">Firebase Realtime Database Rules</summary><pre id="syncRulesCode" class="sync-code whitespace-pre-wrap text-[11px] bg-slate-950 text-slate-100 p-3 rounded-lg mt-3 overflow-x-auto">{
-  "rules": {
-    "mubarak_app_data": {
-      "$uid": {
-        ".read": "auth != null &amp;&amp; auth.uid === $uid",
-        ".write": "auth != null &amp;&amp; auth.uid === $uid"
-      }
-    }
-  }
-}</pre><button onclick="copySyncRules()" class="text-action mt-2">نسخ Rules</button></details>
-                <p class="muted">بعد تسجيل الدخول بنفس الحساب على جهازين، سيتم رفع أي تعديل تلقائياً والاستماع لتعديلات الجهاز الآخر. تعارض التعديل النادر يحسمه آخر حفظ يصل للسحابة.</p>
-            </div>
-        </div>
-    </div>
     <div id="weeklyPlanModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4" role="dialog" aria-modal="true" aria-labelledby="weeklyPlanTitle">
         <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden">
             <div class="px-6 py-5 bg-emerald-950 text-white flex items-center justify-between">
@@ -1279,20 +1159,14 @@
                     </div>
                 </div>
                 <div>
-                    <label for="weeklyPlanSurah" class="field-label">السورة المطلوبة <span class="text-red-500">*</span></label>
-                    <select id="weeklyPlanSurah" onchange="setWeeklyPlanAyahLimits()" required class="field"></select>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label for="weeklyPlanFromAyah" class="field-label">من آية <span class="text-red-500">*</span></label>
-                        <input id="weeklyPlanFromAyah" type="number" min="1" required class="field" placeholder="1">
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <label class="field-label mb-0">المطلوب حفظه يدوياً <span class="text-red-500">*</span></label>
+                        <button type="button" onclick="addPassageRow('weeklyPlanPassages','plan')" class="text-action"><i class="fa-solid fa-plus ml-1"></i> إضافة سورة</button>
                     </div>
-                    <div>
-                        <label for="weeklyPlanToAyah" class="field-label">إلى آية <span class="text-red-500">*</span></label>
-                        <input id="weeklyPlanToAyah" type="number" min="1" required class="field" placeholder="10">
-                    </div>
+                    <div id="weeklyPlanPassages" class="space-y-2"></div>
+                    <p class="muted mt-2">يمكنك وضع سور متعددة أو نطاقات مختلفة، والخطة لا تُحدَّد تلقائياً.</p>
                 </div>
-                <p class="muted">بعد الحفظ، يمكن إرسال الخطة لولي الأمر، وتتضمن: السورة والآيات، الجديد يوم السبت، والتسميع يوم الجمعة.</p>
+                <p class="muted">بعد الحفظ، يمكن إرسال الخطة لولي الأمر: الجديد يوم السبت والتسميع يوم الجمعة.</p>
                 <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
                     <button type="button" onclick="closeModal('weeklyPlanModal')" class="text-action">إلغاء</button>
                     <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-2.5 rounded-xl font-bold text-sm">حفظ الخطة</button>
@@ -1328,32 +1202,6 @@
                 <button id="cancelConfirmButton" onclick="closeModal('confirmModal')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold">إلغاء</button>
                 <button id="confirmActionButton" onclick="runConfirmedAction()" class="px-5 py-2.5 bg-red-700 hover:bg-red-800 text-white rounded-xl text-sm font-bold">تأكيد الحذف</button>
             </div>
-        </div>
-    </div>
-    <!-- AI Assistant (المساعد الذكي للتسجيل بالكلام العادي) -->
-    <button id="aiFab" onclick="toggleAiPanel()" title="المساعد الذكي — سجّل طالب بالكلام العادي" aria-label="فتح المساعد الذكي" class="no-print">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-        <span class="ai-fab-badge" id="aiFabBadge" style="display:none">1</span>
-    </button>
-    <div id="aiPanel" class="hidden no-print" role="dialog" aria-label="المساعد الذكي">
-        <div class="ai-head">
-            <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
-            <div style="flex:1;min-width:0">
-                <div style="font-weight:900;font-size:14px">مساعد مسجد مبارك الذكي</div>
-                <div id="aiBrainLevel" style="font-size:11px;opacity:.9">مستوى التعلم: مبتدئ 🌱</div>
-                <div class="ai-brain-bar"><span id="aiBrainBar" style="width:8%"></span></div>
-            </div>
-            <button class="ai-head-btn" id="aiAnalysisBtn" onclick="aiToggleAnalysis()" title="إظهار/إخفاء تحليل الفهم"><i class="fa-solid fa-magnifying-glass-chart"></i></button>
-            <button class="ai-head-btn" onclick="aiShowBrain()" title="ماذا تعلم المساعد؟"><i class="fa-solid fa-brain"></i></button>
-            <button class="ai-head-btn" onclick="aiResetChat()" title="محادثة جديدة"><i class="fa-solid fa-rotate-right"></i></button>
-            <button class="ai-head-btn" onclick="toggleAiPanel(false)" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div id="aiMessages" aria-live="polite"></div>
-        <div id="aiChips"></div>
-        <div class="ai-inputbar">
-            <button class="ai-mic" id="aiMicBtn" onclick="aiToggleMic()" title="إدخال صوتي"><i class="fa-solid fa-microphone"></i></button>
-            <textarea id="aiInput" rows="1" placeholder="اكتب بأي طريقة… مثال: سجل أحمد محمد هيبدأ من البقرة" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend();}"></textarea>
-            <button class="ai-send" onclick="aiSend()" title="إرسال"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
     <div id="offlineBar" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg items-center gap-2 no-print" style="z-index:2050">
@@ -1592,7 +1440,7 @@
             completed: { label: 'تم التسميع', cls: 'bg-emerald-100 text-emerald-800' },
             needs_review: { label: 'يحتاج إعادة', cls: 'bg-rose-100 text-rose-800' }
         };
-        const MODAL_IDS = ['addStudentModal', 'addSessionModal', 'studentProfileModal', 'questionsModal', 'surahDetailsModal', 'exportModal', 'confirmModal', 'attendanceModal', 'weeklyPlanModal', 'syncModal'];
+        const MODAL_IDS = ['addStudentModal', 'addSessionModal', 'studentProfileModal', 'questionsModal', 'surahDetailsModal', 'exportModal', 'confirmModal', 'attendanceModal', 'weeklyPlanModal'];
         let students = [];
         let sessions = [];
         let activeStudentForProfile = null;
@@ -1606,14 +1454,7 @@
         const modalTriggers = new Map();
         const scriptLoads = new Map();
         const quranApiCache = new Map();
-        const SYNC_CONFIG_KEY = 'mb_firebase_config_v1';
-        let cloudClient = null;
-        let cloudUser = null;
-        let cloudChannel = null;
-        let cloudSyncReady = false;
-        let cloudApplying = false;
-        let cloudPushTimer = null;
-        let cloudLastWrite = '';
+        /* لا يوجد سيرفر — كل البيانات محلية على الجهاز */
 
         function byId(id) { return document.getElementById(id); }
         function todayISO(daysAgo = 0) {
@@ -1861,7 +1702,6 @@
             updateApp();
             byId('studentStartDateInput').max = todayISO();
             byId('sessionDateInput').max = todayISO();
-            initCloudSync();
         });
 
         // Set date string
@@ -1903,11 +1743,15 @@
                 const gender = s.gender === 'female' ? 'female' : 'male';
                 let weeklyPlan = null;
                 if (s.weeklyPlan && typeof s.weeklyPlan === 'object') {
-                    const planSurah = QURAN_SURAHS.find(q => q.name === s.weeklyPlan.surah);
-                    const fromAyah = s.weeklyPlan.fromAyah;
-                    const toAyah = s.weeklyPlan.toAyah;
-                    if (!planSurah || !Number.isInteger(fromAyah) || !Number.isInteger(toAyah) || fromAyah < 1 || toAyah < fromAyah || toAyah > planSurah.ayahs || !Object.prototype.hasOwnProperty.call(PLAN_STATUSES, s.weeklyPlan.status)) throw new Error('خطة أسبوعية غير صالحة في ملف البيانات.');
-                    weeklyPlan = { weekStart: date(s.weeklyPlan.weekStart), surah: planSurah.name, fromAyah, toAyah, status: s.weeklyPlan.status };
+                    const sourceItems = Array.isArray(s.weeklyPlan.passages) ? s.weeklyPlan.passages : (s.weeklyPlan.surah ? [s.weeklyPlan] : []);
+                    const passages = sourceItems.map(item => {
+                        const info = QURAN_SURAHS.find(q => q.name === item.surah);
+                        if (!info || !Number.isInteger(item.fromAyah) || !Number.isInteger(item.toAyah) || item.fromAyah < 1 || item.toAyah < item.fromAyah || item.toAyah > info.ayahs) throw new Error('نطاق آيات غير صالح في الخطة الأسبوعية.');
+                        return { surah: info.name, fromAyah: item.fromAyah, toAyah: item.toAyah };
+                    });
+                    const status = s.weeklyPlan.status || 'planned';
+                    if (!passages.length || !Object.prototype.hasOwnProperty.call(PLAN_STATUSES, status)) throw new Error('خطة أسبوعية غير صالحة في ملف البيانات.');
+                    weeklyPlan = { weekStart: date(s.weeklyPlan.weekStart), passages, status };
                 }
                 return { id: id(s.id), name: text(s.name, 120, true), gender, startDate: date(s.startDate), startSurah: s.startSurah, completedJuz: parts, halaqa: text(s.halaqa, 100), phone: text(s.phone, 50), goal: text(s.goal, 300), notes: text(s.notes, 2000), weeklyPlan };
             });
@@ -1918,9 +1762,15 @@
                 const fromAyah = s.fromAyah ?? 1;
                 const toAyah = s.toAyah ?? surah?.ayahs;
                 const score = s.score ?? 10;
-                if (!surah || !Number.isInteger(fromAyah) || !Number.isInteger(toAyah) || fromAyah < 1 || toAyah < fromAyah || toAyah > surah.ayahs) throw new Error('نطاق آيات غير صحيح في إحدى الجلسات.');
+                const rawPassages = Array.isArray(s.passages) && s.passages.length ? s.passages : [{ surah: s.surah, fromAyah, toAyah }];
+                const passages = rawPassages.map(item => {
+                    const info = QURAN_SURAHS.find(q => q.name === item.surah);
+                    if (!info || !Number.isInteger(item.fromAyah) || !Number.isInteger(item.toAyah) || item.fromAyah < 1 || item.toAyah < item.fromAyah || item.toAyah > info.ayahs) throw new Error('نطاق آيات غير صحيح في إحدى الجلسات.');
+                    return { surah: info.name, fromAyah: item.fromAyah, toAyah: item.toAyah };
+                });
+                const first = passages[0];
                 if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 10 || !SESSION_TYPES.includes(s.type)) throw new Error('نوع تسميع أو درجة غير صالحة.');
-                return { id: id(s.id), studentId: s.studentId, date: date(s.date), type: s.type, surah: s.surah, fromAyah, toAyah, score, notes: text(s.notes, 2000), createdAt: text(s.createdAt, 50) };
+                return { id: id(s.id), studentId: s.studentId, date: date(s.date), type: s.type, surah: first.surah, fromAyah: first.fromAyah, toAyah: first.toAyah, passages, score, notes: text(s.notes, 2000), createdAt: text(s.createdAt, 50) };
             });
             return { students: cleanStudents, sessions: cleanSessions };
         }
@@ -1960,7 +1810,6 @@
             try {
                 // One atomic snapshot prevents a student deletion from leaving orphan sessions.
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', ...next }));
-                scheduleCloudPush({ students: next.students, sessions: next.sessions });
                 loadFailed = false;
                 storageWarning = '';
                 return true;
@@ -1987,10 +1836,7 @@
 
         // Surahs initialization in Selects
         function initSurahDropdowns() {
-            const selects = [
-                document.getElementById('studentStartSurahInput'),
-                document.getElementById('sessionSurahInput')
-            ];
+            const selects = [document.getElementById('studentStartSurahInput')];
 
             selects.forEach(sel => {
                 if (!sel) return;
@@ -2463,11 +2309,6 @@
             const completedJuz = byId('studentCompletedJuzInput').valueAsNumber;
             if (name.length < 2 || name.length > 120 || !startDate || startDate > todayISO() || !QURAN_SURAHS.some(s => s.name === startSurah)) return notify('راجع الاسم وتاريخ الانضمام وسورة البداية. لا يمكن تسجيل بداية في المستقبل.', 'error');
             if (!Number.isFinite(completedJuz) || completedJuz < 0 || completedJuz > 30 || !Number.isInteger(completedJuz * 4)) return notify('عدد الأجزاء من 0 إلى 30، بمضاعفات الربع.', 'error');
-            if (!editId && typeof aiFindDuplicates === 'function' && window._aiDupOverrideName !== name) {
-                const dups = aiFindDuplicates(name, null, 0.80);
-                if (dups.length && dups[0].score >= 0.92) { aiHandleManualDuplicate(name, dups); return; }
-            }
-            window._aiDupOverrideName = '';
             if (editId && !students.some(s => s.id === editId)) return notify('لم يعد هذا الطالب موجوداً.', 'error');
             if (editId && sessions.some(s => s.studentId === editId && s.date < startDate)) return notify('تاريخ الانضمام لا يمكن أن يكون بعد جلسة تسميع مسجلة للطالب.', 'error');
             const existing = editId ? students.find(item => item.id === editId) : null;
@@ -2529,12 +2370,82 @@
             if (activeStudentForProfile) deleteStudent(activeStudentForProfile.id);
         }
 
-        function setAyahLimits() {
-            const surah = QURAN_SURAHS.find(q => q.name === byId('sessionSurahInput').value);
-            if (!surah) return;
-            byId('sessionFromAyahInput').max = surah.ayahs;
-            byId('sessionToAyahInput').max = surah.ayahs;
-            byId('sessionToAyahInput').placeholder = `${surah.ayahs} (نهاية السورة)`;
+        function addPassageRow(containerId, prefix, passage = {}, removable = true) {
+            const container = byId(containerId);
+            const row = document.createElement('div');
+            row.className = 'passage-row grid grid-cols-[minmax(0,1fr)_74px_74px_32px] sm:grid-cols-[minmax(0,1fr)_100px_100px_36px] items-end gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl';
+            const surahWrap = document.createElement('label');
+            surahWrap.className = 'min-w-0';
+            surahWrap.innerHTML = '<span class="block text-[10px] font-bold text-slate-500 mb-1">السورة</span>';
+            const select = document.createElement('select');
+            select.className = 'field passage-surah text-xs';
+            select.required = true;
+            QURAN_SURAHS.forEach(item => select.add(new Option(`سورة ${item.name}`, item.name)));
+            if (passage.surah && QURAN_SURAHS.some(item => item.name === passage.surah)) select.value = passage.surah;
+            const fromWrap = document.createElement('label');
+            fromWrap.innerHTML = '<span class="block text-[10px] font-bold text-slate-500 mb-1">من آية</span>';
+            const from = document.createElement('input');
+            from.type = 'number'; from.min = '1'; from.step = '1'; from.required = true;
+            from.value = passage.fromAyah ?? 1; from.className = 'field passage-from text-center';
+            const toWrap = document.createElement('label');
+            toWrap.innerHTML = '<span class="block text-[10px] font-bold text-slate-500 mb-1">إلى آية</span>';
+            const to = document.createElement('input');
+            to.type = 'number'; to.min = '1'; to.step = '1'; to.required = true;
+            to.value = passage.toAyah ?? ''; to.className = 'field passage-to text-center';
+            const remove = document.createElement('button');
+            remove.type = 'button'; remove.className = 'text-slate-400 hover:text-red-600 h-10 rounded-lg';
+            remove.setAttribute('aria-label', 'إزالة هذا المقطع'); remove.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+            remove.disabled = !removable;
+            remove.onclick = () => { row.remove(); refreshPassageRowControls(containerId); };
+            fromWrap.appendChild(from); toWrap.appendChild(to); surahWrap.appendChild(select);
+            row.append(surahWrap, fromWrap, toWrap, remove);
+            select.addEventListener('change', () => setPassageRowLimits(row));
+            setPassageRowLimits(row);
+            container.appendChild(row);
+            refreshPassageRowControls(containerId);
+            return row;
+        }
+
+        function refreshPassageRowControls(containerId) {
+            const rows = [...byId(containerId).querySelectorAll('.passage-row')];
+            rows.forEach(row => { const button = row.querySelector('button'); if (button) button.disabled = rows.length < 2; });
+        }
+
+        function setPassageRowLimits(row) {
+            const info = QURAN_SURAHS.find(item => item.name === row.querySelector('.passage-surah')?.value);
+            if (!info) return;
+            const from = row.querySelector('.passage-from');
+            const to = row.querySelector('.passage-to');
+            from.max = String(info.ayahs); to.max = String(info.ayahs);
+            to.placeholder = String(info.ayahs);
+        }
+
+        function readPassageRows(containerId) {
+            return [...byId(containerId).querySelectorAll('.passage-row')].map(row => ({
+                surah: row.querySelector('.passage-surah').value,
+                fromAyah: row.querySelector('.passage-from').valueAsNumber,
+                toAyah: row.querySelector('.passage-to').valueAsNumber
+            }));
+        }
+
+        function setPassageRows(containerId, prefix, items) {
+            const container = byId(containerId);
+            container.replaceChildren();
+            (items?.length ? items : [{}]).forEach(item => addPassageRow(containerId, prefix, item));
+        }
+
+        function sessionPassages(session) {
+            if (Array.isArray(session.passages) && session.passages.length) return session.passages;
+            return [{ surah: session.surah, fromAyah: session.fromAyah || 1, toAyah: session.toAyah || QURAN_SURAHS.find(q => q.name === session.surah)?.ayahs }];
+        }
+
+        function passagesDescription(passages) {
+            return (passages || []).map(item => `سورة ${item.surah} (آيات ${formatNumber(item.fromAyah)}–${formatNumber(item.toAyah)})`).join(' + ');
+        }
+
+        function weeklyPlanPassages(student) {
+            const plan = weeklyPlan(student);
+            return Array.isArray(plan.passages) ? plan.passages : [];
         }
 
         function updateSessionStudentContext() {
@@ -2549,27 +2460,29 @@
             const studentId = document.getElementById('sessionStudentSelect').value;
             const date = document.getElementById('sessionDateInput').value;
             const type = document.getElementById('sessionTypeInput').value;
-            const surah = document.getElementById('sessionSurahInput').value;
-            const surahInfo = QURAN_SURAHS.find(s => s.name === surah);
-            const fromAyah = byId('sessionFromAyahInput').value === '' ? 1 : byId('sessionFromAyahInput').valueAsNumber;
-            const toAyah = byId('sessionToAyahInput').value === '' ? surahInfo?.ayahs : byId('sessionToAyahInput').valueAsNumber;
+            const passages = readPassageRows('sessionPassages');
             const score = byId('sessionScoreInput').valueAsNumber;
             const notes = document.getElementById('sessionNotesInput').value.trim();
 
             const student = students.find(s => s.id === studentId);
-            if (!student || !date || !surahInfo) return notify('اختر الطالب وتاريخ التسميع والسورة.', 'error');
+            if (!student || !date || !passages.length) return notify('اختر الطالب والتاريخ وأضف سورة واحدة على الأقل.', 'error');
             if (date < student.startDate || date > todayISO()) return notify('تاريخ التسميع يجب أن يكون بين تاريخ انضمام الطالب واليوم.', 'error');
-            if (!Number.isInteger(fromAyah) || !Number.isInteger(toAyah) || fromAyah < 1 || fromAyah > toAyah || toAyah > surahInfo.ayahs) return notify(`راجع الآيات: سورة ${surah} بها ${surahInfo.ayahs} آية، ونهاية النطاق لا تسبق بدايته.`, 'error');
+            for (const passage of passages) {
+                const info = QURAN_SURAHS.find(q => q.name === passage.surah);
+                if (!info || !Number.isInteger(passage.fromAyah) || !Number.isInteger(passage.toAyah) || passage.fromAyah < 1 || passage.fromAyah > passage.toAyah || passage.toAyah > info.ayahs) return notify(`راجع نطاق آيات سورة ${passage.surah || ''}.`, 'error');
+            }
             if (!Number.isFinite(score) || score < 0 || score > 10) return notify('أدخل الدرجة من صفر إلى 10.', 'error');
+            const firstPassage = passages[0];
 
             const newSession = {
                 id: makeId('ses'),
                 studentId,
                 date,
                 type,
-                surah,
-                fromAyah,
-                toAyah,
+                surah: firstPassage.surah,
+                fromAyah: firstPassage.fromAyah,
+                toAyah: firstPassage.toAyah,
+                passages,
                 score,
                 notes,
                 createdAt: new Date().toISOString()
@@ -2577,7 +2490,9 @@
 
             let nextStudents = students;
             const activeSavedPlan = student.weeklyPlan?.weekStart === planSchedule().weekStart ? student.weeklyPlan : null;
-            if (activeSavedPlan && activeSavedPlan.status !== 'completed' && type === 'حفظ جديد' && surah === activeSavedPlan.surah && fromAyah <= activeSavedPlan.fromAyah && toAyah >= activeSavedPlan.toAyah) {
+            const requested = activeSavedPlan ? weeklyPlanPassages(student) : [];
+            const coversPlan = requested.length && requested.every(wanted => passages.some(actual => actual.surah === wanted.surah && actual.fromAyah <= wanted.fromAyah && actual.toAyah >= wanted.toAyah));
+            if (activeSavedPlan && activeSavedPlan.status !== 'completed' && type === 'حفظ جديد' && coversPlan) {
                 nextStudents = students.map(item => item.id === studentId ? { ...item, weeklyPlan: { ...activeSavedPlan, status: 'completed' } } : item);
             }
             if (!commitData({ sessions: [...sessions, newSession], students: nextStudents })) return;
@@ -2598,8 +2513,9 @@
             if (!student) return;
             openModal('addSessionModal');
             document.getElementById('sessionStudentSelect').value = studentId;
-            byId('sessionSurahInput').value = studentSessions(studentId)[0]?.surah || student.startSurah;
-            setAyahLimits();
+            const latest = studentSessions(studentId)[0];
+            setPassageRows('sessionPassages', 'session', latest ? sessionPassages(latest) : [{ surah: student.startSurah, fromAyah: 1, toAyah: '' }]);
+            byId('sessionSurahCount').value = document.querySelectorAll('#sessionPassages .passage-row').length || 1;
             updateSessionStudentContext();
         }
 
@@ -2631,7 +2547,7 @@
             byId('profileJuzProgress').style.width = `${st.completedJuz / 30 * 100}%`;
             const currentPlan = weeklyPlan(st);
             const currentPlanStatus = planStatus(currentPlan.status);
-            byId('profileWeeklyPlan').textContent = `${planDescription(currentPlan)} | الجديد: ${currentPlan.newDay} | التسميع: ${currentPlan.reciteDay}`;
+            byId('profileWeeklyPlan').textContent = `${planDescription(currentPlan)} | التسميع: ${currentPlan.reciteDay}`;
             byId('profileWeeklyPlanStatus').textContent = currentPlanStatus.label;
             byId('profileWeeklyPlanStatus').className = `status-chip ${currentPlanStatus.cls}`;
 
@@ -2658,16 +2574,18 @@
                 `;
             } else {
                 stdSessions.forEach(ses => {
+                    const amount = passagesDescription(sessionPassages(ses));
                     const row = document.createElement('div');
-                    row.className = "flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 text-xs";
+                    row.className = "flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white border border-slate-200 text-xs";
                     row.innerHTML = `
-                        <div>
-                            <span class="font-bold text-slate-800">سورة ${ses.surah}</span>
+                        <div class="min-w-0">
+                            <span class="font-bold text-slate-800">${escapeHtml(amount)}</span>
                             <span class="text-slate-400 mr-1">(${ses.type})</span>
-                            <span class="block text-[11px] text-slate-400 font-mono mt-0.5">${ses.date}</span>
+                            <span class="block text-[11px] text-slate-400 font-mono mt-0.5">${formatDate(ses.date)}</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="score-chip ${scoreChipClass(ses.score)}">${formatNumber(ses.score ?? 0)} / 10</span>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <span class="score-chip ${scoreChipClass(ses.score)}">${formatNumber(ses.score ?? 0)}/10</span>
+                            ${st.phone ? `<button onclick="sendSessionResult('${st.id}', '${ses.id}')" title="إرسال هذه الدرجة لولي الأمر" aria-label="إرسال هذه الدرجة لولي الأمر" class="text-emerald-600 hover:bg-emerald-50 rounded-lg p-1.5"><i class="fa-brands fa-whatsapp"></i></button>` : ''}
                             <button onclick="deleteSession('${ses.id}')" aria-label="حذف جلسة التسميع" class="text-slate-300 hover:text-red-500 p-1">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
@@ -2804,7 +2722,6 @@
         function saveAttendance(records) {
             try {
                 localStorage.setItem('mb_attendance', JSON.stringify(records));
-                scheduleCloudPush();
             } catch { notify('تعذر حفظ سجل الحضور.', 'error'); }
         }
         function openAttendance() {
@@ -2871,7 +2788,8 @@
 
         // Rank a student among peers who are currently on the same surah (last recited, or starting surah).
         function currentSurahOf(student) {
-            return studentSessions(student.id)[0]?.surah || student.startSurah;
+            const last = studentSessions(student.id)[0];
+            return (last && sessionPassages(last)[0]?.surah) || student.startSurah;
         }
         function peerRanking(student) {
             const surah = currentSurahOf(student);
@@ -2906,33 +2824,19 @@
             return { weekStart: localDateISO(saturday), newDay: label(saturday), reciteDay: label(friday), fridayISO: localDateISO(friday) };
         }
 
-        function suggestedWeeklyPlan(student) {
-            const lastNew = studentSessions(student.id).find(session => session.type === 'حفظ جديد');
-            let surah = lastNew?.surah || student.startSurah;
-            let info = QURAN_SURAHS.find(item => item.name === surah);
-            let fromAyah = lastNew?.toAyah ? lastNew.toAyah + 1 : 1;
-            if (fromAyah > info.ayahs) {
-                const next = QURAN_SURAHS[info.id] || info;
-                surah = next.name;
-                info = next;
-                fromAyah = 1;
-            }
-            return { surah, fromAyah, toAyah: Math.min(info.ayahs, fromAyah + 9), status: 'planned' };
-        }
-
         function weeklyPlan(student) {
             const schedule = planSchedule();
             const saved = student.weeklyPlan?.weekStart === schedule.weekStart ? student.weeklyPlan : null;
-            const plan = saved || suggestedWeeklyPlan(student);
-            return { ...schedule, ...plan, isSuggested: !saved };
+            return { ...schedule, passages: saved?.passages || [], status: saved?.status || 'unplanned', isSuggested: false, isSet: Boolean(saved?.passages?.length) };
         }
 
         function planStatus(status) {
+            if (status === 'unplanned') return { label: 'لم تحدد بعد', cls: 'bg-amber-100 text-amber-900' };
             return PLAN_STATUSES[status] || PLAN_STATUSES.planned;
         }
 
         function planDescription(plan) {
-            return `سورة ${plan.surah} من آية ${formatNumber(plan.fromAyah)} إلى آية ${formatNumber(plan.toAyah)}`;
+            return plan?.passages?.length ? passagesDescription(plan.passages) : 'لم يتم تحديد المطلوب يدوياً لهذا الأسبوع';
         }
 
         function renderWeeklyPlan() {
@@ -2951,43 +2855,26 @@
                 row.innerHTML = `
                     <td class="p-3.5"><button onclick="viewStudentProfile('${student.id}')" class="font-bold text-slate-900 hover:text-emerald-700">${escapeHtml(student.name)}</button><span class="block text-[11px] text-slate-500">${studentTitle(student)}</span></td>
                     <td class="p-3.5 text-xs text-slate-600">${escapeHtml(student.halaqa || 'حلقة عامة')}</td>
-                    <td class="p-3.5"><strong class="text-emerald-950">${planDescription(plan)}</strong>${plan.isSuggested ? '<span class="block text-[10px] text-amber-700 mt-1">اقتراح تلقائي - راجعه قبل الإرسال</span>' : ''}</td>
+                    <td class="p-3.5"><strong class="text-emerald-950">${escapeHtml(planDescription(plan))}</strong>${!plan.isSet ? '<span class="block text-[10px] text-amber-700 mt-1">اضغط «تعديل» لتحديد سورة ونطاق الآيات يدوياً</span>' : ''}</td>
                     <td class="p-3.5 text-xs text-slate-600">${escapeHtml(plan.newDay)}</td>
                     <td class="p-3.5 text-xs text-slate-600">${escapeHtml(plan.reciteDay)}</td>
                     <td class="p-3.5"><span class="status-chip ${status.cls}">${status.label}</span></td>
-                    <td class="p-3.5"><div class="flex items-center justify-center gap-1"><button onclick="openWeeklyPlanModal('${student.id}')" class="text-action">تعديل</button><button onclick="sendWeeklyPlanMessage('${student.id}')" class="text-action"><i class="fa-brands fa-whatsapp ml-1"></i> إرسال</button></div></td>
+                    <td class="p-3.5"><div class="flex items-center justify-center gap-1"><button onclick="openWeeklyPlanModal('${student.id}')" class="text-action">${plan.isSet ? 'تعديل' : 'تحديد الخطة'}</button><button ${plan.isSet ? '' : 'disabled'} onclick="sendWeeklyPlanMessage('${student.id}')" class="text-action"><i class="fa-brands fa-whatsapp ml-1"></i> إرسال</button></div></td>
                 `;
                 tbody.appendChild(row);
             });
-            byId('weeklyPlanCompletion').textContent = students.length ? `تم تسميع ${formatNumber(completed)} من ${formatNumber(students.length)} خطة هذا الأسبوع` : '';
-        }
-
-        function initWeeklyPlanSelect() {
-            const select = byId('weeklyPlanSurah');
-            if (select.options.length) return;
-            QURAN_SURAHS.forEach(surah => select.add(new Option(`سورة ${surah.name} (${surah.ayahs} آية)`, surah.name)));
-        }
-
-        function setWeeklyPlanAyahLimits() {
-            const info = QURAN_SURAHS.find(item => item.name === byId('weeklyPlanSurah').value);
-            if (!info) return;
-            byId('weeklyPlanFromAyah').max = info.ayahs;
-            byId('weeklyPlanToAyah').max = info.ayahs;
-            byId('weeklyPlanToAyah').placeholder = `حتى آية ${info.ayahs}`;
+            const setCount = students.filter(student => weeklyPlan(student).isSet).length;
+            byId('weeklyPlanCompletion').textContent = students.length ? `تم تحديد ${formatNumber(setCount)} خطة يدوياً • تم تسميع ${formatNumber(completed)} من ${formatNumber(setCount)}` : '';
         }
 
         function openWeeklyPlanModal(studentId) {
             const student = students.find(item => item.id === studentId);
             if (!student) return;
-            initWeeklyPlanSelect();
             const plan = weeklyPlan(student);
             byId('weeklyPlanStudentId').value = student.id;
             byId('weeklyPlanStudentName').textContent = `${studentTitle(student)} ${student.name} | الجديد: ${plan.newDay} | التسميع: ${plan.reciteDay}`;
             byId('weeklyPlanWeekStart').value = plan.weekStart;
-            byId('weeklyPlanSurah').value = plan.surah;
-            setWeeklyPlanAyahLimits();
-            byId('weeklyPlanFromAyah').value = plan.fromAyah;
-            byId('weeklyPlanToAyah').value = plan.toAyah;
+            setPassageRows('weeklyPlanPassages', 'plan', plan.passages);
             byId('weeklyPlanStatus').value = plan.status;
             openModal('weeklyPlanModal');
         }
@@ -2996,13 +2883,14 @@
             event.preventDefault();
             const studentId = byId('weeklyPlanStudentId').value;
             const student = students.find(item => item.id === studentId);
-            const surah = byId('weeklyPlanSurah').value;
-            const info = QURAN_SURAHS.find(item => item.name === surah);
-            const fromAyah = byId('weeklyPlanFromAyah').valueAsNumber;
-            const toAyah = byId('weeklyPlanToAyah').valueAsNumber;
+            const passages = readPassageRows('weeklyPlanPassages');
             const status = byId('weeklyPlanStatus').value;
-            if (!student || !info || !Number.isInteger(fromAyah) || !Number.isInteger(toAyah) || fromAyah < 1 || toAyah < fromAyah || toAyah > info.ayahs || !Object.prototype.hasOwnProperty.call(PLAN_STATUSES, status)) return notify(`راجع نطاق الآيات. سورة ${surah} فيها ${info?.ayahs || 0} آية.`, 'error');
-            const plan = { weekStart: byId('weeklyPlanWeekStart').value, surah, fromAyah, toAyah, status };
+            if (!student || !Object.prototype.hasOwnProperty.call(PLAN_STATUSES, status) || !passages.length) return notify('أضف مقطعاً واحداً على الأقل وحدد حالته.', 'error');
+            for (const item of passages) {
+                const info = QURAN_SURAHS.find(q => q.name === item.surah);
+                if (!info || !Number.isInteger(item.fromAyah) || !Number.isInteger(item.toAyah) || item.fromAyah < 1 || item.toAyah < item.fromAyah || item.toAyah > info.ayahs) return notify(`راجع آيات سورة ${item.surah}.`, 'error');
+            }
+            const plan = { weekStart: byId('weeklyPlanWeekStart').value, passages, status };
             if (!commitData({ students: students.map(item => item.id === studentId ? { ...item, weeklyPlan: plan } : item) })) return;
             closeModal('weeklyPlanModal');
             notify(`تم حفظ خطة ${studentTitle(student)}: ${planDescription(plan)}.`);
@@ -3070,15 +2958,40 @@
             ].join('\n');
         }
 
+        // Detailed recitation message: every session with its date, amount and score is written in the message itself.
+        function scoreWord(score) {
+            const value = Number(score ?? 0);
+            if (value >= 10) return 'ممتازة جداً — بإذن الله استمر';
+            if (value >= 9) return 'ممتازة';
+            if (value >= 8) return 'جيدة جداً';
+            if (value >= 7) return 'جيدة';
+            if (value >= 5) return 'تحتاج مراجعة';
+            return 'ضعيفة — نحتاج تركيزاً معاً';
+        }
+        function recitationLogLines(student, limit) {
+            const t = studentTitle(student);
+            const records = studentSessions(student.id);
+            const list = limit ? records.slice(0, limit) : records;
+            if (!list.length) return [`${t} لم يُسجَّل له تسميع حتى الآن.`];
+            const lines = ['*درجات التسميع المسجلة:*'];
+            list.forEach((session, index) => {
+                const passages = sessionPassages(session);
+                const amount = passages.map(item => `سورة ${item.surah} من آية ${item.fromAyah} إلى آية ${item.toAyah}`).join(' + ');
+                lines.push(`${formatNumber(index + 1)}) ${formatDate(session.date)} — ${session.type}: ${amount} — *الدرجة: ${formatNumber(session.score ?? 0)}/10* (${scoreWord(session.score)})`);
+                if (session.notes) lines.push(`   ملاحظة المحفظ: ${session.notes}`);
+            });
+            const scores = records.map(r => r.score ?? 0);
+            const average = scores.length ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : 0;
+            lines.push('');
+            lines.push(`*المجموع:* ${formatNumber(records.length)} جلسة — *المتوسط: ${formatNumber(average)}/10* — أعلى درجة ${formatNumber(Math.max(...scores))} وأدنى درجة ${formatNumber(Math.min(...scores))}`);
+            if (limit && records.length > limit) lines.push(`(أحدث ${formatNumber(limit)} جلسة — باقي الجلسات ${formatNumber(records.length - limit)} موجودة في تقرير PDF)`);
+            return lines;
+        }
         function progressReportMessage(student) {
             const plan = weeklyPlan(student);
             const t = studentTitle(student);
-            if (!canSendProgressReport(student)) return followUpMessage(student);
             const records = studentSessions(student.id);
             const chronological = [...records].reverse();
-            const last = records[0];
-            const scores = records.map(r => r.score ?? 0);
-            const average = scores.length ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : 0;
             const progress = progressAnalysis(chronological);
             const peers = peerRanking(student);
             const lines = [
@@ -3086,23 +2999,60 @@
                 `*تقرير متابعة ${t} ${student.name} - حلقات مسجد مبارك*`,
                 `تاريخ التقرير: ${formatDate(todayISO())}`,
                 '',
-                `جلسات التسميع: ${records.length}`,
-                `متوسط الدرجات: ${records.length ? `${average} / 10` : 'لا يوجد تسميع بعد'}`,
+                recitationLogLines(student).join('\n'),
+                '',
                 `عدد الأجزاء المنجزة: ${student.completedJuz} من 30`,
                 `مدى التطور: ${progress.label}`,
-                `ترتيب${g(student, 'ه', 'ها')} بين زملاء${g(student, 'ه', 'ها')} في سورة ${peers.surah}: ${peers.position} من ${peers.total}`,
-                '',
-                `*المطلوب هذا الأسبوع*`,
-                `${planDescription(plan)} — يبدأ ${g(student, 'الطالب', 'الطالبة')} الجديد يوم ${plan.newDay}، ويُسمَّع المطلوب يوم ${plan.reciteDay}.`
+                `ترتيب${g(student, 'ه', 'ها')} بين زملاء${g(student, 'ه', 'ها')} في سورة ${peers.surah}: ${peers.position} من ${peers.total}`
             ];
-            if (last) {
-                lines.push(`آخر تسميع: سورة ${last.surah} (الآيات ${last.fromAyah} - ${last.toAyah}) بتاريخ ${formatDate(last.date)} - الدرجة ${last.score}/10`);
-                if (last.notes) lines.push(`ملاحظات المحفظ: ${last.notes}`);
+            if (plan.isSet) {
+                lines.push('', '*المطلوب هذا الأسبوع*', `${planDescription(plan)} — يبدأ ${g(student, 'الطالب', 'الطالبة')} الجديد يوم ${plan.newDay}، ويُسمَّع المطلوب يوم ${plan.reciteDay}.`);
             }
-                lines.push('', canSendProgressReport(student) ? `📎 مرفق مع هذه الرسالة ملف PDF كامل فيه تاريخ التسميع والدرجات ورسم بياني لمدى التطور وترتيب ${t} بين زملائ${g(student, 'ه', 'ها')}. نرجو الاطلاع عليه.` : 'سيُرسل ملف PDF بعد إتمام 4 تسميعات كي تكتمل بيانات التطور، ونشكر حرصكم على المتابعة.');
+            lines.push('', canSendProgressReport(student)
+                ? `📎 مرفق مع هذه الرسالة تقرير PDF كامل فيه كل التواريخ والدرجات ورسم بياني لمدى التطور وترتيب ${t} بين زملائ${g(student, 'ه', 'ها')}. نرجو الاطلاع عليه.`
+                : `📄 ستصل رسالة درجات مثل هذه بعد كل تسميع، وتقرير PDF كامل بالرسم البياني يُرسل بعد 4 تسميعات كي تكتمل بيانات التطور.`);
             lines.push('', ...guidanceLines(student));
             lines.push('', 'بارك الله في جهودكم في تنشئة أهل القرآن.');
             return lines.join('\n');
+        }
+
+        // Short message sent right after a recitation is recorded: the score goes straight to the parent.
+        function sessionResultMessage(student, session) {
+            const t = studentTitle(student);
+            const passages = sessionPassages(session);
+            const amount = passages.map(item => `سورة ${item.surah} من آية ${item.fromAyah} إلى آية ${item.toAyah}`).join(' + ');
+            const lines = [
+                'السلام عليكم ورحمة الله وبركاته',
+                `*نتيجة تسميع اليوم - ${t} ${student.name}*`,
+                `التاريخ: ${formatDate(session.date)}`,
+                `النوع: ${session.type}`,
+                `المقدار المسموع: ${amount}`,
+                `*الدرجة: ${formatNumber(session.score ?? 0)} من 10* — ${scoreWord(session.score)}`
+            ];
+            if (session.notes) lines.push(`ملاحظة المحفظ: ${session.notes}`);
+            const plan = weeklyPlan(student);
+            if (plan.isSet) lines.push('', `المطلوب القادم: ${planDescription(plan)} — التسميع يوم ${plan.reciteDay}.`);
+            const all = studentSessions(student.id);
+            if (all.length) {
+                const scores = all.map(item => item.score ?? 0);
+                const average = Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10;
+                lines.push('', `المتوسط العام حتى الآن: ${formatNumber(average)}/10 من ${formatNumber(all.length)} جلسة.`);
+            }
+            lines.push('', 'رجاءً راجعوا معه اليوم المقدار المسموع وأعيدوا عليه حتى يثبت.', '', 'مسجد مبارك — حلقات تحفيظ القرآن الكريم');
+            return lines.join('\n');
+        }
+
+        function sendSessionResult(studentId, sessionId) {
+            const student = students.find(item => item.id === studentId);
+            const session = sessions.find(item => item.id === sessionId);
+            if (!student || !session) return;
+            if (!student.phone) {
+                notify(`أضف رقم واتساب ولي أمر ${studentTitle(student)} لإرسال نتيجة التسميع.`, 'error');
+                openEditStudentModal(studentId);
+                return;
+            }
+            openWhatsApp(student.phone, sessionResultMessage(student, session));
+            notify('تم تجهيز رسالة نتيجة التسميع بالدرجة لولي الأمر.');
         }
 
         function weeklyPlanMessage(student) {
@@ -3146,27 +3096,31 @@
         }
 
         // Downloads the PDF report first, then opens WhatsApp with the message asking the parent to check the attached file.
+        // درجات التسميع تُرسل دائماً في الرسالة؛ PDF اختياري ويُنفذ فقط بعد 4 تسميعات.
         async function sendProgressReport(studentId) {
             const student = students.find(s => s.id === studentId);
             if (!student) return;
-            if (!canSendProgressReport(student)) {
-                notify(`يحتاج تقرير PDF إلى 4 تسميعات على الأقل كي تكتمل البيانات. ${studentTitle(student)} لدي${g(student, 'ه', 'ها')} ${studentSessions(student.id).length} تسميع حتى الآن، وسيُرسل تقرير الترحيب والخطة الأسبوعية بدل ذلك.`, 'info');
-            }
             if (!student.phone) {
                 notify(`أضف رقم واتساب ولي أمر ${studentTitle(student)} من تعديل البيانات أولاً.`, 'error');
                 openEditStudentModal(studentId);
                 return;
             }
-            if (canSendProgressReport(student)) {
+            const eligible = canSendProgressReport(student);
+            if (eligible) {
                 const ok = await exportPdf(`تقرير_${safeFilename(student.name)}_${todayISO()}.pdf`, stage => {
                     addStudentFilePages(stage, student);
                     return [...stage.children];
                 });
                 if (ok === false) return;
+                requestConfirmation('تم تنزيل تقرير PDF', `تم حفظ ملف التقرير على جهازك، والدرجات كلها مكتوبة أيضاً داخل رسالة واتساب. سيُفتح واتساب الآن لولي أمر ${studentTitle(student)} ${student.name}؛ أرفق ملف PDF الذي تم تنزيله قبل الإرسال (واتساب لا يسمح بإرفاق الملفات تلقائياً من المتصفح).`, () => {
+                    openWhatsApp(student.phone, progressReportMessage(student));
+                    notify('تم فتح واتساب. الدرجات مكتوبة في الرسالة، ويمكنك إرفاق PDF أيضاً.', 'info');
+                }, 'فتح واتساب الآن');
+                return;
             }
-                requestConfirmation(canSendProgressReport(student) ? 'تم تنزيل تقرير PDF' : 'تقرير PDF غير متاح بعد', canSendProgressReport(student) ? `تم حفظ ملف التقرير على جهازك. سيُفتح الآن واتساب برسالة المتابعة لولي أمر ${studentTitle(student)} ${student.name}؛ أرفق ملف PDF الذي تم تنزيله مع الرسالة قبل الإرسال (واتساب لا يسمح بإرفاق الملفات تلقائياً من المتصفح).` : `يحتاج تقرير PDF إلى 4 تسميعات على الأقل ليكتمل منحنى التطور؛ يبقى لدى ${studentTitle(student)} ${studentSessions(student.id).length}. سيُفتح واتساب برسالة الخطة الأسبوعية (الجديد يوم السبت والتسميع يوم الجمعة).`, () => {
-                openWhatsApp(student.phone, canSendProgressReport(student) ? progressReportMessage(student) : followUpMessage(student));
-                notify(canSendProgressReport(student) ? 'تم فتح واتساب. لا تنسَ إرفاق ملف PDF قبل الإرسال.' : 'تم فتح واتساب برسالة الخطة الأسبوعية (دون PDF حتى اكتمال 4 تسميعات).', 'info');
+            requestConfirmation('إرسال الدرجات في رسالة', `${studentTitle(student)} لدي${g(student, 'ه', 'ها')} ${formatNumber(studentSessions(student.id).length)} تسميع فقط. الدرجات ستُرسل كاملة داخل الرسالة، وتقرير PDF بالرسم البياني يصبح جاهزاً بعد 4 تسميعات.`, () => {
+                openWhatsApp(student.phone, progressReportMessage(student));
+                notify('تم فتح واتساب برسالة تحتوي كل الدرجات والتواريخ.', 'info');
             }, 'فتح واتساب الآن');
         }
 
@@ -3384,11 +3338,23 @@
         }
 
         function addSessionReport(stage, records, title = 'سجل التسميع والمتابعة') {
-            addTablePages(stage, title, `إجمالي الجلسات: ${formatNumber(records.length)}. الملاحظات الطويلة تستكمل في صفوف تحمل كلمة «تابع».`,
-                ['#', 'الطالب', 'التاريخ', 'نوع التسميع', 'السورة والآيات', 'الدرجة من 10', 'ملاحظات المتابعة'], [4, 20, 12, 13, 18, 11, 22],
-                sortedSessions(records).map((s, index) => {
-                    const student = students.find(st => st.id === s.studentId);
-                    return [formatNumber(index + 1), student?.name || 'غير موجود', formatDate(s.date), s.type, `سورة ${s.surah}\nآية ${formatNumber(s.fromAyah)} إلى ${formatNumber(s.toAyah)}`, formatNumber(s.score ?? 0), s.notes || 'لا توجد'];
+            addTablePages(stage, title, `إجمالي الجلسات: ${formatNumber(records.length)}. كل سورة تُسجَّل في سطر مستقل، والملاحظات الطويلة تستكمل في صفوف تحمل كلمة «تابع».`,
+                ['#', 'الطالب', 'التاريخ', 'نوع التسميع', 'السورة والآيات', 'الدرجة من 10', 'ملاحظات المتابعة'], [4, 18, 12, 12, 24, 10, 20],
+                sortedSessions(records).flatMap((session, index) => {
+                    const student = students.find(st => st.id === session.studentId);
+                    const rows = sessionPassages(session).map((item, itemIndex) => [
+                        itemIndex === 0 ? formatNumber(index + 1) : (itemIndex === 1 ? '↳' : ''),
+                        student?.name || 'غير موجود',
+                        itemIndex === 0 ? formatDate(session.date) : '',
+                        itemIndex === 0 ? session.type : '',
+                        `سورة ${item.surah}\nآية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}`,
+                        itemIndex === 0 ? formatNumber(session.score ?? 0) : '',
+                        itemIndex === 0 ? (session.notes || 'لا توجد') : ''
+                    ]);
+                    const scores = sessionPassages(session).length > 1 ? [[
+                        '', '', '', '', 'المتوسط لهذه الجلسة', formatNumber(session.score ?? 0), 'درجة واحدة لكل الجلسة'
+                    ]] : [];
+                    return rows.concat(scores);
                 }));
         }
 
@@ -3483,6 +3449,14 @@
             const headings = ['#', 'تاريخ التسميع', 'نوع التسميع', 'السورة والآيات', 'الدرجة من 10', 'ملاحظات المحفظ'];
             const widths = [5, 14, 13, 22, 11, 35];
             let pageNumber = 1;
+            const sessionRow = (session, index) => sessionPassages(session).map((item, itemIndex) => ([
+                itemIndex === 0 ? formatNumber(index + 1) : (itemIndex === 1 ? '↳' : ''),
+                itemIndex === 0 ? formatDate(session.date) : '',
+                itemIndex === 0 ? session.type : '',
+                `سورة ${item.surah}\nآية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}`,
+                itemIndex === 0 ? formatNumber(session.score ?? 0) : '',
+                itemIndex === 0 ? (session.notes || 'لا توجد') : ''
+            ]));
             let currentPage = createReportPage(stage, `سجل تسميع ${t} الكامل: ${student.name}`, `كل جلسات التسميع (${formatNumber(records.length)} جلسة) مرتبة من الأقدم إلى الأحدث بالتاريخ والدرجة والملاحظات.`);
             let table, tbody;
             const buildTable = targetPage => {
@@ -3494,31 +3468,32 @@
             };
             buildTable(currentPage);
 
-            records.forEach((session, index) => {
-                const values = [
-                    formatNumber(index + 1), formatDate(session.date), session.type,
-                    `سورة ${session.surah}\nآية ${formatNumber(session.fromAyah)} إلى ${formatNumber(session.toAyah)}`,
-                    formatNumber(session.score ?? 0), session.notes || 'لا توجد'
-                ];
-                const chunks = values.map((value, column) => splitReportText(value, Math.max(40, Math.floor(widths[column] * 5))));
-                const count = Math.max(...chunks.map(parts => parts.length));
-                for (let part = 0; part < count; part++) {
-                    const row = document.createElement('tr');
-                    if (part) row.className = 'report-continued';
-                    chunks.forEach((parts, column) => {
-                        const cell = row.insertCell();
-                        cell.textContent = parts.length === 1 ? parts[0] : (parts[part] || '');
-                        if (part && column === 0) cell.textContent += ' (تابع)';
-                    });
+            const appendRow = row => {
+                tbody.appendChild(row);
+                const limit = currentPage.getBoundingClientRect().bottom - 78;
+                if (table.getBoundingClientRect().bottom > limit && tbody.children.length > 1) {
+                    row.remove();
+                    currentPage = createReportPage(stage, `سجل تسميع ${t} الكامل: ${student.name}`, `${student.name} - استكمال سجل التسميع (صفحة ${formatNumber(++pageNumber)})`);
+                    buildTable(currentPage);
                     tbody.appendChild(row);
-                    const limit = currentPage.getBoundingClientRect().bottom - 78;
-                    if (table.getBoundingClientRect().bottom > limit && tbody.children.length > 1) {
-                        row.remove();
-                        currentPage = createReportPage(stage, `سجل تسميع ${t} الكامل: ${student.name}`, `${student.name} - استكمال سجل التسميع (صفحة ${formatNumber(++pageNumber)})`);
-                        buildTable(currentPage);
-                        tbody.appendChild(row);
-                    }
                 }
+            };
+            // كل سورة في الجلسة تظهر في سطر مستقل، والدرجة واحدة على الجلسة كلها.
+            records.forEach((session, index) => {
+                sessionRow(session, index).forEach(values => {
+                    const chunks = values.map((value, column) => splitReportText(value, Math.max(40, Math.floor(widths[column] * 5))));
+                    const count = Math.max(...chunks.map(parts => parts.length));
+                    for (let part = 0; part < count; part++) {
+                        const row = document.createElement('tr');
+                        if (part) row.className = 'report-continued';
+                        chunks.forEach((parts, column) => {
+                            const cell = row.insertCell();
+                            cell.textContent = parts.length === 1 ? parts[0] : (parts[part] || '');
+                            if (part && column === 0) cell.textContent += ' (تابع)';
+                        });
+                        appendRow(row);
+                    }
+                });
             });
         }
 
@@ -3657,7 +3632,8 @@
                 byId('addSessionForm').reset();
                 byId('sessionDateInput').value = todayISO();
                 byId('sessionStudentSelect').value = '';
-                setAyahLimits();
+                setPassageRows('sessionPassages', 'session', [{}]);
+                byId('sessionSurahCount').value = 1;
                 updateSessionStudentContext();
             }
             modalTriggers.set(id, document.activeElement);
@@ -3737,8 +3713,8 @@
         }
     </script>
 
-    <!-- AI Assistant Engine: NLU + duplicate guard + slot-filling + self-learning -->
-    <script>
+    <!-- تم إلغاء المساعد الذكي نهائياً — كتلة معطلة لا تُنفذ -->
+    <script type="text/plain">
     /* ============================================================
        المساعد الذكي — مسجد مبارك
        - فهم عربي حر بدون جمل ثابتة (NLU)
@@ -3768,7 +3744,7 @@
     const AI_STOP = new Set('سجل سجلي سجللي سجلهولي ضيف ضيفلي اضافه اضاف طالب طالبه الطالب الطالبه جديد جديده اسم اسمه اسمها باسم دخل قيد اشترك اشتراك في ف من الي الي سورة سوره صوره البدا البدايه بادئ بادي هيبدا هيبدأ يبدا يبدأ بدا حلقه الفجر العصر المغرب البراعم تاريخ يوم امبارح النهارده اليوم اسبوع شهر سنه رقم تليفون موبايل هاتف واتس واتساب ذكر انثي بنت ولد جزء اجزاء اللي اللى كام ايه ده دي وهل لو سمحت عايز عاوز ممكن'.split(' ').map(aiNormWord));
 
     let aiBrain = aiLoadBrain();
-    const aiState = { open: false, step: 'idle', slots: {}, dups: [], checkedName: '', dupDismissed: '', pendingAlias: null, awaitingCorrection: null, editField: null, msgSeq: 0, msgAnalysis: {}, chipActions: [], greeted: false, lastAnalysis: null };
+    const aiState = { open: false, step: 'idle', slots: {}, dups: [], checkedName: '', dupDismissed: '', pendingAlias: null, awaitingCorrection: null, editField: null, msgSeq: 0, msgAnalysis: {}, chipActions: [], greeted: false, lastAnalysis: null, bulkDraft: [], bulkDuplicates: [] };
 
     function aiLoadBrain() {
         const def = { version: 2, intentWeights: {}, synonyms: {}, surahAliases: {}, corrections: [], stats: { messages: 0, understood: 0, registered: 0, duplicatesBlocked: 0, feedbackUp: 0, feedbackDown: 0 }, showAnalysis: true, createdAt: Date.now() };
@@ -4064,7 +4040,7 @@
         if (lvl) lvl.textContent = 'مستوى التعلم: ' + aiBrainLabel();
     }
     </script>
-    <script>
+    <script type="text/plain">
     /* ===== المساعد الذكي — واجهة المحادثة وإدارة الحوار ===== */
     function toggleAiPanel(force) {
         const p = byId('aiPanel');
@@ -4153,6 +4129,14 @@
         if (a.act === 'brain') return aiShowBrain();
         if (a.act === 'confirm-save') return aiSaveFromSlots();
         if (a.act === 'edit-menu') return aiAskEditField();
+            if (a.act === 'bulk-save') return aiBulkSave('all');
+            if (a.act === 'bulk-save-unique') return aiBulkSave('unique');
+            if (a.act === 'bulk-save-all') { aiState.bulkDupApproved = true; return aiBulkSave('all'); }
+            if (a.act === 'bulk-cancel') { aiResetFlow(); aiAddMsg('bot', 'ألغيت الدفعة ولم أسجل أي طالب.', { feedback: false }); return aiSetChips([]); }
+            if (a.act === 'open-students') { aiResetFlow(); toggleAiPanel(false); return switchTab('students'); }
+            if (a.act === 'open-plan') { aiResetFlow(); toggleAiPanel(false); return switchTab('plan'); }
+            if (a.act === 'bulk-default-date') { aiState.bulkDraft.forEach(record => { if (!record.date) record.date = todayISO(); }); aiLearnCorrection('bulk-date', 'ناقص', 'التاريخ الافتراضي اليوم بعد موافقة المستخدم'); return aiContinueBulk(); }
+            if (a.act === 'bulk-default-male') { aiState.bulkDraft.forEach(record => { if (!record.gender) record.gender = 'male'; }); aiLearnCorrection('bulk-gender', 'ناقص', 'ذكر بعد موافقة المستخدم'); return aiContinueBulk(); }
         if (a.act === 'open-profile') { toggleAiPanel(false); viewStudentProfile(a.id); return; }
         if (a.act === 'dup-same' && aiState.dups[0]) { toggleAiPanel(false); viewStudentProfile(aiState.dups[0].student.id); aiResetFlow(); return; }
         if (a.act === 'dup-different') { aiState.dupDismissed = aiState.slots.name; aiState.step = 'flow'; aiAddMsg('bot', 'تمام، هعتبره طالب مختلف ✅ هكمّل التسجيل.'); aiLearnCorrection('duplicate', 'اعتبرته مكرر', 'طالب مختلف — أكمل'); return aiContinueFlow(); }
@@ -4191,6 +4175,7 @@
     function aiResetFlow() {
         aiState.step = 'idle'; aiState.slots = {}; aiState.dups = []; aiState.checkedName = '';
         aiState.dupDismissed = ''; aiState.pendingAlias = null; aiState.awaitingCorrection = null; aiState.editField = null;
+        aiState.bulkDraft = []; aiState.bulkDuplicates = []; aiState.bulkDupApproved = false;
     }
     function aiSend(prefill) {
         const inp = byId('aiInput');
@@ -4264,8 +4249,137 @@
         try { aiRec.start(); } catch (e) {}
     }
     </script>
-    <script>
+    <script type="text/plain">
     /* ===== المساعد الذكي — إدارة الحوار والتسجيل ===== */
+    function aiParseStudentEntry(raw) {
+        let text = String(raw || '').trim().replace(/^[-*•\d.)\s]+/, '');
+        text = text.replace(/^(?:الطلاب الجدد|الطالبات الجدد|طلاب جدد|طالبات جدد|الطلاب|الطالبات|اضافه الطلاب|إضافة الطلاب|سجل الطلاب)\s*[:：\-]?\s*/i, '');
+        if (!text || aiNorm(text).length < 3) return null;
+        const gender = aiExtractGender(text);
+        const surah = aiExtractSurah(text);
+        const date = aiExtractDate(text);
+        const halaqa = aiExtractHalaqa(text);
+        const phone = aiExtractPhone(text);
+        const norm = ' ' + aiNorm(text) + ' ';
+        const attrAt = ['من سوره', 'من سورة', 'سوره', 'بدا', 'بدأ', 'امبارح', 'النهارده', 'يوم', 'بتاريخ', 'تاريخ', 'ذكر', 'انثي', 'بنت', 'ولد', 'حلقه', 'الفجر', 'العصر', 'المغرب', 'البراعم', 'واتساب', 'رقم', 'تليفون', 'موبايل', 'اجزاء', 'جزء'].map(x => aiNorm(x)).map(x => norm.indexOf(' ' + x + ' ')).filter(i => i >= 0);
+        const firstBoundary = attrAt.length ? Math.min(...attrAt) : Math.min(text.length, 65);
+        let prefix = text.slice(0, firstBoundary).replace(/^[\s,،:：\-]+|[\s,،:：\-]+$/g, '');
+        const foundName = aiExtractName(text);
+        let name = foundName?.name || aiCleanNameCandidate(prefix);
+        if (!name && !/[\n،,؛;]/.test(text)) name = aiLooksLikeBareName(text);
+        if (!name || name.length < 3) return null;
+        const juzMatch = norm.match(/(?:عدد\s*)?(\d+(?:\.\d+)?)\s*جز(?:ء|ا|ءا|ءين|ءان|ء)/);
+        const juz = juzMatch ? Number(juzMatch[1]) : null;
+        return {
+            name, gender, surah: surah?.name || null, date: date && !date.future ? date.iso : null,
+            dateFuture: !!date?.future, halaqa, phone,
+            completedJuz: Number.isFinite(juz) && juz >= 0 && juz <= 30 ? juz : 0,
+            source: text
+        };
+    }
+    function aiParseStudentBatch(raw) {
+        const text = String(raw || '').trim();
+        let chunks = text.split(/\n+|[؛;]+/).map(s => s.trim()).filter(Boolean);
+        if (chunks.length === 1) {
+            chunks = text.split(/(?=(?:سجل(?:ي|لي)?|ضيف(?:لي)?|أضف|اضف|الطالب(?:ة)?\s+[\u0600-\u06FF]|طالبة\s+[\u0600-\u06FF])\s+)/).map(s => s.trim()).filter(Boolean);
+        }
+        if (chunks.length === 1) {
+            const splitByComma = text.split(/،\s*(?:و?الاسم[:：]?\s*)/).map(s => s.trim()).filter(Boolean);
+            if (splitByComma.length > 1) chunks = splitByComma;
+        }
+        const records = chunks.map(aiParseStudentEntry).filter(Boolean);
+        const unique = [];
+        records.forEach(record => {
+            const duplicate = unique.find(existing => aiNameSimilarity(existing.name, record.name) >= 0.88);
+            if (duplicate) Object.keys(record).forEach(key => { if ((duplicate[key] == null || duplicate[key] === '') && record[key] != null) duplicate[key] = record[key]; });
+            else unique.push(record);
+        });
+        return unique;
+    }
+    function aiBulkMissing(record) {
+        const missing = [];
+        if (!record.gender) missing.push('النوع: ذكر أو أنثى');
+        if (!record.surah) missing.push('سورة البداية');
+        if (!record.date) missing.push(record.dateFuture ? 'تاريخ بداية غير مستقبلي' : 'تاريخ البدء');
+        return missing;
+    }
+    function aiStartBulk(records, simple) {
+        aiResetFlow();
+        aiState.step = 'bulk_missing';
+        aiState.bulkDraft = records.map(record => ({ ...record, halaqa: record.halaqa || 'حلقة المغرب' }));
+        aiBrain.stats.understood++; aiBrain.stats.messages += Math.max(0, records.length - 1); aiSaveBrain(); aiRenderBrain();
+        return aiContinueBulk(simple);
+    }
+    function aiContinueBulk(simple) {
+        const missingRows = aiState.bulkDraft.map(record => ({ record, missing: aiBulkMissing(record) })).filter(row => row.missing.length);
+        if (missingRows.length) {
+            const list = missingRows.map(({ record, missing }) => `• <b>${escapeHtml(record.name)}</b>: ناقص ${missing.join(' + ')}`).join('<br>');
+            aiAddMsg('bot', `استلمت <b>${formatNumber(aiState.bulkDraft.length)} سجلات</b> مرة واحدة ✅<br>محتاج بس المعلومات الناقصة دي — اكتبها كلها في <b>رسالة واحدة</b> وبأي أسلوب، أو اكتب كل اسم في سطر:<div class="ai-card">${list}</div><span style="font-size:11px;color:#64748b">مثال: أحمد ذكر بدأ من البقرة امبارح — فاطمة طالبة من الناس من أسبوع</span>`, { analysis: simple });
+            return aiSetChips([{ t: '📅 خلي تاريخ الناقص اليوم', act: 'bulk-default-date' }, { t: '👦 خلي النوع ذكر للناقص', act: 'bulk-default-male' }, { t: '❌ إلغاء', act: 'bulk-cancel' }]);
+        }
+        aiState.step = 'bulk_confirm';
+        const rows = aiState.bulkDraft.map((record, index) => `<div class="row"><span class="k">${formatNumber(index + 1)}. ${escapeHtml(record.name)}</span><span class="v">${record.gender === 'female' ? 'طالبة' : 'طالب'} • سورة ${escapeHtml(record.surah)} • ${escapeHtml(aiFmtDate(record.date))} • ${escapeHtml(record.halaqa)}</span></div>`).join('');
+        aiAddMsg('bot', `راجعت البيانات كلها. <b>${formatNumber(aiState.bulkDraft.length)} طلاب</b> جاهزين للتسجيل دفعة واحدة:<div class="ai-card">${rows}</div>موافق أحفظهم؟ هافحص تكرار كل اسم قبل الإضافة.`, { analysis: simple });
+        return aiSetChips([{ t: `✅ سجّل ${aiState.bulkDraft.length} طلاب`, act: 'bulk-save', cls: 'green' }, { t: '✏️ لسه هبعت بيانات', q: 'كمل' }, { t: '❌ إلغاء الدفعة', act: 'bulk-cancel' }]);
+    }
+    function aiMergeBulkReply(text, simple) {
+        const incoming = aiParseStudentBatch(text);
+        if (!incoming.length) {
+            aiAddMsg('bot', 'مش قادر أربط المعلومات بالأسماء. ابعتلي كل اسم والناقص بتاعه في نفس السطر، زي: <b>أحمد محمد ذكر من البقرة بدأ امبارح</b>.', { analysis: simple });
+            return aiSetChips([]);
+        }
+        incoming.forEach(update => {
+            let target = update.name ? aiState.bulkDraft.find(item => aiNameSimilarity(item.name, update.name) >= 0.62) : null;
+            if (!target && aiState.bulkDraft.length === 1) target = aiState.bulkDraft[0];
+            if (!target) return;
+            if (update.gender) target.gender = update.gender;
+            if (update.surah) target.surah = update.surah;
+            if (update.date) target.date = update.date;
+            if (update.halaqa) target.halaqa = update.halaqa;
+            if (update.phone) target.phone = update.phone;
+            if (update.completedJuz) target.completedJuz = update.completedJuz;
+        });
+        return aiContinueBulk(simple);
+    }
+    function aiCheckBulkDuplicates() {
+        const collisions = [];
+        aiState.bulkDraft.forEach((record, index) => {
+            const matches = aiFindDuplicates(record.name, null, 0.88);
+            if (matches.length && matches[0].score >= 0.92) collisions.push({ index, record, match: matches[0] });
+            const earlier = aiState.bulkDraft.slice(0, index).find(other => aiNameSimilarity(other.name, record.name) >= 0.92);
+            if (earlier) collisions.push({ index, record, match: { student: earlier, score: aiNameSimilarity(earlier.name, record.name), batch: true } });
+        });
+        return collisions;
+    }
+    function aiBulkSave(mode = 'all') {
+        const collisions = aiState.bulkDuplicates.length ? aiState.bulkDuplicates : aiCheckBulkDuplicates();
+        aiState.bulkDuplicates = collisions;
+        if (collisions.length && mode === 'all' && !aiState.bulkDupApproved) {
+            aiState.step = 'bulk_dups';
+            const listing = collisions.map(item => `• <b>${escapeHtml(item.record.name)}</b> يشبه ${item.match.batch ? 'اسمًا آخر في نفس الرسالة' : `الطالب ${escapeHtml(item.match.student.name)}`} بنسبة ${Math.round(item.match.score * 100)}%`).join('<br>');
+            aiBrain.stats.duplicatesBlocked += collisions.length; aiSaveBrain(); aiRenderBrain();
+            aiAddMsg('bot', `وقفت التسجيل قبل ما أعمل تكرار 🛡️<div class="ai-card ai-dup">${listing}</div>تحب أسجل الأسماء الجديدة فقط وأتخطى المتشابهة، ولا أنت متأكد من تسجيل الكل؟`, { feedback: false });
+            return aiSetChips([{ t: '✅ سجّل الجديد فقط', act: 'bulk-save-unique', cls: 'green' }, { t: '⚠️ سجّل الكل وأنا متأكد', act: 'bulk-save-all', cls: 'amber' }, { t: '❌ إلغاء الكل', act: 'bulk-cancel' }]);
+        }
+        const skipped = mode === 'unique' ? new Set(collisions.map(x => x.index)) : new Set();
+        const now = todayISO();
+        const toSave = aiState.bulkDraft.filter((_, index) => !skipped.has(index)).map(record => ({
+            id: makeId('std'), name: record.name, startDate: record.date || now, startSurah: record.surah || 'الناس',
+            completedJuz: record.completedJuz || 0, gender: record.gender || 'male', halaqa: record.halaqa || 'حلقة المغرب',
+            phone: record.phone || '', goal: '', notes: 'تم التسجيل عبر المساعد الذكي', weeklyPlan: null
+        }));
+        if (!toSave.length) {
+            aiAddMsg('bot', 'كل الأسماء الموجودة في الدفعة متشابهة مع سجلات حالية؛ لم أضف أي تكرار. افتح ملفاتهم أو أرسل أسماء أخرى.', { feedback: false });
+            aiResetFlow(); return aiSetChips([{ t: '➕ دفعة جديدة', q: 'عايز أسجل طلاب جدد' }]);
+        }
+        if (!commitData({ students: [...students, ...toSave] })) return;
+        aiBrain.stats.registered += toSave.length; aiReinforce('add_student', ['دفعة طلاب']); aiSaveBrain(); aiRenderBrain();
+        const skippedText = skipped.size ? ` وتخطيت ${formatNumber(skipped.size)} اسم متشابه.` : '';
+        aiResetFlow();
+        aiAddMsg('bot', `🎉 سجلت <b>${formatNumber(toSave.length)} طلاب/طالبات</b> دفعة واحدة بنجاح!${skippedText}<br>دلوقتي تقدر تراجعهم في سجل الطلاب وتجهز خطط أسبوعهم.`, { feedback: false });
+        return aiSetChips([{ t: '👥 عرض الطلاب', act: 'open-students', cls: 'green' }, { t: '📅 خطة الأسبوع', act: 'open-plan' }, { t: '➕ دفعة جديدة', q: 'عايز أسجل طلاب جدد' }]);
+    }
+
     function aiRespond(rawText) {
         const text = String(rawText || '').trim();
         if (!text) return;
@@ -4284,6 +4398,23 @@
         if (analysis.intent !== 'unknown') { aiBrain.stats.understood++; aiSaveBrain(); }
 
         if (text === '__AI_FORCE_SAVE__') return aiDoAction({ act: 'force-save' });
+        if (aiState.step === 'bulk_missing') return aiMergeBulkReply(text, simple);
+        if (aiState.step === 'bulk_confirm') {
+            if (analysis.intent === 'deny') { aiResetFlow(); aiAddMsg('bot', 'ألغيت تسجيل الدفعة بدون أي تغيير 👍', { feedback: false }); return aiSetChips([]); }
+            if (analysis.intent === 'confirm' || /سجل|احفظ|كلهم|تمام/.test(aiNorm(text))) return aiBulkSave('all');
+            const rows = aiParseStudentBatch(text);
+            if (rows.length) { aiState.bulkDraft = rows; return aiContinueBulk(simple); }
+            return aiContinueBulk(simple);
+        }
+        if (aiState.step === 'bulk_dups') {
+            if (/bulk-save-unique/.test(text)) return aiBulkSave('unique');
+            if (/bulk-save-all/.test(text)) { aiState.bulkDupApproved = true; return aiBulkSave('all'); }
+            if (/bulk-cancel/.test(text)) { aiResetFlow(); return aiAddMsg('bot', 'ألغيت الدفعة ولم أسجل أي طالب.', { feedback: false }); }
+            return aiAddMsg('bot', 'اختار «الجديد فقط» لتجاوز الأسماء المتشابهة، أو «سجّل الكل وأنا متأكد».', { feedback: false });
+        }
+        const bulkRows = aiParseStudentBatch(text);
+        const bulkCue = /(طلاب جدد|الطلاب الجدد|طالبات جدد|الطالبات الجدد|دول الطلاب|الطلاب دول|اضافه الطلاب|إضافة الطلاب|سجل الطلاب|الطلاب التاليين|الطلاب الاتيين)/.test(aiNorm(text));
+        if (aiState.step === 'idle' && bulkRows.length >= 2 && (analysis.intent === 'add_student' || bulkCue || /\n|[؛;]/.test(text))) return aiStartBulk(bulkRows, simple);
         if (aiState.step === 'manual-dup') return aiHandleManualDupReply(text, analysis, simple);
         if (aiState.step === 'dup_resolve') return aiHandleDupReply(text, analysis, simple);
         if (aiState.editField) {
@@ -4833,7 +4964,7 @@
                 offlineBar.classList.toggle('flex', !online);
             }
         }
-        window.addEventListener('online', () => { updateOnlineStatus(); try { notify('عاد الاتصال بالإنترنت'); if (typeof pushCloudData === 'function') pushCloudData(); } catch (e) {} });
+        window.addEventListener('online', () => { updateOnlineStatus(); try { notify('عاد الاتصال بالإنترنت'); } catch (e) {} });
         window.addEventListener('offline', () => { updateOnlineStatus(); try { notify('انقطع الاتصال — التطبيق يعمل محلياً وبياناتك محفوظة', 'info'); } catch (e) {} });
         updateOnlineStatus();
     })();
