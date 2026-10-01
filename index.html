@@ -111,8 +111,20 @@
         .trend-up { background: #d1fae5; color: #065f46; }
         .trend-down { background: #fee2e2; color: #991b1b; }
         .trend-flat { background: #e2e8f0; color: #334155; }
-        /* صفوف السور المتعددة في نافذة التسميع */
+        .passage-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; animation: section-in .2s ease-out; }
+        .passage-heading { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #475569; font-size: 12px; }
+        .passage-row label { min-width: 0; }
+        .passage-surah-field, .passage-type-field { grid-column: 1 / -1; }
+        .passage-row[data-recitation="حفظ جديد"] { border-inline-start: 3px solid #047857; }
+        .passage-row[data-recitation="ماضي"] { border-inline-start: 3px solid #4f46e5; }
+        .passage-remove { width: 30px; height: 30px; border-radius: 6px; color: #64748b; }
+        .passage-remove:hover { color: #b91c1c; background: #fff1f2; }
         .passage-row button:disabled { opacity: .3; cursor: not-allowed; }
+        @media (min-width: 640px) {
+            .passage-row { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr) 65px 65px; align-items: end; }
+            .passage-surah-field, .passage-type-field { grid-column: auto; }
+            .passage-row .field { font-size: 12px; padding: 9px 6px; }
+        }
         @keyframes section-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes dialog-in { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -511,11 +523,10 @@
                 <div class="min-w-[160px]">
                     <label class="block text-xs font-semibold text-slate-500 mb-1">نوع التسميع:</label>
                     <select id="sessionFilterType" onchange="renderSessionsTable()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
-                        <option value="all">الكل (حفظ ومراجعة)</option>
-                        <option value="حفظ جديد">حفظ جديد</option>
-                        <option value="مراجعة قريبة">مراجعة صغرى</option>
-                        <option value="مراجعة كبرى">مراجعة كبرى</option>
-                        <option value="تثبيت وتجويد">تثبيت وتجويد</option>
+                        <option value="all">كل التسميعات</option>
+                        <option value="حفظ جديد">يشمل جديداً</option>
+                        <option value="ماضي">يشمل ماضياً (مراجعة)</option>
+                        <option value="جديد وماضي">جديد وماضي معاً</option>
                     </select>
                 </div>
 
@@ -866,38 +877,24 @@
                     </select>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">
-                            تاريخ التسميع <span class="text-red-500">*</span>
-                        </label>
-                        <input type="date" id="sessionDateInput" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">
-                            نوع التسميع <span class="text-red-500">*</span>
-                        </label>
-                        <select id="sessionTypeInput" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none">
-                            <option value="حفظ جديد">حفظ جديد</option>
-                            <option value="مراجعة قريبة">مراجعة صغرى (قريبة)</option>
-                            <option value="مراجعة كبرى">مراجعة كبرى</option>
-                            <option value="تثبيت وتجويد">تثبيت وتجويد</option>
-                        </select>
-                    </div>
+                <div>
+                    <label for="sessionDateInput" class="field-label">تاريخ التسميع <span class="text-red-500">*</span></label>
+                    <input type="date" id="sessionDateInput" required class="field">
                 </div>
 
                 <div>
                     <div class="grid grid-cols-2 gap-3 mb-2">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1" for="sessionSurahCount">عدد السور المسمعة <span class="text-red-500">*</span></label>
-                            <input type="number" id="sessionSurahCount" min="1" max="20" value="1" onchange="setSessionPassageCount()" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none font-bold text-center">
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="sessionSurahCount">عدد السور / المقاطع المسمعة <span class="text-red-500">*</span></label>
+                            <input type="number" id="sessionSurahCount" min="1" max="114" step="1" value="1" required onchange="setSessionPassageCount()" aria-describedby="sessionPassageHelp" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-sm outline-none font-bold text-center">
                         </div>
                         <div class="flex items-end justify-end">
-                            <button type="button" onclick="addPassageRow('sessionPassages','session');syncSessionPassageCount()" class="text-action"><i class="fa-solid fa-plus ml-1"></i> إضافة سورة</button>
+                            <button type="button" onclick="addPassageRow('sessionPassages','session')" class="text-action"><i class="fa-solid fa-plus ml-1"></i> إضافة سورة / مقطع</button>
                         </div>
                     </div>
                     <div id="sessionPassages" class="space-y-2"></div>
-                    <p class="muted mt-2">حدد عدد السور أولاً ثم املأ كل سورة وآياتها — تُسجَّل كلها في جلسة واحدة وبدرجة واحدة.</p>
+                    <p id="sessionPassageHelp" class="muted mt-2">اختَر «جديد» أو «ماضي (مراجعة)» لكل مقطع. يمكن الجمع بينهما في نفس الجلسة، وحتى في نفس السورة بوضعها في سطرين.</p>
+                    <p id="sessionTypeSummary" class="text-xs font-bold text-emerald-800 mt-2" role="status" aria-live="polite"></p>
                 </div>
 
                 <div>
@@ -905,7 +902,7 @@
                         الدرجة (من 10) <span class="text-red-500">*</span>
                     </label>
                     <input type="number" id="sessionScoreInput" min="0" max="10" step="0.5" value="10" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-lg outline-none font-bold text-center text-emerald-900" aria-describedby="scoreHelp">
-                    <p id="scoreHelp" class="muted mt-1">التقييم بدرجة رقمية فقط من 0 إلى 10، وتقبل النصف درجة.</p>
+                    <p id="scoreHelp" class="muted mt-1">درجة واحدة لهذه الجلسة من 0 إلى 10. لو تريد درجة مستقلة للجديد وأخرى للماضي، احفظ جلستين بنفس التاريخ؛ لن تستبدل إحداهما الأخرى.</p>
                 </div>
 
                 <div>
@@ -1066,7 +1063,7 @@
 
             <div class="p-6 overflow-y-auto space-y-5 text-sm text-slate-700 leading-loose">
                 <div><h4 class="font-bold text-emerald-900">1. سجّل الطالب / الطالبة</h4><p>أدخل الاسم والجنس (ذكر/أنثى) وتاريخ الانضمام والسورة التي بدأ منها وعدد الأجزاء المنجزة. الرسائل والتقارير تُصاغ تلقائياً بـ«طالب» أو «طالبة» حسب الجنس.</p></div>
-                <div><h4 class="font-bold text-emerald-900">2. تابع الحفظ</h4><p>سجّل كل جلسة تسميع بالسورة والآيات والدرجة الرقمية من 10 والملاحظات، وحدّث عدد الأجزاء يدوياً عند اعتماد الإنجاز.</p></div>
+                <div><h4 class="font-bold text-emerald-900">2. سجّل الجديد والماضي</h4><p>حدّد عدد مقاطع التسميع، ثم اختر لكل مقطع السورة والآيات ونوعه: جديد أو ماضي (مراجعة). يمكن الجمع بينهما في جلسة واحدة بدرجة عامة، أو تسجيل جلستين في اليوم نفسه لو لكل نوع درجة مختلفة. يظهر النوع مع الآيات في السجل ورسالة ولي الأمر والتقرير.</p></div>
                 <div><h4 class="font-bold text-emerald-900">3. اقرأ معلومات السور والتفسير</h4><p>اضغط أي سورة في الفهرس، ثم اختر الآية والمفسر. تحتاج هذه الميزة إلى اتصال بالإنترنت.</p></div>
                 <div><h4 class="font-bold text-emerald-900">4. المتابعة الأسبوعية وتقرير PDF لولي الأمر</h4><p>الخطة: يبدأ الطالب الجديد يوم السبت ويُسمَّع ما عليه يوم الجمعة، وتُذكر الأهل بالمطلوب أسبوعياً (السورة ورقم الآية). زر واتساب يُنزّل تقرير PDF كاملاً (بيانات، منحنى التطور، ترتيبه في سيرته الحالية، وسجل التسميع) ثم يفتح واتساب برسالة جاهزة. لا يُرسل التقرير إلا بعد 4 تسميعات كي تكتمل بيانات التحليل، وحتى ذلك الحين تُرسل رسالة الخطة الأسبوعية فقط.</p></div>
                 <div><h4 class="font-bold text-emerald-900">5. الحضور والغياب</h4><p>سجّل حضور كل حلقة، ومن يُسجَّل غائباً يُجهَّز له فوراً رسالة استفسار لولي الأمر عن سبب الغياب والظروف الخاصة.</p></div>
@@ -1427,7 +1424,11 @@
 
         const STORAGE_KEY = 'mb_mubarak_v2';
         const APP_NAME = 'Mosque-Mubarak-Quran-App';
-        const SESSION_TYPES = ['حفظ جديد', 'مراجعة قريبة', 'مراجعة كبرى', 'تثبيت وتجويد'];
+        const PASSAGE_TYPES = ['حفظ جديد', 'ماضي'];
+        const LEGACY_REVIEW_TYPES = ['مراجعة قريبة', 'مراجعة كبرى', 'تثبيت وتجويد'];
+        const SESSION_TYPES = [...PASSAGE_TYPES, 'جديد وماضي', ...LEGACY_REVIEW_TYPES];
+        const MAX_SESSION_PASSAGES = 114;
+        let passageRowSequence = 0;
         const HIGH_SCORE = 9;
         const TAFSIR_EDITIONS = [
             ['ar.muyassar', 'التفسير الميسر'], ['ar.jalalayn', 'تفسير الجلالين'],
@@ -1763,14 +1764,18 @@
                 const toAyah = s.toAyah ?? surah?.ayahs;
                 const score = s.score ?? 10;
                 const rawPassages = Array.isArray(s.passages) && s.passages.length ? s.passages : [{ surah: s.surah, fromAyah, toAyah }];
+                if (rawPassages.length > MAX_SESSION_PASSAGES) throw new Error('عدد المقاطع في إحدى الجلسات أكبر من الحد المسموح.');
                 const passages = rawPassages.map(item => {
+                    if (!item || typeof item !== 'object') throw new Error('مقطع تسميع غير صالح.');
                     const info = QURAN_SURAHS.find(q => q.name === item.surah);
                     if (!info || !Number.isInteger(item.fromAyah) || !Number.isInteger(item.toAyah) || item.fromAyah < 1 || item.toAyah < item.fromAyah || item.toAyah > info.ayahs) throw new Error('نطاق آيات غير صحيح في إحدى الجلسات.');
-                    return { surah: info.name, fromAyah: item.fromAyah, toAyah: item.toAyah };
+                    const type = normalizeRecitationType(item.type ?? s.type);
+                    if (!PASSAGE_TYPES.includes(type)) throw new Error('حدد جديد أو ماضي لكل مقطع تسميع في النسخة الاحتياطية.');
+                    return { surah: info.name, fromAyah: item.fromAyah, toAyah: item.toAyah, type };
                 });
                 const first = passages[0];
-                if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 10 || !SESSION_TYPES.includes(s.type)) throw new Error('نوع تسميع أو درجة غير صالحة.');
-                return { id: id(s.id), studentId: s.studentId, date: date(s.date), type: s.type, surah: first.surah, fromAyah: first.fromAyah, toAyah: first.toAyah, passages, score, notes: text(s.notes, 2000), createdAt: text(s.createdAt, 50) };
+                if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 10 || (s.type != null && !SESSION_TYPES.includes(s.type))) throw new Error('نوع تسميع أو درجة غير صالحة.');
+                return { id: id(s.id), studentId: s.studentId, date: date(s.date), type: summarizePassageTypes(passages), surah: first.surah, fromAyah: first.fromAyah, toAyah: first.toAyah, passages, score, notes: text(s.notes, 2000), createdAt: text(s.createdAt, 50) };
             });
             return { students: cleanStudents, sessions: cleanSessions };
         }
@@ -1939,7 +1944,7 @@
                             <div>
                                 <h5 class="text-sm font-bold text-slate-800">${escapeHtml(student.name)}</h5>
                                 <p class="text-xs text-slate-500">
-                                    <span class="text-emerald-700 font-semibold">${ses.type}</span> • سورة ${ses.surah} (آية ${ses.fromAyah || 1} - ${ses.toAyah || 'نهاية'})
+                                    <span class="text-emerald-700 font-semibold">${sessionTypeLabel(ses)}</span> : ${escapeHtml(passagesDescription(sessionPassages(ses)))}
                                 </p>
                             </div>
                         </div>
@@ -2079,7 +2084,7 @@
                             </div>
                             <div class="flex items-center justify-between text-slate-600">
                                 <span><i class="fa-solid fa-clock-rotate-left ml-1 text-purple-600"></i> آخر تسميع:</span>
-                                <span class="font-medium text-slate-700">${lastSession ? `سورة ${lastSession.surah}` : 'لم يسَمِّع بعد'}</span>
+                                <span class="font-medium text-slate-700 text-left">${lastSession ? escapeHtml(passagesDescription(sessionPassages(lastSession))) : 'لم يسَمِّع بعد'}</span>
                             </div>
                             <div class="flex items-center justify-between border-t border-slate-200 pt-2 mt-2"><span class="text-slate-600">عدد الأجزاء المنجزة</span><strong class="text-emerald-900">${formatNumber(st.completedJuz)} / ${formatNumber(30)}</strong></div>
                             <div class="juz-progress" aria-hidden="true"><span style="width:${st.completedJuz / 30 * 100}%"></span></div>
@@ -2112,7 +2117,7 @@
 
             let filtered = sessions.filter(ses => {
                 const matchesStudent = studentFilter === 'all' || ses.studentId === studentFilter;
-                const matchesType = typeFilter === 'all' || ses.type === typeFilter;
+                const matchesType = sessionMatchesType(ses, typeFilter);
                 const matchesDate = !dateFilter || ses.date === dateFilter;
                 return matchesStudent && matchesType && matchesDate;
             });
@@ -2139,14 +2144,16 @@
                         <td class="p-3.5 text-xs text-slate-500 font-mono">${ses.date}</td>
                         <td class="p-3.5">
                             <span class="inline-block px-2.5 py-0.5 rounded text-xs font-semibold ${getSessionTypeBadge(ses.type)}">
-                                ${ses.type}
+                                ${sessionTypeLabel(ses)}
                             </span>
                         </td>
                         <td class="p-3.5">
-                            <span class="font-bold text-emerald-950 font-quran text-base">سورة ${escapeHtml(ses.surah)}</span>
-                            <span class="text-xs text-slate-500 block">
-                                (من آية ${ses.fromAyah || 1} إلى ${ses.toAyah || 'آخرها'})
-                            </span>
+                            ${sessionPassages(ses).map(item => `
+                                <div class="mb-2 last:mb-0">
+                                    <span class="text-xs font-bold ${item.type === 'حفظ جديد' ? 'text-emerald-700' : 'text-indigo-700'}">${recitationTypeLabel(item.type)}</span>
+                                    <span class="font-bold text-emerald-950 font-quran text-base">: سورة ${escapeHtml(item.surah)}</span>
+                                    <span class="text-xs text-slate-500 block">من آية ${formatNumber(item.fromAyah)} إلى آية ${formatNumber(item.toAyah)}</span>
+                                </div>`).join('')}
                         </td>
                         <td class="p-3.5">
                             <span class="score-chip ${scoreChipClass(ses.score)}">${formatNumber(ses.score ?? 0)}<span class="opacity-60 font-normal"> / 10</span></span>
@@ -2372,33 +2379,76 @@
 
         function addPassageRow(containerId, prefix, passage = {}, removable = true) {
             const container = byId(containerId);
+            if (!container) return null;
+            if (container.children.length >= MAX_SESSION_PASSAGES) {
+                notify(`الحد الأقصى ${formatNumber(MAX_SESSION_PASSAGES)} مقطعاً في الجلسة.`, 'info');
+                return null;
+            }
+            const isSession = prefix === 'session';
+            const rowId = `${prefix}-passage-${++passageRowSequence}`;
             const row = document.createElement('div');
-            row.className = 'passage-row grid grid-cols-[minmax(0,1fr)_74px_74px_32px] sm:grid-cols-[minmax(0,1fr)_100px_100px_36px] items-end gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl';
+            row.className = 'passage-row';
+            const heading = document.createElement('div');
+            heading.className = 'passage-heading';
+            const number = document.createElement('strong');
+            number.className = 'passage-number';
             const surahWrap = document.createElement('label');
-            surahWrap.className = 'min-w-0';
+            surahWrap.className = 'passage-surah-field';
+            surahWrap.htmlFor = `${rowId}-surah`;
             surahWrap.innerHTML = '<span class="block text-[10px] font-bold text-slate-500 mb-1">السورة</span>';
             const select = document.createElement('select');
+            select.id = `${rowId}-surah`;
             select.className = 'field passage-surah text-xs';
             select.required = true;
+            select.add(new Option('اختر السورة', ''));
             QURAN_SURAHS.forEach(item => select.add(new Option(`سورة ${item.name}`, item.name)));
             if (passage.surah && QURAN_SURAHS.some(item => item.name === passage.surah)) select.value = passage.surah;
             const fromWrap = document.createElement('label');
+            fromWrap.htmlFor = `${rowId}-from`;
             fromWrap.innerHTML = '<span class="block text-[10px] font-bold text-slate-500 mb-1">من آية</span>';
             const from = document.createElement('input');
+            from.id = `${rowId}-from`;
             from.type = 'number'; from.min = '1'; from.step = '1'; from.required = true;
             from.value = passage.fromAyah ?? 1; from.className = 'field passage-from text-center';
             const toWrap = document.createElement('label');
+            toWrap.htmlFor = `${rowId}-to`;
             toWrap.innerHTML = '<span class="block text-[10px] font-bold text-slate-500 mb-1">إلى آية</span>';
             const to = document.createElement('input');
+            to.id = `${rowId}-to`;
             to.type = 'number'; to.min = '1'; to.step = '1'; to.required = true;
             to.value = passage.toAyah ?? ''; to.className = 'field passage-to text-center';
             const remove = document.createElement('button');
-            remove.type = 'button'; remove.className = 'text-slate-400 hover:text-red-600 h-10 rounded-lg';
+            remove.type = 'button'; remove.className = 'passage-remove';
             remove.setAttribute('aria-label', 'إزالة هذا المقطع'); remove.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
             remove.disabled = !removable;
             remove.onclick = () => { row.remove(); refreshPassageRowControls(containerId); };
+            heading.append(number, remove);
             fromWrap.appendChild(from); toWrap.appendChild(to); surahWrap.appendChild(select);
-            row.append(surahWrap, fromWrap, toWrap, remove);
+            row.append(heading, surahWrap);
+            if (isSession) {
+                const typeWrap = document.createElement('label');
+                typeWrap.className = 'passage-type-field';
+                typeWrap.htmlFor = `${rowId}-type`;
+                typeWrap.innerHTML = '<span class="block text-[10px] font-bold text-slate-500 mb-1">نوع هذا المقطع</span>';
+                const type = document.createElement('select');
+                type.id = `${rowId}-type`;
+                type.className = 'field passage-type';
+                type.required = true;
+                type.add(new Option('اختر النوع', ''));
+                type.add(new Option('جديد', 'حفظ جديد'));
+                type.add(new Option('ماضي (مراجعة)', 'ماضي'));
+                type.value = normalizeRecitationType(passage.type);
+                row.dataset.recitation = type.value;
+                type.onchange = () => {
+                    row.dataset.recitation = type.value;
+                    syncSessionPassageCount();
+                };
+                typeWrap.appendChild(type);
+                row.appendChild(typeWrap);
+            } else {
+                surahWrap.style.gridColumn = '1 / -1';
+            }
+            row.append(fromWrap, toWrap);
             select.addEventListener('change', () => setPassageRowLimits(row));
             setPassageRowLimits(row);
             container.appendChild(row);
@@ -2408,14 +2458,55 @@
 
         function refreshPassageRowControls(containerId) {
             const rows = [...byId(containerId).querySelectorAll('.passage-row')];
-            rows.forEach(row => { const button = row.querySelector('button'); if (button) button.disabled = rows.length < 2; });
+            rows.forEach((row, index) => {
+                row.querySelector('.passage-number').textContent = `المقطع ${formatNumber(index + 1)}`;
+                row.querySelector('.passage-remove').disabled = rows.length < 2;
+            });
+            if (containerId === 'sessionPassages') syncSessionPassageCount();
+        }
+
+        function syncSessionPassageCount() {
+            const rows = [...byId('sessionPassages').querySelectorAll('.passage-row')];
+            byId('sessionSurahCount').value = rows.length;
+            const types = rows.map(row => row.querySelector('.passage-type')?.value || '');
+            const fresh = types.filter(type => type === 'حفظ جديد').length;
+            const past = types.filter(type => type === 'ماضي').length;
+            const unset = types.length - fresh - past;
+            byId('sessionTypeSummary').textContent = `جديد: ${formatNumber(fresh)} | ماضي: ${formatNumber(past)}${unset ? ` | لم يحدد النوع: ${formatNumber(unset)}` : ''}`;
+        }
+
+        function setSessionPassageCount() {
+            const input = byId('sessionSurahCount');
+            const wanted = input.valueAsNumber;
+            const rows = [...byId('sessionPassages').querySelectorAll('.passage-row')];
+            if (!Number.isInteger(wanted) || wanted < 1 || wanted > MAX_SESSION_PASSAGES) {
+                input.value = rows.length;
+                notify(`أدخل عدداً صحيحاً من 1 إلى ${MAX_SESSION_PASSAGES}.`, 'error');
+                return false;
+            }
+            if (wanted < rows.length) {
+                input.value = rows.length;
+                requestConfirmation('تقليل عدد المقاطع؟', `سيتم حذف آخر ${formatNumber(rows.length - wanted)} مقطع من النموذج فقط. المقاطع المحفوظة سابقاً لن تتغير.`, () => {
+                    rows.slice(wanted).forEach(row => row.remove());
+                    refreshPassageRowControls('sessionPassages');
+                }, 'تقليل العدد');
+                return false;
+            }
+            for (let index = rows.length; index < wanted; index++) addPassageRow('sessionPassages', 'session');
+            syncSessionPassageCount();
+            return true;
         }
 
         function setPassageRowLimits(row) {
             const info = QURAN_SURAHS.find(item => item.name === row.querySelector('.passage-surah')?.value);
-            if (!info) return;
             const from = row.querySelector('.passage-from');
             const to = row.querySelector('.passage-to');
+            if (!info) {
+                from.removeAttribute('max');
+                to.removeAttribute('max');
+                to.placeholder = '';
+                return;
+            }
             from.max = String(info.ayahs); to.max = String(info.ayahs);
             to.placeholder = String(info.ayahs);
         }
@@ -2424,7 +2515,8 @@
             return [...byId(containerId).querySelectorAll('.passage-row')].map(row => ({
                 surah: row.querySelector('.passage-surah').value,
                 fromAyah: row.querySelector('.passage-from').valueAsNumber,
-                toAyah: row.querySelector('.passage-to').valueAsNumber
+                toAyah: row.querySelector('.passage-to').valueAsNumber,
+                ...(row.querySelector('.passage-type') ? { type: row.querySelector('.passage-type').value } : {})
             }));
         }
 
@@ -2434,13 +2526,46 @@
             (items?.length ? items : [{}]).forEach(item => addPassageRow(containerId, prefix, item));
         }
 
+        function normalizeRecitationType(type) {
+            if (type === 'حفظ جديد') return 'حفظ جديد';
+            if (type === 'ماضي' || LEGACY_REVIEW_TYPES.includes(type)) return 'ماضي';
+            return '';
+        }
+
+        function recitationTypeLabel(type) {
+            if (type === 'جديد وماضي') return 'جديد وماضي';
+            const normalized = normalizeRecitationType(type);
+            return normalized === 'حفظ جديد' ? 'جديد' : normalized === 'ماضي' ? 'ماضي (مراجعة)' : 'غير محدد';
+        }
+
         function sessionPassages(session) {
-            if (Array.isArray(session.passages) && session.passages.length) return session.passages;
-            return [{ surah: session.surah, fromAyah: session.fromAyah || 1, toAyah: session.toAyah || QURAN_SURAHS.find(q => q.name === session.surah)?.ayahs }];
+            const items = Array.isArray(session.passages) && session.passages.length ? session.passages : [{
+                surah: session.surah,
+                fromAyah: session.fromAyah ?? 1,
+                toAyah: session.toAyah ?? QURAN_SURAHS.find(q => q.name === session.surah)?.ayahs
+            }];
+            // Old sessions inherit their original type; mixed sessions keep each passage's type.
+            return items.map(item => ({ ...item, type: normalizeRecitationType(item.type ?? session.type) }));
+        }
+
+        function summarizePassageTypes(passages) {
+            const types = new Set(passages.map(item => normalizeRecitationType(item.type)).filter(Boolean));
+            return types.size > 1 ? 'جديد وماضي' : [...types][0] || '';
+        }
+
+        function sessionTypeLabel(session) {
+            return recitationTypeLabel(summarizePassageTypes(sessionPassages(session)));
+        }
+
+        function sessionMatchesType(session, filter) {
+            if (filter === 'all') return true;
+            const passages = sessionPassages(session);
+            if (filter === 'جديد وماضي') return summarizePassageTypes(passages) === filter;
+            return passages.some(item => item.type === normalizeRecitationType(filter));
         }
 
         function passagesDescription(passages) {
-            return (passages || []).map(item => `سورة ${item.surah} (آيات ${formatNumber(item.fromAyah)}–${formatNumber(item.toAyah)})`).join(' + ');
+            return (passages || []).map(item => `${item.type ? recitationTypeLabel(item.type) + ': ' : ''}سورة ${item.surah} (من آية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)})`).join(' + ');
         }
 
         function weeklyPlanPassages(student) {
@@ -2459,20 +2584,22 @@
             event.preventDefault();
             const studentId = document.getElementById('sessionStudentSelect').value;
             const date = document.getElementById('sessionDateInput').value;
-            const type = document.getElementById('sessionTypeInput').value;
             const passages = readPassageRows('sessionPassages');
             const score = byId('sessionScoreInput').valueAsNumber;
             const notes = document.getElementById('sessionNotesInput').value.trim();
 
             const student = students.find(s => s.id === studentId);
             if (!student || !date || !passages.length) return notify('اختر الطالب والتاريخ وأضف سورة واحدة على الأقل.', 'error');
+            if (passages.length > MAX_SESSION_PASSAGES || byId('sessionSurahCount').valueAsNumber !== passages.length) return notify('راجع عدد المقاطع وحدد السور المطلوبة قبل الحفظ.', 'error');
             if (date < student.startDate || date > todayISO()) return notify('تاريخ التسميع يجب أن يكون بين تاريخ انضمام الطالب واليوم.', 'error');
             for (const passage of passages) {
                 const info = QURAN_SURAHS.find(q => q.name === passage.surah);
                 if (!info || !Number.isInteger(passage.fromAyah) || !Number.isInteger(passage.toAyah) || passage.fromAyah < 1 || passage.fromAyah > passage.toAyah || passage.toAyah > info.ayahs) return notify(`راجع نطاق آيات سورة ${passage.surah || ''}.`, 'error');
+                if (!PASSAGE_TYPES.includes(passage.type)) return notify(`حدد هل مقطع سورة ${passage.surah} جديد أم ماضي.`, 'error');
             }
             if (!Number.isFinite(score) || score < 0 || score > 10) return notify('أدخل الدرجة من صفر إلى 10.', 'error');
             const firstPassage = passages[0];
+            const type = summarizePassageTypes(passages);
 
             const newSession = {
                 id: makeId('ses'),
@@ -2489,15 +2616,17 @@
             };
 
             let nextStudents = students;
-            const activeSavedPlan = student.weeklyPlan?.weekStart === planSchedule().weekStart ? student.weeklyPlan : null;
+            const schedule = planSchedule();
+            const activeSavedPlan = student.weeklyPlan?.weekStart === schedule.weekStart ? student.weeklyPlan : null;
             const requested = activeSavedPlan ? weeklyPlanPassages(student) : [];
-            const coversPlan = requested.length && requested.every(wanted => passages.some(actual => actual.surah === wanted.surah && actual.fromAyah <= wanted.fromAyah && actual.toAyah >= wanted.toAyah));
-            if (activeSavedPlan && activeSavedPlan.status !== 'completed' && type === 'حفظ جديد' && coversPlan) {
+            const freshPassages = passages.filter(passage => passage.type === 'حفظ جديد');
+            const coversPlan = requested.length && requested.every(wanted => freshPassages.some(actual => actual.surah === wanted.surah && actual.fromAyah <= wanted.fromAyah && actual.toAyah >= wanted.toAyah));
+            if (activeSavedPlan && activeSavedPlan.status !== 'completed' && date >= schedule.weekStart && date <= schedule.fridayISO && coversPlan) {
                 nextStudents = students.map(item => item.id === studentId ? { ...item, weeklyPlan: { ...activeSavedPlan, status: 'completed' } } : item);
             }
             if (!commitData({ sessions: [...sessions, newSession], students: nextStudents })) return;
             closeModal('addSessionModal');
-            notify('تم حفظ جلسة التسميع.');
+            notify(`تم حفظ جلسة التسميع (${recitationTypeLabel(type)}) دون تغيير الجلسات السابقة في نفس اليوم.`);
         }
 
         function deleteSession(sessionId) {
@@ -2559,10 +2688,12 @@
                 const totalScores = stdSessions.reduce((acc, curr) => acc + curr.score, 0);
                 const avg = (totalScores / stdSessions.length).toFixed(1);
                 document.getElementById('profileAvgScore').textContent = `${avg} / 10`;
-                document.getElementById('profileLastSurah').textContent = `سورة ${stdSessions[0].surah}`;
+                document.getElementById('profileLastSurah').textContent = [...new Set(sessionPassages(stdSessions[0]).map(item => item.surah))].join(' + ');
+                byId('profileLastSurah').title = passagesDescription(sessionPassages(stdSessions[0]));
             } else {
                 document.getElementById('profileAvgScore').textContent = `- / 10`;
                 document.getElementById('profileLastSurah').textContent = `لم يبدأ التسميع`;
+                byId('profileLastSurah').title = '';
             }
 
             const sessionsList = document.getElementById('profileSessionsList');
@@ -2580,7 +2711,7 @@
                     row.innerHTML = `
                         <div class="min-w-0">
                             <span class="font-bold text-slate-800">${escapeHtml(amount)}</span>
-                            <span class="text-slate-400 mr-1">(${ses.type})</span>
+                            <span class="text-slate-400 mr-1">(${sessionTypeLabel(ses)})</span>
                             <span class="block text-[11px] text-slate-400 font-mono mt-0.5">${formatDate(ses.date)}</span>
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
@@ -2788,8 +2919,12 @@
 
         // Rank a student among peers who are currently on the same surah (last recited, or starting surah).
         function currentSurahOf(student) {
-            const last = studentSessions(student.id)[0];
-            return (last && sessionPassages(last)[0]?.surah) || student.startSurah;
+            const records = studentSessions(student.id);
+            for (const record of records) {
+                const fresh = sessionPassages(record).find(item => item.type === 'حفظ جديد');
+                if (fresh) return fresh.surah;
+            }
+            return student.startSurah;
         }
         function peerRanking(student) {
             const surah = currentSurahOf(student);
@@ -2875,7 +3010,7 @@
             byId('weeklyPlanStudentName').textContent = `${studentTitle(student)} ${student.name} | الجديد: ${plan.newDay} | التسميع: ${plan.reciteDay}`;
             byId('weeklyPlanWeekStart').value = plan.weekStart;
             setPassageRows('weeklyPlanPassages', 'plan', plan.passages);
-            byId('weeklyPlanStatus').value = plan.status;
+            byId('weeklyPlanStatus').value = plan.isSet ? plan.status : 'planned';
             openModal('weeklyPlanModal');
         }
 
@@ -2958,26 +3093,18 @@
             ].join('\n');
         }
 
-        // Detailed recitation message: every session with its date, amount and score is written in the message itself.
-        function scoreWord(score) {
-            const value = Number(score ?? 0);
-            if (value >= 10) return 'ممتازة جداً — بإذن الله استمر';
-            if (value >= 9) return 'ممتازة';
-            if (value >= 8) return 'جيدة جداً';
-            if (value >= 7) return 'جيدة';
-            if (value >= 5) return 'تحتاج مراجعة';
-            return 'ضعيفة — نحتاج تركيزاً معاً';
-        }
+        // Session scores remain numeric; each passage retains its own new/review classification.
         function recitationLogLines(student, limit) {
             const t = studentTitle(student);
             const records = studentSessions(student.id);
             const list = limit ? records.slice(0, limit) : records;
-            if (!list.length) return [`${t} لم يُسجَّل له تسميع حتى الآن.`];
+            if (!list.length) return [`لم يسجل تسميع حتى الآن باسم ${t} ${student.name}.`];
             const lines = ['*درجات التسميع المسجلة:*'];
             list.forEach((session, index) => {
                 const passages = sessionPassages(session);
-                const amount = passages.map(item => `سورة ${item.surah} من آية ${item.fromAyah} إلى آية ${item.toAyah}`).join(' + ');
-                lines.push(`${formatNumber(index + 1)}) ${formatDate(session.date)} — ${session.type}: ${amount} — *الدرجة: ${formatNumber(session.score ?? 0)}/10* (${scoreWord(session.score)})`);
+                lines.push(`${formatNumber(index + 1)}. ${formatDate(session.date)} | ${sessionTypeLabel(session)}`);
+                passages.forEach(item => lines.push(`- ${recitationTypeLabel(item.type)}: سورة ${item.surah} من آية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}`));
+                lines.push(`*درجة الجلسة: ${formatNumber(session.score ?? 0)}/10*`);
                 if (session.notes) lines.push(`   ملاحظة المحفظ: ${session.notes}`);
             });
             const scores = records.map(r => r.score ?? 0);
@@ -3020,14 +3147,14 @@
         function sessionResultMessage(student, session) {
             const t = studentTitle(student);
             const passages = sessionPassages(session);
-            const amount = passages.map(item => `سورة ${item.surah} من آية ${item.fromAyah} إلى آية ${item.toAyah}`).join(' + ');
             const lines = [
                 'السلام عليكم ورحمة الله وبركاته',
                 `*نتيجة تسميع اليوم - ${t} ${student.name}*`,
                 `التاريخ: ${formatDate(session.date)}`,
-                `النوع: ${session.type}`,
-                `المقدار المسموع: ${amount}`,
-                `*الدرجة: ${formatNumber(session.score ?? 0)} من 10* — ${scoreWord(session.score)}`
+                `النوع: ${sessionTypeLabel(session)}`,
+                '*المقدار المسمع:*',
+                ...passages.map(item => `- ${recitationTypeLabel(item.type)}: سورة ${item.surah} من آية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}`),
+                `*درجة الجلسة: ${formatNumber(session.score ?? 0)} من 10*`
             ];
             if (session.notes) lines.push(`ملاحظة المحفظ: ${session.notes}`);
             const plan = weeklyPlan(student);
@@ -3038,14 +3165,14 @@
                 const average = Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10;
                 lines.push('', `المتوسط العام حتى الآن: ${formatNumber(average)}/10 من ${formatNumber(all.length)} جلسة.`);
             }
-            lines.push('', 'رجاءً راجعوا معه اليوم المقدار المسموع وأعيدوا عليه حتى يثبت.', '', 'مسجد مبارك — حلقات تحفيظ القرآن الكريم');
+            lines.push('', `رجاءً راجعوا مع ${t} المقدار المسمع لتثبيت الحفظ.`, '', 'مسجد مبارك - حلقات تحفيظ القرآن الكريم');
             return lines.join('\n');
         }
 
         function sendSessionResult(studentId, sessionId) {
             const student = students.find(item => item.id === studentId);
             const session = sessions.find(item => item.id === sessionId);
-            if (!student || !session) return;
+            if (!student || !session || session.studentId !== student.id) return;
             if (!student.phone) {
                 notify(`أضف رقم واتساب ولي أمر ${studentTitle(student)} لإرسال نتيجة التسميع.`, 'error');
                 openEditStudentModal(studentId);
@@ -3346,13 +3473,13 @@
                         itemIndex === 0 ? formatNumber(index + 1) : (itemIndex === 1 ? '↳' : ''),
                         student?.name || 'غير موجود',
                         itemIndex === 0 ? formatDate(session.date) : '',
-                        itemIndex === 0 ? session.type : '',
+                        recitationTypeLabel(item.type),
                         `سورة ${item.surah}\nآية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}`,
                         itemIndex === 0 ? formatNumber(session.score ?? 0) : '',
                         itemIndex === 0 ? (session.notes || 'لا توجد') : ''
                     ]);
                     const scores = sessionPassages(session).length > 1 ? [[
-                        '', '', '', '', 'المتوسط لهذه الجلسة', formatNumber(session.score ?? 0), 'درجة واحدة لكل الجلسة'
+                        '', '', '', '', 'درجة الجلسة', formatNumber(session.score ?? 0), 'درجة واحدة لجميع المقاطع'
                     ]] : [];
                     return rows.concat(scores);
                 }));
@@ -3452,7 +3579,7 @@
             const sessionRow = (session, index) => sessionPassages(session).map((item, itemIndex) => ([
                 itemIndex === 0 ? formatNumber(index + 1) : (itemIndex === 1 ? '↳' : ''),
                 itemIndex === 0 ? formatDate(session.date) : '',
-                itemIndex === 0 ? session.type : '',
+                recitationTypeLabel(item.type),
                 `سورة ${item.surah}\nآية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}`,
                 itemIndex === 0 ? formatNumber(session.score ?? 0) : '',
                 itemIndex === 0 ? (session.notes || 'لا توجد') : ''
@@ -3699,11 +3826,10 @@
         }
 
         function getSessionTypeBadge(type) {
-            switch(type) {
+            if (type === 'جديد وماضي') return 'bg-amber-100 text-amber-900';
+            switch(normalizeRecitationType(type)) {
                 case 'حفظ جديد': return 'bg-emerald-100 text-emerald-800';
-                case 'مراجعة قريبة': return 'bg-indigo-100 text-indigo-800';
-                case 'مراجعة كبرى': return 'bg-purple-100 text-purple-800';
-                case 'تثبيت وتجويد': return 'bg-amber-100 text-amber-800';
+                case 'ماضي': return 'bg-indigo-100 text-indigo-800';
                 default: return 'bg-slate-100 text-slate-700';
             }
         }
