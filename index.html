@@ -147,6 +147,22 @@
         .rank-progress { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
         .rank-progress span { display: block; height: 100%; background: #047857; }
         .status-chip { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        /* ===== UX polish ===== */
+        button, select, input, textarea { -webkit-tap-highlight-color: transparent; }
+        button, .text-action, .gender-option span, .surah-button, .reminder-check, input[type="checkbox"] { touch-action: manipulation; }
+        input[type="checkbox"], input[type="radio"] { width: 1.05rem; height: 1.05rem; accent-color: #047857; cursor: pointer; }
+        .rank-table tbody tr { cursor: pointer; }
+        .rank-table tbody tr:hover { background: #f0fdf7; }
+        .passage-row { transition: border-color .2s ease, background .2s ease; }
+        .passage-row:focus-within { border-color: #047857; background: #fff; }
+        #reminderStudentList::-webkit-scrollbar { width: 6px; }
+        #reminderStudentList::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        @media (max-width: 640px) {
+            #thursdayBanner { padding: 14px; }
+            #tab-daily .flex.gap-2 { flex-direction: column; }
+        }
+        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+        .pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
         .sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; }
         .sync-dot.online { background: #34d399; box-shadow: 0 0 0 4px #34d39922; }
         .sync-dot.error { background: #fb7185; }
@@ -296,6 +312,18 @@
             </button>
         </div>
         <p id="storageNotice" role="status" class="text-xs text-slate-500 mb-5 no-print">البيانات محفوظة على هذا المتصفح فقط. احفظ نسخة احتياطية دورياً من قائمة التصدير.</p>
+        <div id="thursdayBanner" class="hidden mb-6 rounded-2xl border-2 border-amber-400 bg-gradient-to-l from-amber-50 to-white p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 no-print" role="status" aria-live="polite">
+            <div class="flex items-start gap-3">
+                <div class="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xl shrink-0 shadow-sm"><i class="fa-solid fa-bell"></i></div>
+                <div>
+                    <h3 class="font-bold text-slate-900">يوم الخميس — تذكير أولياء الأمور بالتحفيظ</h3>
+                    <p class="text-sm text-slate-600 mt-1">التحفيظ غداً بعد صلاة المغرب. أرسل رسالة التذكير حتى يراجع الأبناء السورة المطلوبة قبل الحضور.</p>
+                </div>
+            </div>
+            <button onclick="openThursdayReminder()" class="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-3 rounded-xl text-sm shadow-md flex items-center justify-center gap-2 shrink-0">
+                <i class="fa-brands fa-whatsapp text-base"></i><span>إنشاء رسالة التذكير</span>
+            </button>
+        </div>
 
         <!-- ========================================== -->
         <!-- TAB 1: DASHBOARD OVERVIEW -->
@@ -499,12 +527,16 @@
                     <p class="text-xs text-slate-500 mt-1">الجديد يُقدَّم يوم السبت، ويُسمَّع ما عليه الطلاب يوم الجمعة. سجّل الحضور والغياب، وأضف جلسات التسميع بالسور والآيات والدرجات والملاحظات.</p>
                 </div>
 
-                <div class="flex items-center gap-2 w-full md:w-auto">
-                    <button onclick="openAttendance()" class="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-emerald-950 font-bold px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow">
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <button onclick="openAttendance()" class="flex-1 md:flex-none bg-amber-500 hover:bg-amber-600 text-emerald-950 font-bold px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow">
                         <i class="fa-solid fa-user-check text-base"></i>
                         <span>تسجيل الحضور والغياب</span>
                     </button>
-                    <button onclick="openModal('addSessionModal')" class="w-full md:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow">
+                    <button onclick="openThursdayReminder()" class="flex-1 md:flex-none bg-blue-700 hover:bg-blue-800 text-white font-bold px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow">
+                        <i class="fa-solid fa-paper-plane text-base"></i>
+                        <span>تذكير أولياء الأمور</span>
+                    </button>
+                    <button onclick="openModal('addSessionModal')" class="flex-1 md:flex-none bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow">
                         <i class="fa-solid fa-plus-circle text-base"></i>
                         <span>تسجيل تسميع جديد</span>
                     </button>
@@ -1129,6 +1161,40 @@
             </div>
         </div>
     </div>
+    <div id="reminderModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4" role="dialog" aria-modal="true" aria-labelledby="reminderTitle">
+        <div class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col" style="max-height:92dvh">
+            <div class="px-6 py-5 bg-blue-900 text-white flex items-start justify-between gap-4 shrink-0">
+                <div>
+                    <h3 id="reminderTitle" class="font-bold text-lg">تذكير أولياء الأمور — التحفيظ يوم الجمعة</h3>
+                    <p class="text-xs text-blue-200 mt-1">اختر الطلاب وراجع نص الرسالة، ثم أرسلها على واتساب.</p>
+                </div>
+                <button onclick="closeModal('reminderModal')" class="w-9 h-9 rounded-lg hover:bg-white/10 shrink-0" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-5 overflow-y-auto">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <label class="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer select-none">
+                        <input type="checkbox" id="reminderSelectAll" onchange="toggleReminderSelection(this.checked)" checked class="w-4 h-4 rounded accent-blue-700">
+                        <span>تحديد كل الطلاب</span>
+                    </label>
+                    <span id="reminderCount" class="text-xs font-bold text-blue-800 bg-blue-50 px-3 py-1.5 rounded-full"></span>
+                </div>
+                <div id="reminderStudentList" onchange="updateReminderCount()" class="grid sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto p-1"></div>
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-bold text-slate-800 text-sm">نص الرسالة (يتغير اسم الطالب وسورته تلقائياً)</h4>
+                        <span class="text-[11px] text-slate-400 bg-slate-100 px-2 py-1 rounded-full">رسالة جماعية موحّدة</span>
+                    </div>
+                    <div id="reminderPreview" class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 leading-loose whitespace-pre-line"></div>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+                <p class="text-[11px] text-slate-500 text-center sm:text-right">قد يمنع المتصفح فتح نوافذ متعددة. لو حدث ذلك، أرسل الطلاب على شكل مجموعات صغيرة.</p>
+                <button onclick="sendReminderToSelected()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-base"></i><span>إرسال المحددين على واتساب</span>
+                </button>
+            </div>
+        </div>
+    </div>
     <div id="weeklyPlanModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4" role="dialog" aria-modal="true" aria-labelledby="weeklyPlanTitle">
         <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden">
             <div class="px-6 py-5 bg-emerald-950 text-white flex items-center justify-between">
@@ -1441,7 +1507,7 @@
             completed: { label: 'تم التسميع', cls: 'bg-emerald-100 text-emerald-800' },
             needs_review: { label: 'يحتاج إعادة', cls: 'bg-rose-100 text-rose-800' }
         };
-        const MODAL_IDS = ['addStudentModal', 'addSessionModal', 'studentProfileModal', 'questionsModal', 'surahDetailsModal', 'exportModal', 'confirmModal', 'attendanceModal', 'weeklyPlanModal'];
+        const MODAL_IDS = ['addStudentModal', 'addSessionModal', 'studentProfileModal', 'questionsModal', 'surahDetailsModal', 'exportModal', 'confirmModal', 'attendanceModal', 'reminderModal', 'weeklyPlanModal'];
         let students = [];
         let sessions = [];
         let activeStudentForProfile = null;
@@ -1868,6 +1934,7 @@
             renderSessionsTable();
             renderWeeklyPlan();
             renderRanking();
+            updateThursdayBanner();
             document.getElementById('totalStudentsBadge').textContent = students.length;
             updateSessionStudentContext();
             updateExportSummary();
@@ -3220,6 +3287,108 @@
                 eligible.forEach(student => openWhatsApp(student.phone, weeklyPlanMessage(student)));
                 notify('تم فتح رسائل الخطط الأسبوعية. قد يمنع المتصفح النوافذ المتعددة، فأعد الضغط لكل طالب عند الحاجة.', 'info');
             }, 'إرسال الخطط');
+        }
+
+        // ================== THURSDAY REMINDER ==================
+        // One shared message; only the student name and assigned passages change per recipient.
+        function thursdayReminderTemplate() {
+            return [
+                'السلام عليكم ورحمة الله وبركاته 🌿',
+                '',
+                'تذكير كريم من *حلقات تحفيظ القرآن الكريم — مسجد مبارك*',
+                '',
+                '*موعد التحفيظ: يوم الجمعة بعد صلاة المغرب مباشرة.*',
+                '',
+                'نرجو من سيادتكم مراجعة {t} {name} على السورة والمقدار المطلوب منه قبل الحضور،',
+                'لأن من لا يُتم مراجعته جيداً يخرج من التسميع دون إتمامه، ثم يعود للمراجعة مرة أخرى.',
+                '',
+                'المطلوب من {t}:',
+                '{passages}',
+                '',
+                'حضوركم ومتابعتكم البيتية هما سرّ تثبيت الحفظ ورسوخه بإذن الله 🤲',
+                '',
+                'بارك الله فيكم وفي أولادكم.'
+            ].join('\n');
+        }
+
+        function thursdayReminderMessage(student) {
+            const plan = weeklyPlan(student);
+            const passages = plan.isSet
+                ? plan.passages.map(item => `• ${recitationTypeLabel(item.type)}: سورة ${item.surah} من آية ${formatNumber(item.fromAyah)} إلى آية ${formatNumber(item.toAyah)}`).join('\n')
+                : '• لم يتم تحديد مقطع محدد؛ يرجى التواصل مع المحفظ لمعرفة المطلوب.';
+            return thursdayReminderTemplate()
+                .replaceAll('{t}', studentTitle(student))
+                .replaceAll('{name}', student.name)
+                .replaceAll('{passages}', passages);
+        }
+
+        function reminderStudentRows() {
+            return [...students].sort((a, b) => a.name.localeCompare(b.name, 'ar')).map(student => {
+                const plan = weeklyPlan(student);
+                return {
+                    student,
+                    planSet: plan.isSet,
+                    passages: plan.isSet ? plan.passages.map(item => `${recitationTypeLabel(item.type)}: سورة ${item.surah} (آية ${formatNumber(item.fromAyah)}–${formatNumber(item.toAyah)})`).join(' + ') : 'لم تُحدد خطة بعد',
+                    hasPhone: Boolean(student.phone)
+                };
+            });
+        }
+
+        function openThursdayReminder() {
+            if (!students.length) return notify('لا يوجد طلاب مسجلين لإرسال التذكير.', 'info');
+            const rows = reminderStudentRows();
+            const list = byId('reminderStudentList');
+            list.replaceChildren();
+            rows.forEach(({ student, passages, planSet, hasPhone }) => {
+                const label = document.createElement('label');
+                label.className = 'flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition cursor-pointer';
+                label.innerHTML = `
+                    <input type="checkbox" class="reminder-check mt-0.5 w-4 h-4 rounded accent-blue-700 shrink-0" value="${student.id}" checked>
+                    <span class="min-w-0 flex-1">
+                        <span class="block text-sm font-bold text-slate-800">${escapeHtml(student.name)}</span>
+                        <span class="block text-[11px] text-slate-500 mt-0.5">${escapeHtml(passages)}</span>
+                        ${planSet ? '' : '<span class="block text-[11px] text-amber-700 mt-1">بدون خطة محددة — ستصله رسالة عامة</span>'}
+                        ${hasPhone ? '' : '<span class="block text-[11px] text-rose-700 mt-1">لا يوجد رقم ولي أمر</span>'}
+                    </span>`;
+                list.appendChild(label);
+            });
+            byId('reminderSelectAll').checked = true;
+            updateReminderCount();
+            const preview = byId('reminderPreview');
+            preview.textContent = thursdayReminderTemplate().replace('{passages}', '• (تظهر هنا السورة والآيات المطلوبة لكل طالب عند الإرسال)');
+            openModal('reminderModal');
+        }
+
+        function toggleReminderSelection(checked) {
+            byId('reminderStudentList').querySelectorAll('.reminder-check').forEach(box => { box.checked = checked; });
+            updateReminderCount();
+        }
+
+        function updateReminderCount() {
+            const boxes = [...byId('reminderStudentList').querySelectorAll('.reminder-check')];
+            const chosen = boxes.filter(box => box.checked);
+            const ready = chosen.filter(box => students.find(s => s.id === box.value)?.phone).length;
+            byId('reminderCount').textContent = `المحدد: ${formatNumber(chosen.length)} | قابل للإرسال: ${formatNumber(ready)}`;
+        }
+
+        function sendReminderToSelected() {
+            const chosen = [...byId('reminderStudentList').querySelectorAll('.reminder-check')].filter(box => box.checked);
+            if (!chosen.length) return notify('اختر طالباً واحداً على الأقل.', 'error');
+            const eligible = chosen.map(box => students.find(s => s.id === box.value)).filter(s => s?.phone);
+            const withoutPhone = chosen.length - eligible.length;
+            if (!eligible.length) return notify('لا يوجد أرقام واتساب للطلاب المحددين. أضف الأرقام من بيانات الطلاب أولاً.', 'error');
+            requestConfirmation('إرسال تذكير أولياء الأمور', `سيتم فتح ${formatNumber(eligible.length)} رسالة واتساب للتذكير بالتحفيظ يوم الجمعة بعد صلاة المغرب.${withoutPhone ? `\nتم تجاهل ${formatNumber(withoutPhone)} طالب لعدم وجود رقم ولي الأمر.` : ''}\nقد يمنع المتصفح فتح نوافذ كثيرة؛ في هذه الحالة أرسل على دفعات.`, () => {
+                eligible.forEach(student => openWhatsApp(student.phone, thursdayReminderMessage(student)));
+                notify('تم فتح رسائل التذكير على واتساب.', 'info');
+            }, 'إرسال التذكير');
+        }
+
+        // Show the Thursday banner automatically on Thursdays and after the reminder is due.
+        function updateThursdayBanner() {
+            const isThursday = new Date().getDay() === 4;
+            const banner = byId('thursdayBanner');
+            if (!banner) return;
+            banner.classList.toggle('hidden', !(isThursday && students.length));
         }
 
         // Downloads the PDF report first, then opens WhatsApp with the message asking the parent to check the attached file.
