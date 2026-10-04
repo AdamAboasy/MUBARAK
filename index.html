@@ -264,6 +264,9 @@
                         <span>تثبيت التطبيق</span>
                     </button>
                     <div class="flex items-center gap-1.5">
+                        <button id="workspaceSwitchButton" onclick="openWorkspaceHub()" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-3 py-2.5 rounded-xl text-xs transition-all cursor-pointer" title="تغيير المشروع">
+                            <i class="fa-solid fa-folder-open"></i><span id="workspaceSwitchLabel" class="hidden sm:inline"> المشاريع</span>
+                        </button>
                         <div id="syncIndicator" class="flex items-center gap-1.5 bg-amber-400/15 border border-amber-300/30 text-amber-100 px-3 py-2.5 rounded-xl text-xs font-bold cursor-default" title="المزامنة التلقائية">
                             <span id="syncIndicatorDot" class="sync-dot bg-amber-400"></span>
                             <span id="syncIndicatorLabel">جارٍ الاتصال…</span>
@@ -1111,16 +1114,7 @@
                 <div><h4 class="font-bold text-emerald-900">3. اقرأ معلومات السور والتفسير</h4><p>اضغط أي سورة في الفهرس، ثم اختر الآية والمفسر. تحتاج هذه الميزة إلى اتصال بالإنترنت.</p></div>
                 <div><h4 class="font-bold text-emerald-900">4. المتابعة الأسبوعية وتقرير PDF لولي الأمر</h4><p>الخطة: يبدأ الطالب الجديد يوم السبت ويُسمَّع ما عليه يوم الجمعة، وتُذكر الأهل بالمطلوب أسبوعياً (السورة ورقم الآية). زر واتساب يُنزّل تقرير PDF كاملاً (بيانات، منحنى التطور، ترتيبه في سيرته الحالية، وسجل التسميع) ثم يفتح واتساب برسالة جاهزة. لا يُرسل التقرير إلا بعد 4 تسميعات كي تكتمل بيانات التحليل، وحتى ذلك الحين تُرسل رسالة الخطة الأسبوعية فقط.</p></div>
                 <div><h4 class="font-bold text-emerald-900">5. الحضور والغياب</h4><p>سجّل حضور كل حلقة، ومن يُسجَّل غائباً يُجهَّز له فوراً رسالة استفسار لولي الأمر عن سبب الغياب والظروف الخاصة.</p></div>
-                <div class="border-t border-slate-200 pt-4"><h4 class="font-bold text-sky-800">المزامنة التلقائية بين الأجهزة</h4><p>التطبيق متصل دائماً بقاعدة بيانات مسجد مبارك، فيظهر أي تسجيل أو تسميع أو حضور على الكمبيوتر والجوال فوراً وبدون تسجيل دخول. عند عدم توفر الإنترنت يعمل التطبيق محلياً، وتُرفع التعديلات تلقائياً عند عودة الاتصال.</p><p class="mt-2">لضمان الخصوصية، في لوحة Firebase افتح <bdi dir="ltr">Realtime Database → Rules</bdi> واجعلها:</p><pre class="mt-2 rounded-lg bg-slate-900 p-3 text-[11px] leading-relaxed text-slate-100 overflow-x-auto" dir="ltr">{
-  "rules": {
-    "mubarak_app_data": {
-      "$uid": {
-        ".read": "auth != null &amp;&amp; auth.uid === $uid",
-        ".write": "auth != null &amp;&amp; auth.uid === $uid"
-      }
-    }
-  }
-}</pre><p class="mt-2">وفعّل <bdi dir="ltr">Authentication → Sign-in method → Email/Password</bdi>.</p></div>
+                <div class="border-t border-slate-200 pt-4"><h4 class="font-bold text-sky-800">المشاريع والمزامنة بين الأجهزة</h4><p>سجّل الدخول بحسابك، ثم اختر مشروعاً أو أنشئ مشروعاً جديداً. لمشاركة المشروع أرسل كوده أو رابط الدعوة؛ العضو الجديد يرسل طلباً، ولا يرى البيانات إلا بعد قبول مالك المشروع. يمكن إعادة الطلب بعد الرفض.</p><p class="mt-2">تُحفظ بيانات المشاريع في Firebase Realtime Database. لضمان الخصوصية، فعّل <bdi dir="ltr">Authentication → Email/Password</bdi> وانشر الملف <bdi dir="ltr">database.rules.json</bdi> في <bdi dir="ltr">Realtime Database → Rules</bdi>. لا تجعل القواعد عامة.</p></div>
                 <div class="border-t border-slate-200 pt-4"><h4 class="font-bold text-amber-800">حافظ على بياناتك</h4><p>استخدم نسخة JSON لنقل البيانات واستعادتها عند الحاجة؛ PDF للقراءة والطباعة فقط.</p></div>
             </div>
 
@@ -1556,7 +1550,9 @@
             appId: "1:77228798249:web:0029ed36e0e94bf7f58738",
             measurementId: "G-V5M7PLZY8Y"
         };
-        const CLOUD_PATH = 'mubarak_app_data';
+        const CLOUD_PATH = 'mubarak_app_data'; // legacy per-account snapshots
+        const PROJECTS_PATH = 'mubarak_projects';
+        const USER_PROJECTS_PATH = 'mubarak_user_projects';
         let cloudApp = null;
         let cloudAuth = null;
         let cloudDb = null;
@@ -1566,6 +1562,12 @@
         let cloudLastWrite = '';
         let cloudPushTimer = null;
         let cloudDetacher = null;
+        let activeWorkspace = null;
+        let workspaceProjects = [];
+        let workspaceIncomingRequests = [];
+        let legacyMigrationWarning = '';
+        let workspaceLoadToken = 0;
+        let projectSyncToken = 0;
 
         function byId(id) { return document.getElementById(id); }
         function todayISO(daysAgo = 0) {
@@ -1765,10 +1767,12 @@
             return true;
         }
 
-        /* ================== CLOUD SYNC + LOGIN ================== */
-        // كل حساب له بياناته الخاصة في السحابة (mubarak_app_data/{uid})، وكل جهاز يدخل بنفس الحساب يتشارك نفس البيانات.
+        /* ================== FIREBASE AUTH + REALTIME DATABASE PROJECTS ================== */
+        // Authentication and all project data use Firebase Auth + Realtime Database.
         let loginSignUpMode = false;
         let loginScreenState = 'connecting';
+        let workspaceCopyOptionInitialized = false;
+        let cloudWriteChain = Promise.resolve();
 
         function setSyncIndicator(state, text) {
             const wrap = byId('syncIndicator');
@@ -1787,6 +1791,15 @@
             wrap.title = text || defaultText;
         }
 
+        function updateWorkspaceHeader() {
+            const label = byId('workspaceSwitchLabel');
+            const button = byId('workspaceSwitchButton');
+            if (!label || !button) return;
+            const name = activeWorkspace?.name || '';
+            label.textContent = name ? ` ${name}` : ' المشاريع';
+            button.title = name ? `المشروع الحالي: ${name} — تغيير المشروع` : 'إدارة المشاريع';
+        }
+
         function setLoginScreenMode(mode) {
             const screen = byId('loginScreen');
             const spinner = byId('loginConnecting');
@@ -1799,9 +1812,52 @@
             spinner.classList.toggle('hidden', mode !== 'connecting');
             form.classList.toggle('hidden', mode === 'connecting');
             const submit = byId('loginSubmitButton');
-            if (submit) submit.disabled = mode === 'connecting';
+            if (submit) submit.disabled = mode === 'connecting' || !cloudAuth;
             const label = byId('loginSubmitLabel');
             if (label) label.textContent = mode === 'connecting' ? 'جارٍ التحقق…' : (loginSignUpMode ? 'إنشاء حساب جديد' : 'تسجيل الدخول');
+        }
+
+        function setWorkspaceScreenMode(mode) {
+            const screen = byId('workspaceScreen');
+            const loading = byId('workspaceLoading');
+            const content = byId('workspaceContent');
+            if (!screen || !loading || !content) return;
+            if (mode === 'hidden') {
+                screen.classList.add('hidden');
+                return;
+            }
+            screen.classList.remove('hidden');
+            loading.classList.toggle('hidden', mode !== 'loading');
+            content.classList.toggle('hidden', mode === 'loading');
+        }
+
+        function showWorkspaceError(message) {
+            const panel = byId('workspaceError');
+            if (!panel) return;
+            panel.replaceChildren();
+            const text = document.createElement('p');
+            text.textContent = message;
+            const retry = document.createElement('button');
+            retry.type = 'button';
+            retry.className = 'mt-2 text-xs font-extrabold underline';
+            retry.textContent = 'إعادة المحاولة';
+            retry.onclick = () => refreshWorkspaceHub();
+            panel.append(text, retry);
+            panel.classList.remove('hidden');
+        }
+
+        function hideWorkspaceError() {
+            const panel = byId('workspaceError');
+            if (!panel) return;
+            panel.replaceChildren();
+            panel.classList.add('hidden');
+        }
+
+        function showWorkspaceJoinStatus(message, type = 'info') {
+            const panel = byId('workspaceJoinStatus');
+            if (!panel) return;
+            panel.className = `rounded-xl p-3 text-xs leading-relaxed ${type === 'error' ? 'bg-red-50 text-red-800 border border-red-200' : type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}`;
+            panel.textContent = message;
         }
 
         function showLoginError(message) {
@@ -1820,14 +1876,25 @@
         function loginToggleMode() {
             loginSignUpMode = !loginSignUpMode;
             hideLoginError();
+            const nameField = byId('loginNameField');
+            const nameInput = byId('loginDisplayName');
+            const toggle = byId('loginModeToggle');
+            const reset = byId('passwordResetButton');
             const label = byId('loginSubmitLabel');
-            if (label) label.textContent = loginSignUpMode ? 'إنشاء حساب جديد' : 'تسجيل الدخول';
             const email = byId('loginEmail');
-            if (email) { email.placeholder = loginSignUpMode ? 'اختر بريداً جديداً' : 'name@example.com'; email.focus(); }
+            const password = byId('loginPassword');
+            if (nameField) nameField.classList.toggle('hidden', !loginSignUpMode);
+            if (toggle) toggle.textContent = loginSignUpMode ? 'لديك حساب؟ سجّل الدخول' : 'ليس عندك حساب؟ أنشئ حساباً جديداً';
+            if (reset) reset.classList.toggle('hidden', loginSignUpMode);
+            if (label) label.textContent = loginSignUpMode ? 'إنشاء حساب جديد' : 'تسجيل الدخول';
+            if (email) email.placeholder = loginSignUpMode ? 'اختر بريداً جديداً' : 'name@example.com';
+            if (password) password.autocomplete = loginSignUpMode ? 'new-password' : 'current-password';
+            if (loginSignUpMode && nameInput) nameInput.focus();
+            else if (email) email.focus();
         }
 
         function syncAuthError(error) {
-            const code = String(error?.code || '');
+            const code = String(error?.code || '').toLowerCase();
             if (code.includes('user-not-found')) return 'هذا البريد غير مسجّل — اختر «إنشاء حساب جديد» أو تأكد من البريد.';
             if (code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('invalid-login-credentials')) return 'كلمة المرور غير صحيحة.';
             if (code.includes('email-already-in-use')) return 'هذا البريد مسجّل بالفعل — اختر «تسجيل الدخول».';
@@ -1835,15 +1902,24 @@
             if (code.includes('invalid-email')) return 'البريد الإلكتروني غير صحيح.';
             if (code.includes('too-many-requests')) return 'محاولات كثيرة في وقت قصير — انتظر قليلاً ثم أعد المحاولة.';
             if (code.includes('network-request-failed') || code.includes('network')) return 'تعذر الاتصال بالإنترنت. تحقق من الاتصال.';
-            if (code.includes('operation-not-allowed')) return 'لم تُفعّل خاصية البريد/كلمة المرور في Firebase Authentication.';
+            if (code.includes('operation-not-allowed')) return 'فعّل طريقة البريد الإلكتروني/كلمة المرور من Firebase Authentication.';
             return error?.message || 'حدث خطأ غير متوقع.';
+        }
+
+        function realtimeDatabaseError(error) {
+            const code = String(error?.code || error?.message || '').toLowerCase();
+            if (code.includes('permission_denied') || code.includes('permission-denied')) return 'رفضت قواعد Realtime Database العملية. انشر ملف database.rules.json في قاعدة Realtime Database نفسها.';
+            if (code.includes('unavailable') || code.includes('network')) return 'تعذر الاتصال بقاعدة Realtime Database. تحقق من الإنترنت ثم أعد المحاولة.';
+            return error?.message || 'حدث خطأ أثناء الاتصال بقاعدة Realtime Database.';
         }
 
         async function loginSubmit() {
             if (!cloudAuth || loginScreenState === 'connecting') return;
             const email = byId('loginEmail').value.trim().toLowerCase();
             const password = byId('loginPassword').value;
+            const displayName = byId('loginDisplayName').value.trim().replace(/\s+/g, ' ');
             if (!email || !password) return showLoginError('أدخل البريد الإلكتروني وكلمة المرور.');
+            if (loginSignUpMode && displayName.length < 2) return showLoginError('اكتب اسماً من حرفين على الأقل ليظهر لصاحب المشروع عند إرسال طلب الانضمام.');
             hideLoginError();
             const submit = byId('loginSubmitButton');
             submit.disabled = true;
@@ -1851,12 +1927,15 @@
             try {
                 if (loginSignUpMode) {
                     if (password.length < 6) { showLoginError('كلمة المرور يجب أن تكون 6 أحرف على الأقل.'); submit.disabled = false; return; }
-                    await cloudAuth.createUserWithEmailAndPassword(email, password);
-                    notify('تم إنشاء الحساب بنجاح — جاري فتح التطبيق…');
+                    const credential = await cloudAuth.createUserWithEmailAndPassword(email, password);
+                    try { await credential.user.updateProfile({ displayName }); } catch (profileError) { console.warn('Could not save display name', profileError); }
+                    try { await credential.user.sendEmailVerification(); } catch (verificationError) { console.warn('Could not send verification email', verificationError); }
+                    byId('loginPassword').value = '';
+                    notify('تم إنشاء الحساب. أرسلنا رابط تحقق إلى بريدك؛ افتحه قبل إنشاء مشروع أو طلب الانضمام.', 'info');
                 } else {
                     await cloudAuth.signInWithEmailAndPassword(email, password);
+                    byId('loginPassword').value = '';
                 }
-                byId('loginPassword').value = '';
             } catch (error) {
                 showLoginError(syncAuthError(error));
                 submit.disabled = false;
@@ -1864,38 +1943,647 @@
             }
         }
 
+        async function sendVerificationEmail() {
+            const user = cloudAuth?.currentUser;
+            if (!user) return;
+            try {
+                await user.sendEmailVerification();
+                notify('أرسلنا رسالة تحقق جديدة. افحص البريد الوارد ومجلد الرسائل غير المرغوب فيها.', 'info');
+            } catch (error) {
+                notify(syncAuthError(error), 'error');
+            }
+        }
+
+        async function refreshEmailVerification() {
+            try {
+                const user = cloudAuth?.currentUser;
+                if (!user) return;
+                await user.reload();
+                await user.getIdToken(true);
+                cloudUser = cloudAuth.currentUser;
+                byId('emailVerificationNotice').classList.toggle('hidden', Boolean(cloudUser?.emailVerified));
+                if (cloudUser?.emailVerified) {
+                    notify('تم التحقق من البريد الإلكتروني. يمكنك الآن إنشاء مشروع أو إرسال طلب انضمام.');
+                    await refreshWorkspaceHub();
+                } else {
+                    notify('لم يظهر التحقق بعد. افتح رابط التأكيد في البريد ثم اضغط «تحققت — تحديث».', 'info');
+                }
+            } catch (error) {
+                notify(syncAuthError(error), 'error');
+            }
+        }
+
+        async function sendPasswordReset() {
+            if (!cloudAuth) return;
+            const email = byId('loginEmail').value.trim().toLowerCase();
+            if (!email) return showLoginError('اكتب بريدك الإلكتروني أولاً لإرسال رابط إعادة تعيين كلمة المرور.');
+            try {
+                await cloudAuth.sendPasswordResetEmail(email);
+                hideLoginError();
+                notify('إذا كان البريد مسجلاً، سيصلك رابط إعادة تعيين كلمة المرور.');
+            } catch (error) {
+                showLoginError(syncAuthError(error));
+            }
+        }
+
+        function normalizeCloudSnapshot(snapshot) {
+            if (!snapshot || typeof snapshot !== 'object') throw new Error('نسخة بيانات سحابية غير صالحة.');
+            const list = (value, field) => {
+                if (Array.isArray(value)) return value;
+                if (value == null) return [];
+                if (typeof value === 'object') {
+                    const keys = Object.keys(value).sort((a, b) => Number(a) - Number(b));
+                    if (!keys.length) return [];
+                    if (keys.every((key, index) => /^\d+$/.test(key) && Number(key) === index)) return keys.map(key => value[key]);
+                }
+                throw new Error(`حقل ${field} غير صالح في بيانات المشروع.`);
+            };
+            const normalized = {
+                ...snapshot,
+                students: list(snapshot.students, 'students'),
+                sessions: list(snapshot.sessions, 'sessions')
+            };
+            const clean = validateData(normalized);
+            const attendance = validateAttendanceImport(list(snapshot.attendance, 'attendance'), new Set(clean.students.map(student => student.id)));
+            return {
+                app: APP_NAME,
+                version: '4.0',
+                exportDate: typeof snapshot.exportDate === 'string' ? snapshot.exportDate : new Date().toISOString(),
+                students: clean.students,
+                sessions: clean.sessions,
+                attendance
+            };
+        }
+
+        function cloudSnapshot() {
+            return { app: APP_NAME, version: '4.0', exportDate: new Date().toISOString(), students, sessions, attendance: attendanceData() };
+        }
+
+        function emptyCloudSnapshot() {
+            return { app: APP_NAME, version: '4.0', exportDate: new Date().toISOString(), students: [], sessions: [], attendance: [] };
+        }
+
+        function applyRemoteSnapshot(snapshot, announce = true) {
+            try {
+                const clean = normalizeCloudSnapshot(snapshot);
+                cloudApplying = true;
+                students = clean.students;
+                sessions = clean.sessions;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', students, sessions }));
+                localStorage.setItem('mb_attendance', JSON.stringify(clean.attendance));
+                loadFailed = false;
+                storageWarning = '';
+                byId('storageNotice').textContent = 'بيانات هذا المشروع محفوظة محلياً ومتزامنة مع أعضائه عبر Realtime Database.';
+                cloudApplying = false;
+                updateApp();
+                if (announce) notify('تم تحديث بيانات المشروع من جهاز آخر.', 'info');
+                return true;
+            } catch (error) {
+                cloudApplying = false;
+                notify(`وصلت بيانات غير صالحة ولم تُطبّق: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function workspaceProjectRef(projectId) { return cloudDb.ref(`${PROJECTS_PATH}/${projectId}`); }
+        function userWorkspaceIndex(uid = cloudUser?.uid) { return cloudDb.ref(`${USER_PROJECTS_PATH}/${uid}`); }
+
+        function projectDataPayload(snapshot, user = cloudUser) {
+            return {
+                data: normalizeCloudSnapshot(snapshot),
+                updated_at: Date.now(),
+                revision: makeId('rev'),
+                updated_by: user.uid
+            };
+        }
+
+        async function createWorkspaceRecords(name, initialSnapshot, user = cloudUser) {
+            if (!cloudDb || !user) throw new Error('سجّل الدخول أولاً لإنشاء مشروع.');
+            const projectId = cloudDb.ref(PROJECTS_PATH).push().key;
+            if (!projectId) throw new Error('تعذر إنشاء كود للمشروع. أعد المحاولة.');
+            const projectRef = workspaceProjectRef(projectId);
+            const ownerName = String(user.displayName || user.email?.split('@')[0] || 'مالك المشروع').trim().slice(0, 80);
+            const now = Date.now();
+            await projectRef.child('info').set({ name, ownerUid: user.uid, createdAt: now });
+            await projectRef.child('members').child(user.uid).set({
+                uid: user.uid, email: user.email || '', displayName: ownerName, role: 'owner', joinedAt: now
+            });
+            await userWorkspaceIndex(user.uid).child(projectId).set({
+                projectId, name, role: 'owner', ownerUid: user.uid, addedAt: now
+            });
+            await projectRef.child('data').set(projectDataPayload(initialSnapshot, user));
+            return { id: projectId, name, role: 'owner', ownerUid: user.uid };
+        }
+
+        async function tryMigrateLegacyAccount(user) {
+            if (!cloudDb || !user) return false;
+            let legacy;
+            try {
+                const legacySnapshot = await cloudDb.ref(`${CLOUD_PATH}/${user.uid}`).once('value');
+                legacy = legacySnapshot.val();
+            } catch (error) {
+                console.info('Legacy account migration could not read the old snapshot', error);
+                return false;
+            }
+            if (!legacy?.data) return false;
+            try {
+                const normalized = normalizeCloudSnapshot(legacy.data);
+                await createWorkspaceRecords('مشروعي الأول', normalized, user);
+                return true;
+            } catch (error) {
+                console.warn('Legacy snapshot found but could not be migrated', error);
+                legacyMigrationWarning = 'وجدنا بيانات قديمة لهذا الحساب لكن تعذّر نقلها تلقائياً. النسخة القديمة لم تُحذف؛ راجع قواعد Realtime Database أو نزّل نسخة احتياطية قبل المتابعة.';
+                return false;
+            }
+        }
+
+        function workspaceAuthLabel(user) { return user?.email || user?.displayName || ''; }
+        function setWorkspaceLoadingText(text) {
+            const label = byId('workspaceLoadingText');
+            if (label) label.textContent = text;
+        }
+
+        function normalizeWorkspaceCode(input) {
+            const value = String(input || '').trim();
+            if (!value) return '';
+            try {
+                const url = new URL(value);
+                return url.searchParams.get('join') || value;
+            } catch { return value; }
+        }
+
+        function formatWorkspaceDate(value) {
+            try {
+                const date = typeof value === 'number' ? new Date(value) : value instanceof Date ? value : null;
+                return date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+            } catch { return ''; }
+        }
+
+        async function loadWorkspaceHub(user = cloudUser) {
+            if (!cloudDb || !user) return;
+            const token = ++workspaceLoadToken;
+            legacyMigrationWarning = '';
+            setWorkspaceLoadingText('جارٍ تحميل المشاريع وطلبات الانضمام…');
+            setWorkspaceScreenMode('loading');
+            hideWorkspaceError();
+            byId('workspaceAccountLabel').textContent = workspaceAuthLabel(user);
+            byId('emailVerificationNotice').classList.toggle('hidden', Boolean(user.emailVerified));
+            try {
+                let indexSnapshot = await userWorkspaceIndex(user.uid).once('value');
+                if (token !== workspaceLoadToken || cloudUser?.uid !== user.uid) return;
+                if (!indexSnapshot.exists()) {
+                    const migrated = await tryMigrateLegacyAccount(user);
+                    if (token !== workspaceLoadToken || cloudUser?.uid !== user.uid) return;
+                    if (migrated) indexSnapshot = await userWorkspaceIndex(user.uid).once('value');
+                }
+                const index = indexSnapshot.val() || {};
+                workspaceProjects = Object.entries(index).map(([id, value]) => ({ ...(value || {}), id }))
+                    .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ar'));
+                workspaceIncomingRequests = [];
+                for (const project of workspaceProjects.filter(item => item.role === 'owner')) {
+                    try {
+                        const requests = await workspaceProjectRef(project.id).child('joinRequests').orderByChild('status').equalTo('pending').once('value');
+                        requests.forEach(snapshot => workspaceIncomingRequests.push({
+                            ...(snapshot.val() || {}),
+                            uid: snapshot.key,
+                            projectId: project.id,
+                            projectName: project.name
+                        }));
+                    } catch (error) {
+                        console.warn('Unable to read join requests for project', project.id, error);
+                    }
+                    if (token !== workspaceLoadToken || cloudUser?.uid !== user.uid) return;
+                }
+                renderWorkspaceProjects();
+                renderWorkspaceRequests();
+                const inviteCode = new URLSearchParams(location.search).get('join');
+                if (inviteCode && !byId('workspaceJoinProjectId').value) byId('workspaceJoinProjectId').value = inviteCode;
+                if (!workspaceCopyOptionInitialized) {
+                    byId('workspaceCopyCurrentData').checked = false;
+                    workspaceCopyOptionInitialized = true;
+                }
+                byId('workspaceProjectCount').textContent = formatNumber(workspaceProjects.length);
+                byId('workspaceRequestCount').textContent = formatNumber(workspaceIncomingRequests.length);
+                setWorkspaceScreenMode('hub');
+                if (legacyMigrationWarning) showWorkspaceError(legacyMigrationWarning);
+                else hideWorkspaceError();
+                if (!activeWorkspace) setSyncIndicator('offline', 'اختر مشروعاً أو أنشئ مشروعاً');
+            } catch (error) {
+                if (token !== workspaceLoadToken || cloudUser?.uid !== user.uid) return;
+                console.error('Could not load Realtime Database workspaces', error);
+                setWorkspaceScreenMode('hub');
+                showWorkspaceError(realtimeDatabaseError(error));
+            }
+        }
+
+        async function refreshWorkspaceHub() {
+            if (!cloudUser) return;
+            await loadWorkspaceHub(cloudUser);
+        }
+
+        function renderWorkspaceProjects() {
+            const container = byId('workspaceProjectList');
+            if (!container) return;
+            if (!workspaceProjects.length) {
+                container.innerHTML = '<div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center text-xs text-slate-500 leading-relaxed">لا توجد مشاريع في حسابك بعد. أنشئ مشروعاً جديداً، أو أدخل كود مشروع واطلب الانضمام إليه.</div>';
+            } else {
+                container.innerHTML = workspaceProjects.map(project => {
+                    const role = project.role === 'owner' ? 'مالك المشروع' : 'عضو مقبول';
+                    return `<article class="rounded-xl border border-slate-200 p-4 hover:border-emerald-300 transition">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0"><h3 class="font-extrabold text-slate-900 break-words">${escapeHtml(project.name || 'مشروع بدون اسم')}</h3><p class="text-[11px] text-slate-500 mt-1">${role}</p></div>
+                            <button type="button" data-workspace-action="open" data-project-id="${escapeHtml(project.id)}" class="shrink-0 bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-2 rounded-lg text-xs"><i class="fa-solid fa-arrow-up-right-from-square ml-1"></i> فتح</button>
+                        </div>
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
+                            <span class="text-[10px] text-slate-500">كود المشروع</span><code dir="ltr" class="sync-code bg-slate-100 rounded-md px-2 py-1 text-[10px] select-all">${escapeHtml(project.id)}</code>
+                            <button type="button" data-workspace-action="copy-code" data-project-id="${escapeHtml(project.id)}" class="text-action"><i class="fa-regular fa-copy ml-1"></i> نسخ الكود</button>
+                            <button type="button" data-workspace-action="copy-link" data-project-id="${escapeHtml(project.id)}" class="text-action"><i class="fa-solid fa-link ml-1"></i> نسخ رابط الدعوة</button>
+                        </div>
+                    </article>`;
+                }).join('');
+            }
+            container.onclick = async event => {
+                const button = event.target.closest('[data-workspace-action]');
+                if (!button) return;
+                const projectId = button.dataset.projectId;
+                if (button.dataset.workspaceAction === 'open') await openWorkspaceProject(projectId);
+                else await copyWorkspaceInvite(projectId, button.dataset.workspaceAction === 'copy-link');
+            };
+        }
+
+        function renderWorkspaceRequests() {
+            const container = byId('workspaceRequestList');
+            if (!container) return;
+            if (!workspaceIncomingRequests.length) {
+                container.innerHTML = '<div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center text-xs text-slate-500">لا توجد طلبات معلّقة حالياً.</div>';
+                return;
+            }
+            container.innerHTML = workspaceIncomingRequests.map(request => {
+                const name = request.displayName || request.email || 'مستخدم جديد';
+                const date = formatWorkspaceDate(request.requestedAt);
+                return `<article class="rounded-xl border border-amber-200 bg-amber-50/60 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="min-w-0"><p class="font-extrabold text-slate-900">${escapeHtml(name)}</p><p class="text-xs text-slate-600 mt-1" dir="ltr">${escapeHtml(request.email || '')}</p><p class="text-[11px] text-slate-500 mt-1">طلب الانضمام إلى <strong>${escapeHtml(request.projectName)}</strong>${date ? ` • ${escapeHtml(date)}` : ''}</p></div>
+                    <div class="flex gap-2 shrink-0">
+                        <button type="button" data-request-action="approve" data-project-id="${escapeHtml(request.projectId)}" data-request-uid="${escapeHtml(request.uid)}" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-lg text-xs"><i class="fa-solid fa-check ml-1"></i> قبول</button>
+                        <button type="button" data-request-action="reject" data-project-id="${escapeHtml(request.projectId)}" data-request-uid="${escapeHtml(request.uid)}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 font-bold px-4 py-2 rounded-lg text-xs"><i class="fa-solid fa-xmark ml-1"></i> رفض</button>
+                    </div>
+                </article>`;
+            }).join('');
+            container.onclick = async event => {
+                const button = event.target.closest('[data-request-action]');
+                if (!button) return;
+                await respondToWorkspaceRequest(button.dataset.projectId, button.dataset.requestUid, button.dataset.requestAction);
+            };
+        }
+
+        async function copyWorkspaceInvite(projectId, asLink = false) {
+            const project = workspaceProjects.find(item => item.id === projectId);
+            if (!project) return;
+            const url = new URL(location.href);
+            url.searchParams.set('join', projectId);
+            const value = asLink ? url.toString() : projectId;
+            try {
+                await navigator.clipboard.writeText(value);
+                notify(asLink ? 'تم نسخ رابط الدعوة. أرسله للشخص المطلوب.' : 'تم نسخ كود المشروع. أرسله للشخص المطلوب.');
+            } catch {
+                window.prompt(asLink ? 'انسخ رابط الدعوة وأرسله:' : 'انسخ كود المشروع وأرسله:', value);
+            }
+        }
+
+        async function createWorkspaceProject(event) {
+            event?.preventDefault();
+            if (!cloudUser || !cloudDb) return;
+            if (!cloudUser.emailVerified) return notify('تحقق من بريدك الإلكتروني أولاً من الرسالة المرسلة إليك.', 'error');
+            const input = byId('workspaceNewProjectName');
+            const name = input.value.trim().replace(/\s+/g, ' ');
+            if (name.length < 2 || name.length > 100) return notify('اسم المشروع يجب أن يكون من حرفين إلى 100 حرف.', 'error');
+            const button = byId('workspaceCreateButton');
+            button.disabled = true;
+            const copyData = byId('workspaceCopyCurrentData').checked;
+            const initialSnapshot = copyData ? cloudSnapshot() : emptyCloudSnapshot();
+            setWorkspaceLoadingText('جارٍ إنشاء المشروع وتجهيز بياناته…');
+            setWorkspaceScreenMode('loading');
+            hideWorkspaceError();
+            try {
+                const project = await createWorkspaceRecords(name, initialSnapshot, cloudUser);
+                input.value = '';
+                byId('workspaceCopyCurrentData').checked = false;
+                await loadWorkspaceHub(cloudUser);
+                notify(`تم إنشاء مشروع «${name}». يمكنك نسخ كوده من قائمة المشاريع لدعوة الأعضاء.`);
+                await openWorkspaceProject(project.id);
+            } catch (error) {
+                console.error('Project creation failed', error);
+                setWorkspaceScreenMode('hub');
+                showWorkspaceError(realtimeDatabaseError(error));
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function sendWorkspaceJoinRequest(event) {
+            event?.preventDefault();
+            if (!cloudUser || !cloudDb) return;
+            if (!cloudUser.emailVerified) return showWorkspaceJoinStatus('تحقق من بريدك الإلكتروني أولاً من الرسالة المرسلة إليك.', 'error');
+            const projectId = normalizeWorkspaceCode(byId('workspaceJoinProjectId').value);
+            if (!projectId || projectId.length < 10 || projectId.includes('/')) return showWorkspaceJoinStatus('أدخل كود مشروع صحيحاً أو الصق رابط الدعوة.', 'error');
+            if (workspaceProjects.some(project => project.id === projectId)) return showWorkspaceJoinStatus('هذا المشروع موجود بالفعل في قائمة مشاريعك. افتحه من القائمة.', 'info');
+            const button = byId('workspaceJoinButton');
+            button.disabled = true;
+            try {
+                const requestRef = workspaceProjectRef(projectId).child('joinRequests').child(cloudUser.uid);
+                const currentRequest = await requestRef.once('value');
+                const currentStatus = currentRequest.val()?.status || '';
+                if (currentStatus === 'pending') return showWorkspaceJoinStatus('طلبك ما زال قيد المراجعة. لن تتمكن من فتح المشروع حتى يقبله المالك.', 'info');
+                if (currentStatus === 'approved') {
+                    await loadWorkspaceHub(cloudUser);
+                    return showWorkspaceJoinStatus('تم قبول طلبك بالفعل. حدّثت قائمة المشاريع؛ افتح المشروع من القائمة.', 'success');
+                }
+                const payload = {
+                    uid: cloudUser.uid,
+                    email: cloudUser.email || '',
+                    displayName: String(cloudUser.displayName || cloudUser.email?.split('@')[0] || '').slice(0, 80),
+                    status: 'pending',
+                    requestedAt: Date.now()
+                };
+                await requestRef.set(payload);
+                showWorkspaceJoinStatus(currentStatus === 'rejected' ? 'أُعيد إرسال طلبك. انتظر قرار صاحب المشروع؛ لن يكون لديك وصول قبل القبول.' : 'تم إرسال طلبك لصاحب المشروع. لن تتمكن من فتح بياناته إلا بعد القبول.', 'success');
+            } catch (error) {
+                console.warn('Join request failed', error);
+                showWorkspaceJoinStatus(realtimeDatabaseError(error) + ' تأكد أيضاً من صحة كود المشروع.', 'error');
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function checkWorkspaceRequestStatus() {
+            if (!cloudUser || !cloudDb) return;
+            const projectId = normalizeWorkspaceCode(byId('workspaceJoinProjectId').value);
+            if (!projectId || projectId.length < 10 || projectId.includes('/')) return showWorkspaceJoinStatus('أدخل كود المشروع أو رابط الدعوة أولاً.', 'error');
+            try {
+                const requestSnapshot = await workspaceProjectRef(projectId).child('joinRequests').child(cloudUser.uid).once('value');
+                if (!requestSnapshot.exists()) return showWorkspaceJoinStatus('لا يوجد طلب مسجل بهذا الحساب لهذا المشروع. يمكنك إرسال طلب الآن.', 'info');
+                const status = requestSnapshot.val()?.status;
+                if (status === 'pending') showWorkspaceJoinStatus('طلبك قيد المراجعة. لا يوجد وصول للمشروع حتى يقبل المالك.', 'info');
+                else if (status === 'rejected') showWorkspaceJoinStatus('لم تتم الموافقة على الطلب. يمكنك إرسال طلب جديد إذا رغبت.', 'error');
+                else if (status === 'approved') {
+                    await loadWorkspaceHub(cloudUser);
+                    showWorkspaceJoinStatus('تم قبول طلبك. افتح المشروع من قائمة مشاريعك.', 'success');
+                } else showWorkspaceJoinStatus('حالة الطلب غير معروفة. حدّث الصفحة أو تواصل مع مالك المشروع.', 'error');
+            } catch (error) {
+                showWorkspaceJoinStatus(realtimeDatabaseError(error) + ' تأكد من كود المشروع.', 'error');
+            }
+        }
+
+        async function respondToWorkspaceRequest(projectId, requestUid, action) {
+            if (!cloudUser || !cloudDb || !['approve', 'reject'].includes(action)) return;
+            if (!cloudUser.emailVerified) return notify('تحقق من بريدك الإلكتروني قبل إدارة طلبات الأعضاء.', 'error');
+            const project = workspaceProjects.find(item => item.id === projectId && item.role === 'owner');
+            if (!project) return notify('لا تملك صلاحية إدارة طلبات هذا المشروع.', 'error');
+            try {
+                const projectRef = workspaceProjectRef(projectId);
+                const requestRef = projectRef.child('joinRequests').child(requestUid);
+                const requestSnapshot = await requestRef.once('value');
+                const request = requestSnapshot.val();
+                if (!request || request.status !== 'pending') {
+                    notify('تم التعامل مع هذا الطلب بالفعل. حدّث القائمة.', 'info');
+                    await loadWorkspaceHub(cloudUser);
+                    return;
+                }
+                if (action === 'approve') {
+                    const memberRef = projectRef.child('members').child(requestUid);
+                    const existingMember = await memberRef.once('value');
+                    if (!existingMember.exists()) {
+                        await memberRef.set({
+                            uid: requestUid,
+                            email: request.email || '',
+                            displayName: request.displayName || request.email || 'عضو جديد',
+                            role: 'member',
+                            joinedAt: Date.now()
+                        });
+                    }
+                    await userWorkspaceIndex(requestUid).child(projectId).set({
+                        projectId,
+                        name: project.name,
+                        role: 'member',
+                        ownerUid: project.ownerUid || cloudUser.uid,
+                        addedAt: Date.now()
+                    });
+                }
+                await requestRef.update({
+                    status: action === 'approve' ? 'approved' : 'rejected',
+                    respondedAt: Date.now()
+                });
+                notify(action === 'approve' ? `تم قبول ${request.email || 'طلب الانضمام'} وإضافته للمشروع.` : 'تم رفض الطلب. لن يستطيع صاحبه دخول المشروع.');
+                await loadWorkspaceHub(cloudUser);
+            } catch (error) {
+                console.error('Could not respond to workspace request', error);
+                notify(realtimeDatabaseError(error), 'error');
+            }
+        }
+
+        async function openWorkspaceHub() {
+            if (!cloudUser || !cloudDb) return notify('سجّل الدخول أولاً لإدارة المشاريع.', 'info');
+            setWorkspaceLoadingText('جارٍ تحميل المشاريع وطلبات الانضمام…');
+            setWorkspaceScreenMode('loading');
+            await loadWorkspaceHub(cloudUser);
+        }
+
+        async function openWorkspaceProject(projectId) {
+            if (!cloudUser || !cloudDb) return;
+            const project = workspaceProjects.find(item => item.id === projectId);
+            if (!project) return notify('المشروع غير موجود في قائمة حسابك. حدّث القائمة.', 'error');
+            if (activeWorkspace?.id === projectId && cloudReady) {
+                setWorkspaceScreenMode('hidden');
+                return;
+            }
+            setWorkspaceLoadingText(`جارٍ فتح مشروع «${project.name}» ومزامنة بياناته…`);
+            setWorkspaceScreenMode('loading');
+            hideWorkspaceError();
+            try {
+                if (cloudReady && activeWorkspace && activeWorkspace.id !== projectId) {
+                    clearTimeout(cloudPushTimer);
+                    const saved = await pushCloudData();
+                    if (!saved) {
+                        setWorkspaceScreenMode('hub');
+                        showWorkspaceError('لم يتمكن التطبيق من حفظ التغييرات بالمشروع السابق. تأكد من الاتصال ثم أعد المحاولة حتى لا تفقد تعديلاتك.');
+                        return;
+                    }
+                }
+                if (cloudDetacher) { cloudDetacher(); cloudDetacher = null; }
+                cloudReady = false;
+                const token = ++projectSyncToken;
+                const openingUserId = cloudUser.uid;
+                const projectRef = workspaceProjectRef(project.id);
+                const infoSnapshot = await projectRef.child('info').once('value');
+                if (!infoSnapshot.exists()) throw new Error('المشروع غير موجود أو كوده غير صحيح.');
+                const info = infoSnapshot.val();
+                if (token !== projectSyncToken || cloudUser?.uid !== openingUserId) return;
+                activeWorkspace = { id: project.id, name: info.name || project.name, role: project.role, ownerUid: info.ownerUid || project.ownerUid || '' };
+                updateWorkspaceHeader();
+                setSyncIndicator('connecting', `جارٍ تحميل ${activeWorkspace.name}…`);
+                const dataRef = projectRef.child('data');
+                let dataSnapshot = await dataRef.once('value');
+                if (!dataSnapshot.exists() && project.role === 'owner') {
+                    await dataRef.set(projectDataPayload(emptyCloudSnapshot(), cloudUser));
+                    dataSnapshot = await dataRef.once('value');
+                }
+                if (!dataSnapshot.exists()) throw new Error('لم يتم العثور على بيانات المشروع. اطلب من مالكه إعادة المحاولة.');
+                const value = dataSnapshot.val();
+                if (token !== projectSyncToken || cloudUser?.uid !== openingUserId) return;
+                if (!value?.data || !applyRemoteSnapshot(value.data, false)) throw new Error('تعذر تطبيق بيانات المشروع على هذا الجهاز.');
+                cloudLastWrite = value.revision || '';
+                cloudReady = true;
+                const listener = snapshot => {
+                    const nextValue = snapshot.val();
+                    if (!nextValue?.data || !nextValue.revision || nextValue.revision === cloudLastWrite) return;
+                    const announce = nextValue.updated_by !== cloudUser?.uid;
+                    if (applyRemoteSnapshot(nextValue.data, announce)) cloudLastWrite = nextValue.revision;
+                };
+                dataRef.on('value', listener, error => {
+                    console.error('Project sync listener failed', error);
+                    setSyncIndicator('offline', 'تعذرت المزامنة — تحقق من قواعد Realtime Database');
+                });
+                cloudDetacher = () => dataRef.off('value', listener);
+                setSyncIndicator('online', `متزامن • ${activeWorkspace.name}`);
+                updateWorkspaceHeader();
+                setWorkspaceScreenMode('hidden');
+            } catch (error) {
+                console.error('Could not open Realtime Database project', error);
+                cloudReady = false;
+                if (cloudDetacher) { cloudDetacher(); cloudDetacher = null; }
+                activeWorkspace = null;
+                updateWorkspaceHeader();
+                setWorkspaceScreenMode('hub');
+                showWorkspaceError(realtimeDatabaseError(error));
+            }
+        }
+
+        function scheduleCloudPush() {
+            if (!cloudReady || cloudApplying || !activeWorkspace) return;
+            clearTimeout(cloudPushTimer);
+            cloudPushTimer = setTimeout(() => pushCloudData(), 800);
+        }
+
+        async function pushCloudData() {
+            if (!cloudReady || !cloudUser || !cloudDb || !activeWorkspace) return false;
+            const targetProjectId = activeWorkspace.id;
+            const targetUserId = cloudUser.uid;
+            const snapshot = cloudSnapshot();
+            const write = async () => {
+                if (!cloudReady || cloudUser?.uid !== targetUserId || activeWorkspace?.id !== targetProjectId) return false;
+                try {
+                    const payload = projectDataPayload(snapshot, cloudUser);
+                    await workspaceProjectRef(targetProjectId).child('data').set(payload);
+                    if (activeWorkspace?.id === targetProjectId && cloudUser?.uid === targetUserId) {
+                        cloudLastWrite = payload.revision;
+                        setSyncIndicator('online', `متزامن • ${activeWorkspace.name}`);
+                    }
+                    return true;
+                } catch (error) {
+                    console.error('Realtime Database project write failed', error);
+                    setSyncIndicator('offline', 'تعذر رفع التغييرات');
+                    notify(`تعذر مزامنة المشروع: ${realtimeDatabaseError(error)}`, 'error');
+                    return false;
+                }
+            };
+            const operation = cloudWriteChain.then(write, write);
+            cloudWriteChain = operation.catch(() => false);
+            return operation;
+        }
+
+        async function pullCloudData() {
+            if (!cloudReady || !activeWorkspace || !cloudDb) return false;
+            try {
+                const snapshot = await workspaceProjectRef(activeWorkspace.id).child('data').once('value');
+                const value = snapshot.val();
+                if (!value?.data) {
+                    notify('لا توجد بيانات محفوظة في المشروع بعد.');
+                    return false;
+                }
+                if (!applyRemoteSnapshot(value.data, false)) return false;
+                cloudLastWrite = value.revision || '';
+                notify('تم تنزيل أحدث بيانات المشروع.');
+                return true;
+            } catch (error) {
+                notify(`تعذر تنزيل البيانات: ${realtimeDatabaseError(error)}`, 'error');
+                return false;
+            }
+        }
+
         async function logoutCloud() {
-            requestConfirmation('تسجيل الخروج؟', 'قبل الخروج سترفع بيانات هذا الجهاز إلى سحابة حسابك تلقائياً، ثم تظهر شاشة تسجيل الدخول.', async () => {
-                try { if (cloudReady && cloudUser) await pushCloudData(); } catch {}
-                try { await cloudAuth.signOut(); } catch {}
-                notify('تم تسجيل الخروج — البيانات محفوظة في سحابة حسابك.', 'info');
+            requestConfirmation('تسجيل الخروج؟', 'سيحفظ التطبيق آخر التغييرات في المشروع الحالي قبل تسجيل الخروج.', async () => {
+                try {
+                    clearTimeout(cloudPushTimer);
+                    if (cloudReady && cloudUser) {
+                        const saved = await pushCloudData();
+                        if (!saved) return notify('لم يتم تسجيل الخروج حتى لا تفقد آخر التغييرات. تحقق من الاتصال ثم أعد المحاولة.', 'error');
+                    }
+                    if (cloudDetacher) { cloudDetacher(); cloudDetacher = null; }
+                    await cloudAuth?.signOut();
+                    notify('تم تسجيل الخروج. بيانات المشاريع محفوظة في قاعدة Realtime Database.', 'info');
+                } catch (error) {
+                    notify(`تعذر تسجيل الخروج: ${error.message || 'أعد المحاولة.'}`, 'error');
+                }
             }, 'تسجيل الخروج');
+        }
+
+        async function finishCloudSync(user) {
+            if (!cloudDb || !user) return;
+            ++projectSyncToken;
+            cloudUser = user;
+            cloudReady = false;
+            if (cloudDetacher) { cloudDetacher(); cloudDetacher = null; }
+            activeWorkspace = null;
+            workspaceProjects = [];
+            workspaceIncomingRequests = [];
+            updateWorkspaceHeader();
+            setSyncIndicator('connecting', 'جارٍ تحميل مشاريع حسابك…');
+            byId('workspaceAccountLabel').textContent = workspaceAuthLabel(user);
+            setWorkspaceLoadingText('جارٍ تحميل المشاريع وطلبات الانضمام…');
+            setWorkspaceScreenMode('loading');
+            await loadWorkspaceHub(user);
         }
 
         function cloudInit() {
             if (cloudApp) return true;
             if (!window.firebase?.initializeApp) {
-                // لا يوجد إنترنت ولم تُحمّل مكتبات Firebase — التطبيق يعمل محلياً واللوحة متاحة، والمزامنة تعود عند الاتصال.
-                setSyncIndicator('offline', 'لا يوجد اتصال — العمل محلياً');
-                setLoginScreenMode('authed');
+                // لا نفتح بيانات مشروع خاص دون التحقق من هوية العضو، حتى عند تعذر تحميل Firebase.
+                setSyncIndicator('offline', 'تعذر التحقق من الحساب');
+                setWorkspaceScreenMode('hidden');
+                setLoginScreenMode('auth');
+                showLoginError('تعذر تحميل خدمات Firebase. تحقق من الاتصال وأعد تحميل الصفحة؛ لا يمكن فتح بيانات المشروع دون التحقق من الحساب.');
                 return false;
             }
             try {
                 cloudApp = window.firebase.initializeApp(FIREBASE_CONFIG);
                 cloudAuth = cloudApp.auth();
                 cloudDb = cloudApp.database();
-                // LOCAL persistence: الجلسة تبقى بعد إعادة فتح التطبيق، فلا يظهر اللوجين إلا عند الخروج.
                 cloudAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
                 cloudAuth.onAuthStateChanged(user => {
                     if (user) {
                         setLoginScreenMode('authed');
-                        finishCloudSync(user);
+                        finishCloudSync(user).catch(error => {
+                            console.error('Workspace startup failed', error);
+                            setWorkspaceScreenMode('hub');
+                            showWorkspaceError(realtimeDatabaseError(error));
+                        });
                     } else {
+                        ++workspaceLoadToken;
+                        ++projectSyncToken;
                         cloudUser = null;
                         cloudReady = false;
+                        if (loginSignUpMode) loginToggleMode();
+                        activeWorkspace = null;
+                        workspaceProjects = [];
+                        workspaceIncomingRequests = [];
+                        workspaceCopyOptionInitialized = false;
+                        byId('workspaceCopyCurrentData').checked = false;
+                        clearTimeout(cloudPushTimer);
                         if (cloudDetacher) { cloudDetacher(); cloudDetacher = null; }
+                        updateWorkspaceHeader();
+                        setWorkspaceScreenMode('hidden');
                         setSyncIndicator('offline');
-                        if (!cloudAuth.isInitializing) setLoginScreenMode('auth');
+                        setLoginScreenMode('auth');
                     }
                 });
                 setSyncIndicator('connecting');
@@ -1905,98 +2593,10 @@
                 console.error('Firebase init failed', error);
                 setSyncIndicator('offline', 'تعذر تهيئة المزامنة');
                 setLoginScreenMode('auth');
-                showLoginError('تعذر تهيئة خدمات المزامنة. تحقق من الإعدادات ثم أعد المحاولة.');
+                showLoginError(error.message || 'تعذر تهيئة خدمات المزامنة. تحقق من إعدادات Firebase.');
                 return false;
             }
         }
-
-        async function finishCloudSync(user, isNewAccount = false) {
-            if (!cloudDb || !user) return;
-            cloudUser = user;
-            cloudReady = true;
-            setSyncIndicator('connecting', 'جارٍ مزامنة بيانات حسابك…');
-
-            const ref = cloudDb.ref(`${CLOUD_PATH}/${user.uid}`);
-            if (cloudDetacher) cloudDetacher();
-            cloudDetacher = ref.on('value', snapshot => {
-                const value = snapshot.val();
-                if (!value || !value.data || value.updated_at === cloudLastWrite || cloudApplying) return;
-                applyRemoteSnapshot(value.data);
-                cloudLastWrite = value.updated_at || '';
-            });
-
-            const snapshot = await ref.once('value');
-            const existing = snapshot.val();
-            if (!existing || isNewAccount) await pushCloudData();
-            else {
-                applyRemoteSnapshot(existing.data);
-                cloudLastWrite = existing.updated_at || '';
-            }
-            setSyncIndicator('online');
-        }
-
-        function cloudSnapshot() {
-            return { app: APP_NAME, version: '4.0', exportDate: new Date().toISOString(), students, sessions, attendance: attendanceData() };
-        }
-
-        function scheduleCloudPush() {
-            if (!cloudReady || cloudApplying) return;
-            clearTimeout(cloudPushTimer);
-            cloudPushTimer = setTimeout(() => pushCloudData(), 800);
-        }
-
-        async function pushCloudData() {
-            if (!cloudReady || !cloudUser || !cloudDb) return false;
-            const updatedAt = new Date().toISOString();
-            const snapshot = cloudSnapshot();
-            cloudLastWrite = updatedAt;
-            try {
-                await cloudDb.ref(`${CLOUD_PATH}/${cloudUser.uid}`).set({ data: snapshot, updated_at: updatedAt });
-                notify('تم رفع بيانات هذا الجهاز إلى السحابة.');
-                return true;
-            } catch (error) {
-                notify(`تعذر رفع البيانات: ${error.message || 'تحقق من الاتصال.'}`, 'error');
-                return false;
-            }
-        }
-
-        async function pullCloudData() {
-            if (!cloudReady || !cloudUser || !cloudDb) return false;
-            try {
-                const snapshot = await cloudDb.ref(`${CLOUD_PATH}/${cloudUser.uid}`).once('value');
-                const value = snapshot.val();
-                if (!value?.data) {
-                    notify('لا توجد بيانات محفوظة في السحابة بعد. ارفع بيانات هذا الجهاز أولاً.');
-                    return false;
-                }
-                applyRemoteSnapshot(value.data);
-                cloudLastWrite = value.updated_at || '';
-                notify('تم تنزيل أحدث البيانات من السحابة.');
-                return true;
-            } catch (error) {
-                notify(`تعذر تنزيل البيانات: ${error.message || 'تحقق من الاتصال.'}`, 'error');
-                return false;
-            }
-        }
-
-        function applyRemoteSnapshot(snapshot) {
-            try {
-                const clean = validateData(snapshot);
-                const attendance = validateAttendanceImport(snapshot.attendance || [], new Set(clean.students.map(s => s.id)));
-                cloudApplying = true;
-                students = clean.students;
-                sessions = clean.sessions;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', students, sessions }));
-                localStorage.setItem('mb_attendance', JSON.stringify(attendance));
-                cloudApplying = false;
-                updateApp();
-                notify('تم تحديث البيانات من جهاز آخر.');
-            } catch (error) {
-                cloudApplying = false;
-                notify(`وصلت بيانات غير صالحة ولم تُطبّق: ${error.message}`, 'error');
-            }
-        }
-
 
         // Surahs initialization in Selects
         function initSurahDropdowns() {
@@ -5230,6 +5830,10 @@
             </div>
             <div id="loginFormCard" class="bg-white rounded-2xl p-6 shadow-2xl space-y-4 hidden">
                 <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl p-3"></div>
+                <div id="loginNameField" class="hidden">
+                    <label for="loginDisplayName" class="field-label">الاسم الظاهر للآخرين</label>
+                    <input id="loginDisplayName" type="text" autocomplete="name" maxlength="80" class="field" placeholder="مثال: أحمد محمد">
+                </div>
                 <div>
                     <label for="loginEmail" class="field-label">البريد الإلكتروني</label>
                     <input id="loginEmail" type="email" dir="ltr" autocomplete="email" class="field text-left" placeholder="name@example.com">
@@ -5239,8 +5843,94 @@
                     <input id="loginPassword" type="password" dir="ltr" autocomplete="current-password" class="field text-left" placeholder="••••••••" onkeydown="if(event.key==='Enter'){event.preventDefault();loginSubmit();}">
                 </div>
                 <button id="loginSubmitButton" onclick="loginSubmit()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-right-to-bracket"></i><span id="loginSubmitLabel">تسجيل الدخول</span></button>
-                <button onclick="loginToggleMode()" class="w-full text-xs font-bold text-emerald-700 hover:text-emerald-900 py-1">ليس عندك حساب؟ أنشئ حساباً جديداً</button>
-                <p class="text-[11px] text-slate-400 text-center leading-relaxed">كل جهاز يدخل بنفس الحساب يتشارك بيانات الحلقات تلقائياً. كلمة المرور 6 أحرف على الأقل.</p>
+                <button id="loginModeToggle" onclick="loginToggleMode()" class="w-full text-xs font-bold text-emerald-700 hover:text-emerald-900 py-1">ليس عندك حساب؟ أنشئ حساباً جديداً</button>
+                <button id="passwordResetButton" onclick="sendPasswordReset()" class="w-full text-[11px] text-slate-500 hover:text-emerald-700 py-1">نسيت كلمة المرور؟ أرسل رابط إعادة تعيين</button>
+                <p class="text-[11px] text-slate-400 text-center leading-relaxed">أنشئ مشروعاً أو اطلب الانضمام بكود المشروع. لن يدخل أي عضو قبل موافقة المالك. كلمة المرور 6 أحرف على الأقل.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- بوابة المشاريع وإدارة طلبات الانضمام -->
+    <div id="workspaceScreen" class="hidden fixed inset-0 z-[40] bg-slate-100 overflow-y-auto" dir="rtl">
+        <div class="min-h-full max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+            <header class="bg-islamic-pattern text-white rounded-3xl p-5 sm:p-7 shadow-xl border-b-4 border-amber-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border-2 border-amber-400/50 flex items-center justify-center text-amber-300 text-2xl"><i class="fa-solid fa-folder-tree"></i></div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-extrabold">مشاريع حلقات مبارك</h1>
+                        <p id="workspaceAccountLabel" class="text-emerald-100 text-xs mt-1" dir="ltr"></p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="refreshWorkspaceHub()" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-4 py-2.5 rounded-xl text-xs font-bold"><i class="fa-solid fa-rotate ml-1"></i> تحديث</button>
+                    <button onclick="logoutCloud()" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-4 py-2.5 rounded-xl text-xs font-bold"><i class="fa-solid fa-right-from-bracket ml-1"></i> تسجيل الخروج</button>
+                </div>
+            </header>
+
+            <div id="workspaceLoading" class="hidden mt-6 bg-white rounded-2xl p-8 shadow-sm border border-slate-200 text-center">
+                <div class="export-spinner mx-auto mb-3"></div>
+                <p id="workspaceLoadingText" class="text-sm font-bold text-slate-700">جارٍ تحميل المشاريع…</p>
+            </div>
+            <div id="workspaceContent" class="hidden mt-6 space-y-6">
+                <div id="workspaceError" class="hidden bg-red-50 border border-red-200 rounded-2xl p-4 text-sm text-red-800" role="alert"></div>
+                <div id="emailVerificationNotice" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3" role="status">
+                    <div><h2 class="text-sm font-extrabold text-amber-900">تحقق من بريدك الإلكتروني</h2><p class="text-xs text-amber-800 mt-1">أكد بريدك حتى تتمكن من إنشاء مشروع أو إرسال طلب انضمام أو إدارة طلبات الأعضاء.</p></div>
+                    <div class="flex gap-2 shrink-0"><button onclick="sendVerificationEmail()" class="bg-amber-500 hover:bg-amber-600 text-emerald-950 font-bold px-3 py-2 rounded-lg text-xs">إرسال رسالة التحقق</button><button onclick="refreshEmailVerification()" class="bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold px-3 py-2 rounded-lg text-xs">تحققت — تحديث</button></div>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-5 items-start">
+                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+                        <div class="flex items-start justify-between gap-3 mb-4">
+                            <div>
+                                <h2 class="text-lg font-extrabold text-slate-900">مشاريعي</h2>
+                                <p class="text-xs text-slate-500 mt-1">افتح مشروعاً أنت مالكه أو تمت إضافتك إليه.</p>
+                            </div>
+                            <span id="workspaceProjectCount" class="status-chip bg-emerald-100 text-emerald-800">0</span>
+                        </div>
+                        <div id="workspaceProjectList" class="space-y-3"></div>
+                    </section>
+
+                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 space-y-5">
+                        <div>
+                            <h2 class="text-lg font-extrabold text-slate-900"><i class="fa-solid fa-circle-plus text-emerald-700 ml-1"></i> إنشاء مشروع جديد</h2>
+                            <p class="text-xs text-slate-500 mt-1">كل مشروع له بياناته وأعضاؤه وطلبات انضمام مستقلة.</p>
+                        </div>
+                        <form onsubmit="createWorkspaceProject(event)" class="space-y-3">
+                            <label for="workspaceNewProjectName" class="field-label">اسم المشروع</label>
+                            <input id="workspaceNewProjectName" type="text" maxlength="100" required class="field" placeholder="مثال: حلقة مسجد النور">
+                            <label class="flex items-start gap-2 text-xs text-slate-600 leading-relaxed cursor-pointer">
+                                <input id="workspaceCopyCurrentData" type="checkbox" class="mt-0.5 shrink-0">
+                                <span>ابدأ بنسخة من البيانات الموجودة على هذا الجهاز. ألغِ الاختيار لإنشاء مشروع فارغ.</span>
+                            </label>
+                            <button id="workspaceCreateButton" type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl text-sm"><i class="fa-solid fa-folder-plus ml-2"></i> إنشاء المشروع</button>
+                        </form>
+                        <div class="border-t border-slate-100"></div>
+                        <form onsubmit="sendWorkspaceJoinRequest(event)" class="space-y-3">
+                            <div>
+                                <h2 class="text-base font-extrabold text-slate-900"><i class="fa-solid fa-user-plus text-amber-600 ml-1"></i> طلب الانضمام لمشروع</h2>
+                                <p class="text-xs text-slate-500 mt-1">أدخل كود المشروع أو افتح رابط الدعوة. لن تظهر بياناته لك قبل قبول المالك.</p>
+                            </div>
+                            <label for="workspaceJoinProjectId" class="field-label">كود المشروع</label>
+                            <input id="workspaceJoinProjectId" type="text" dir="ltr" autocomplete="off" class="field text-left" placeholder="الصق كود المشروع أو رابط الدعوة">
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="workspaceJoinButton" type="submit" class="bg-amber-500 hover:bg-amber-600 text-emerald-950 font-extrabold py-2.5 rounded-xl text-xs"><i class="fa-solid fa-paper-plane ml-1"></i> إرسال طلب</button>
+                                <button type="button" onclick="checkWorkspaceRequestStatus()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs">حالة الطلب</button>
+                            </div>
+                            <div id="workspaceJoinStatus" class="hidden rounded-xl p-3 text-xs leading-relaxed" role="status" aria-live="polite"></div>
+                        </form>
+                    </section>
+                </div>
+
+                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h2 class="text-lg font-extrabold text-slate-900"><i class="fa-solid fa-user-check text-emerald-700 ml-1"></i> طلبات الانضمام الواردة</h2>
+                            <p class="text-xs text-slate-500 mt-1">تظهر هنا الطلبات الجديدة لمشاريع أنت مالكها فقط.</p>
+                        </div>
+                        <span id="workspaceRequestCount" class="status-chip bg-amber-100 text-amber-900">0</span>
+                    </div>
+                    <div id="workspaceRequestList" class="space-y-3"></div>
+                </section>
+                <p class="text-[11px] text-slate-500 text-center leading-relaxed">مالك المشروع يشارك كود المشروع أو رابط الدعوة. الرفض لا يمنح أي صلاحية، ويمكن للمتقدم إرسال طلب جديد لاحقاً.</p>
             </div>
         </div>
     </div>

@@ -1,5 +1,5 @@
 /* Service Worker — Masjid Mubarak Quran app (app-shell + runtime caching, offline-first) */
-const CACHE_VERSION = 'mubarak-quran-v1';
+const CACHE_VERSION = 'mubarak-quran-v2';
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
