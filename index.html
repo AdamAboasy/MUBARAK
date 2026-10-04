@@ -263,10 +263,14 @@
                         <i class="fa-solid fa-mobile-screen-button"></i>
                         <span>تثبيت التطبيق</span>
                     </button>
-                    <!-- مؤشر المزامنة (غير قابل للنقر) -->
-                    <div id="syncIndicator" class="flex items-center gap-1.5 bg-emerald-400/15 border border-emerald-300/30 text-emerald-100 px-3 py-2.5 rounded-xl text-xs font-bold cursor-default" title="المزامنة التلقائية">
-                        <span id="syncIndicatorDot" class="sync-dot"></span>
-                        <span id="syncIndicatorLabel">جارٍ الاتصال…</span>
+                    <div class="flex items-center gap-1.5">
+                        <div id="syncIndicator" class="flex items-center gap-1.5 bg-amber-400/15 border border-amber-300/30 text-amber-100 px-3 py-2.5 rounded-xl text-xs font-bold cursor-default" title="المزامنة التلقائية">
+                            <span id="syncIndicatorDot" class="sync-dot bg-amber-400"></span>
+                            <span id="syncIndicatorLabel">جارٍ الاتصال…</span>
+                        </div>
+                        <button id="logoutButton" onclick="logoutCloud()" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-3 py-2.5 rounded-xl text-xs transition-all cursor-pointer" title="تسجيل الخروج">
+                            <i class="fa-solid fa-right-from-bracket"></i><span class="hidden sm:inline"> خروج</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1553,11 +1557,6 @@
             measurementId: "G-V5M7PLZY8Y"
         };
         const CLOUD_PATH = 'mubarak_app_data';
-        // حساب موحّد للمسجد: كل الأجهزة تدخل به تلقائياً فتتشارك نفس البيانات بدون تسجيل دخول.
-        const SHARED_ACCOUNT = {
-            email: 'mosque.mubarak@gmail.com',
-            password: 'MubarakQuran#2025'
-        };
         let cloudApp = null;
         let cloudAuth = null;
         let cloudDb = null;
@@ -1766,7 +1765,11 @@
             return true;
         }
 
-        /* ================== CLOUD SYNC FUNCTIONS ================== */
+        /* ================== CLOUD SYNC + LOGIN ================== */
+        // كل حساب له بياناته الخاصة في السحابة (mubarak_app_data/{uid})، وكل جهاز يدخل بنفس الحساب يتشارك نفس البيانات.
+        let loginSignUpMode = false;
+        let loginScreenState = 'connecting';
+
         function setSyncIndicator(state, text) {
             const wrap = byId('syncIndicator');
             const dot = byId('syncIndicatorDot');
@@ -1784,68 +1787,134 @@
             wrap.title = text || defaultText;
         }
 
-        function cloudInit() {
-            if (cloudApp || !window.firebase?.initializeApp) return false;
-            try {
-                cloudApp = window.firebase.initializeApp(FIREBASE_CONFIG);
-                cloudAuth = cloudApp.auth();
-                cloudDb = cloudApp.database();
-                // LOCAL persistence keeps the session alive across reloads — no login screen ever.
-                cloudAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
-                cloudAuth.onAuthStateChanged(user => {
-                    if (user) finishCloudSync(user);
-                    else {
-                        cloudUser = null;
-                        cloudReady = false;
-                        if (cloudDetacher) { cloudDetacher(); cloudDetacher = null; }
-                        setSyncIndicator('offline');
-                        cloudAutoSignIn();
-                    }
-                });
-                setSyncIndicator('connecting');
-                return true;
-            } catch (error) {
-                console.error('Firebase init failed', error);
-                setSyncIndicator('offline', 'تعذر تهيئة المزامنة');
-                return false;
-            }
+        function setLoginScreenMode(mode) {
+            const screen = byId('loginScreen');
+            const spinner = byId('loginConnecting');
+            const form = byId('loginFormCard');
+            if (!screen || !spinner || !form) return;
+            loginScreenState = mode;
+            if (mode === 'authed') { screen.classList.add('hidden'); screen.classList.remove('flex'); return; }
+            screen.classList.remove('hidden');
+            screen.classList.add('flex');
+            spinner.classList.toggle('hidden', mode !== 'connecting');
+            form.classList.toggle('hidden', mode === 'connecting');
+            const submit = byId('loginSubmitButton');
+            if (submit) submit.disabled = mode === 'connecting';
+            const label = byId('loginSubmitLabel');
+            if (label) label.textContent = mode === 'connecting' ? 'جارٍ التحقق…' : (loginSignUpMode ? 'إنشاء حساب جديد' : 'تسجيل الدخول');
         }
 
-        // دخول تلقائي بحساب المسجد الموحّد: يُنشئ الحساب أول مرة لو مش موجود.
-        async function cloudAutoSignIn() {
-            if (!cloudAuth || cloudAuth.currentUser) return;
-            try {
-                await cloudAuth.signInWithEmailAndPassword(SHARED_ACCOUNT.email, SHARED_ACCOUNT.password);
-            } catch (error) {
-                const code = String(error?.code || '');
-                if (code.includes('user-not-found') || code.includes('invalid-credential') || code.includes('invalid-login-credentials')) {
-                    try { await cloudAuth.createUserWithEmailAndPassword(SHARED_ACCOUNT.email, SHARED_ACCOUNT.password); }
-                    catch (signUpError) { setSyncIndicator('offline', 'تحقق من إعدادات Firebase'); }
-                } else if (code.includes('operation-not-allowed')) {
-                    setSyncIndicator('offline', 'فعّل البريد/كلمة المرور في Firebase');
-                } else if (code.includes('too-many-requests')) {
-                    setSyncIndicator('offline', 'محاولات كثيرة — انتظر قليلاً');
-                } else {
-                    setSyncIndicator('offline', navigator.onLine === false ? 'لا يوجد اتصال بالإنترنت' : 'تعذر الاتصال');
-                }
-            }
+        function showLoginError(message) {
+            const el = byId('loginError');
+            if (!el) return;
+            el.textContent = message;
+            el.classList.remove('hidden');
+        }
+        function hideLoginError() {
+            const el = byId('loginError');
+            if (!el) return;
+            el.textContent = '';
+            el.classList.add('hidden');
         }
 
-        function renderSyncStatus() {
-            setSyncIndicator(cloudReady && cloudUser ? 'online' : 'offline');
+        function loginToggleMode() {
+            loginSignUpMode = !loginSignUpMode;
+            hideLoginError();
+            const label = byId('loginSubmitLabel');
+            if (label) label.textContent = loginSignUpMode ? 'إنشاء حساب جديد' : 'تسجيل الدخول';
+            const email = byId('loginEmail');
+            if (email) { email.placeholder = loginSignUpMode ? 'اختر بريداً جديداً' : 'name@example.com'; email.focus(); }
         }
 
         function syncAuthError(error) {
             const code = String(error?.code || '');
-            if (code.includes('network-request-failed')) return 'تعذر الاتصال. تحقق من الإنترنت.';
+            if (code.includes('user-not-found')) return 'هذا البريد غير مسجّل — اختر «إنشاء حساب جديد» أو تأكد من البريد.';
+            if (code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('invalid-login-credentials')) return 'كلمة المرور غير صحيحة.';
+            if (code.includes('email-already-in-use')) return 'هذا البريد مسجّل بالفعل — اختر «تسجيل الدخول».';
+            if (code.includes('weak-password')) return 'كلمة المرور قصيرة — استخدم 6 أحرف على الأقل.';
+            if (code.includes('invalid-email')) return 'البريد الإلكتروني غير صحيح.';
+            if (code.includes('too-many-requests')) return 'محاولات كثيرة في وقت قصير — انتظر قليلاً ثم أعد المحاولة.';
+            if (code.includes('network-request-failed') || code.includes('network')) return 'تعذر الاتصال بالإنترنت. تحقق من الاتصال.';
+            if (code.includes('operation-not-allowed')) return 'لم تُفعّل خاصية البريد/كلمة المرور في Firebase Authentication.';
             return error?.message || 'حدث خطأ غير متوقع.';
+        }
+
+        async function loginSubmit() {
+            if (!cloudAuth || loginScreenState === 'connecting') return;
+            const email = byId('loginEmail').value.trim().toLowerCase();
+            const password = byId('loginPassword').value;
+            if (!email || !password) return showLoginError('أدخل البريد الإلكتروني وكلمة المرور.');
+            hideLoginError();
+            const submit = byId('loginSubmitButton');
+            submit.disabled = true;
+            byId('loginSubmitLabel').textContent = loginSignUpMode ? 'جارٍ إنشاء الحساب…' : 'جارٍ تسجيل الدخول…';
+            try {
+                if (loginSignUpMode) {
+                    if (password.length < 6) { showLoginError('كلمة المرور يجب أن تكون 6 أحرف على الأقل.'); submit.disabled = false; return; }
+                    await cloudAuth.createUserWithEmailAndPassword(email, password);
+                    notify('تم إنشاء الحساب بنجاح — جاري فتح التطبيق…');
+                } else {
+                    await cloudAuth.signInWithEmailAndPassword(email, password);
+                }
+                byId('loginPassword').value = '';
+            } catch (error) {
+                showLoginError(syncAuthError(error));
+                submit.disabled = false;
+                byId('loginSubmitLabel').textContent = loginSignUpMode ? 'إنشاء حساب جديد' : 'تسجيل الدخول';
+            }
+        }
+
+        async function logoutCloud() {
+            requestConfirmation('تسجيل الخروج؟', 'قبل الخروج سترفع بيانات هذا الجهاز إلى سحابة حسابك تلقائياً، ثم تظهر شاشة تسجيل الدخول.', async () => {
+                try { if (cloudReady && cloudUser) await pushCloudData(); } catch {}
+                try { await cloudAuth.signOut(); } catch {}
+                notify('تم تسجيل الخروج — البيانات محفوظة في سحابة حسابك.', 'info');
+            }, 'تسجيل الخروج');
+        }
+
+        function cloudInit() {
+            if (cloudApp) return true;
+            if (!window.firebase?.initializeApp) {
+                // لا يوجد إنترنت ولم تُحمّل مكتبات Firebase — التطبيق يعمل محلياً واللوحة متاحة، والمزامنة تعود عند الاتصال.
+                setSyncIndicator('offline', 'لا يوجد اتصال — العمل محلياً');
+                setLoginScreenMode('authed');
+                return false;
+            }
+            try {
+                cloudApp = window.firebase.initializeApp(FIREBASE_CONFIG);
+                cloudAuth = cloudApp.auth();
+                cloudDb = cloudApp.database();
+                // LOCAL persistence: الجلسة تبقى بعد إعادة فتح التطبيق، فلا يظهر اللوجين إلا عند الخروج.
+                cloudAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+                cloudAuth.onAuthStateChanged(user => {
+                    if (user) {
+                        setLoginScreenMode('authed');
+                        finishCloudSync(user);
+                    } else {
+                        cloudUser = null;
+                        cloudReady = false;
+                        if (cloudDetacher) { cloudDetacher(); cloudDetacher = null; }
+                        setSyncIndicator('offline');
+                        if (!cloudAuth.isInitializing) setLoginScreenMode('auth');
+                    }
+                });
+                setSyncIndicator('connecting');
+                setLoginScreenMode(cloudAuth.isInitializing ? 'connecting' : 'auth');
+                return true;
+            } catch (error) {
+                console.error('Firebase init failed', error);
+                setSyncIndicator('offline', 'تعذر تهيئة المزامنة');
+                setLoginScreenMode('auth');
+                showLoginError('تعذر تهيئة خدمات المزامنة. تحقق من الإعدادات ثم أعد المحاولة.');
+                return false;
+            }
         }
 
         async function finishCloudSync(user, isNewAccount = false) {
             if (!cloudDb || !user) return;
             cloudUser = user;
             cloudReady = true;
-            setSyncIndicator('online');
+            setSyncIndicator('connecting', 'جارٍ مزامنة بيانات حسابك…');
 
             const ref = cloudDb.ref(`${CLOUD_PATH}/${user.uid}`);
             if (cloudDetacher) cloudDetacher();
@@ -1863,6 +1932,7 @@
                 applyRemoteSnapshot(existing.data);
                 cloudLastWrite = existing.updated_at || '';
             }
+            setSyncIndicator('online');
         }
 
         function cloudSnapshot() {
@@ -5145,6 +5215,36 @@
         return aiSetChips([]);
     }
     </script>
+
+    <!-- شاشة تسجيل الدخول -->
+    <div id="loginScreen" class="fixed inset-0 z-[60] bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 items-center justify-center p-5">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-7">
+                <div class="w-20 h-20 mx-auto rounded-2xl bg-amber-500/20 border-2 border-amber-400/50 flex items-center justify-center text-amber-300 text-4xl shadow-lg mb-4"><i class="fa-solid fa-mosque"></i></div>
+                <h1 class="text-2xl font-extrabold text-white">حِلقَات مَسْجِد مُبَارَك</h1>
+                <p class="text-emerald-200/80 text-sm mt-2">منظومة تحفيظ القرآن الكريم</p>
+            </div>
+            <div id="loginConnecting" class="bg-white rounded-2xl p-8 shadow-2xl text-center">
+                <div class="export-spinner mx-auto mb-4"></div>
+                <p class="text-sm font-bold text-slate-700">جارٍ التحقق من حسابك ومزامنة البيانات…</p>
+            </div>
+            <div id="loginFormCard" class="bg-white rounded-2xl p-6 shadow-2xl space-y-4 hidden">
+                <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl p-3"></div>
+                <div>
+                    <label for="loginEmail" class="field-label">البريد الإلكتروني</label>
+                    <input id="loginEmail" type="email" dir="ltr" autocomplete="email" class="field text-left" placeholder="name@example.com">
+                </div>
+                <div>
+                    <label for="loginPassword" class="field-label">كلمة المرور</label>
+                    <input id="loginPassword" type="password" dir="ltr" autocomplete="current-password" class="field text-left" placeholder="••••••••" onkeydown="if(event.key==='Enter'){event.preventDefault();loginSubmit();}">
+                </div>
+                <button id="loginSubmitButton" onclick="loginSubmit()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-right-to-bracket"></i><span id="loginSubmitLabel">تسجيل الدخول</span></button>
+                <button onclick="loginToggleMode()" class="w-full text-xs font-bold text-emerald-700 hover:text-emerald-900 py-1">ليس عندك حساب؟ أنشئ حساباً جديداً</button>
+                <p class="text-[11px] text-slate-400 text-center leading-relaxed">كل جهاز يدخل بنفس الحساب يتشارك بيانات الحلقات تلقائياً. كلمة المرور 6 أحرف على الأقل.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- PWA: dynamic PNG icons + manifest, service worker, install prompt, offline indicator, deep links -->
     <script>
     (function () {
@@ -5286,9 +5386,9 @@
         window.addEventListener('online', () => {
             updateOnlineStatus();
             try { notify('عاد الاتصال — جاري مزامنة البيانات'); } catch (e) {}
-            // إعادة الاتصال تلقائياً عند عودة الإنترنت.
-            if (typeof cloudAutoSignIn === 'function' && !cloudUser) cloudAutoSignIn();
-            else if (typeof pushCloudData === 'function' && cloudReady) pushCloudData();
+            // إعادة محاولة المزامنة تلقائياً عند عودة الإنترنت (حتى لو فشلت التهيئة أول مرة).
+            if (typeof cloudInit === 'function' && !cloudApp) { try { cloudInit(); } catch {} return; }
+            if (typeof pushCloudData === 'function' && cloudReady) pushCloudData();
         });
         window.addEventListener('offline', () => { updateOnlineStatus(); try { notify('انقطع الاتصال — التطبيق يعمل محلياً وبياناتك محفوظة', 'info'); } catch (e) {} });
         updateOnlineStatus();
