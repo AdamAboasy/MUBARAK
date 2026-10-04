@@ -1,0 +1,58 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "mubarak_app_data": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+
+    "mubarak_user_projects": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        "$projectId": {
+          ".write": "auth != null && auth.token.email_verified == true && newData.exists() && ((auth.uid == $uid && root.child('mubarak_projects').child($projectId).child('members').child($uid).exists()) || (root.child('mubarak_projects').child($projectId).child('info').child('ownerUid').val() == auth.uid && root.child('mubarak_projects').child($projectId).child('members').child($uid).exists()))",
+          ".validate": "newData.hasChildren(['projectId', 'name', 'role', 'ownerUid', 'addedAt']) && newData.child('projectId').val() == $projectId && newData.child('name').isString() && newData.child('name').val().length >= 2 && newData.child('name').val().length <= 100 && newData.child('role').val() == root.child('mubarak_projects').child($projectId).child('members').child($uid).child('role').val() && (newData.child('role').val() == 'owner' || newData.child('role').val() == 'member') && newData.child('ownerUid').val() == root.child('mubarak_projects').child($projectId).child('info').child('ownerUid').val() && newData.child('name').val() == root.child('mubarak_projects').child($projectId).child('info').child('name').val() && newData.child('addedAt').isNumber()"
+        }
+      }
+    },
+
+    "mubarak_projects": {
+      "$projectId": {
+        "info": {
+          ".read": "auth != null && root.child('mubarak_projects').child($projectId).child('members').child(auth.uid).exists()",
+          ".write": "auth != null && auth.token.email_verified == true && newData.exists() && ((!data.exists() && newData.child('ownerUid').val() == auth.uid) || (data.exists() && data.child('ownerUid').val() == auth.uid))",
+          ".validate": "newData.hasChildren(['name', 'ownerUid', 'createdAt']) && newData.child('name').isString() && newData.child('name').val().length >= 2 && newData.child('name').val().length <= 100 && newData.child('ownerUid').isString() && newData.child('createdAt').isNumber() && ((!data.exists() && newData.child('ownerUid').val() == auth.uid) || (data.exists() && newData.child('ownerUid').val() == data.child('ownerUid').val() && newData.child('createdAt').val() == data.child('createdAt').val()))"
+        },
+
+        "members": {
+          ".read": "auth != null && root.child('mubarak_projects').child($projectId).child('info').child('ownerUid').val() == auth.uid",
+          "$memberUid": {
+            ".read": "auth != null && (auth.uid == $memberUid || root.child('mubarak_projects').child($projectId).child('info').child('ownerUid').val() == auth.uid)",
+            ".write": "auth != null && auth.token.email_verified == true && newData.exists() && ((auth.uid == $memberUid && root.child('mubarak_projects').child($projectId).child('info').child('ownerUid').val() == auth.uid && newData.child('role').val() == 'owner') || (root.child('mubarak_projects').child($projectId).child('info').child('ownerUid').val() == auth.uid && root.child('mubarak_projects').child($projectId).child('joinRequests').child($memberUid).child('status').val() == 'pending' && newData.child('role').val() == 'member'))",
+            ".validate": "newData.hasChildren(['uid', 'email', 'displayName', 'role', 'joinedAt']) && newData.child('uid').val() == $memberUid && newData.child('email').isString() && newData.child('displayName').isString() && newData.child('displayName').val().length <= 80 && (newData.child('role').val() == 'owner' || newData.child('role').val() == 'member') && newData.child('joinedAt').isNumber()"
+          }
+        },
+
+        "joinRequests": {
+          ".read": "auth != null && root.child('mubarak_projects').child($projectId).child('info').child('ownerUid').val() == auth.uid",
+          ".indexOn": ["status"],
+          "$requesterUid": {
+            ".read": "auth != null && (auth.uid == $requesterUid || root.child('mubarak_projects').child($projectId).child('info').child('ownerUid').val() == auth.uid)",
+            ".write": "auth != null && auth.token.email_verified == true && ((auth.uid == $requesterUid && root.child('mubarak_projects').child($projectId).child('info').exists() && !root.child('mubarak_projects').child($projectId).child('members').child($requesterUid).exists() && (!data.exists() || data.child('status').val() == 'rejected') && newData.exists() && newData.child('status').val() == 'pending' && newData.child('uid').val() == auth.uid && newData.child('email').val() == auth.token.email) || (root.child('mubarak_projects').child($projectId).child('info').child('ownerUid').val() == auth.uid && data.exists() && data.child('status').val() == 'pending' && newData.exists() && (newData.child('status').val() == 'approved' || newData.child('status').val() == 'rejected') && newData.child('uid').val() == data.child('uid').val() && newData.child('email').val() == data.child('email').val() && newData.child('displayName').val() == data.child('displayName').val() && newData.child('requestedAt').val() == data.child('requestedAt').val() && newData.child('respondedAt').isNumber()))",
+            ".validate": "newData.hasChildren(['uid', 'email', 'displayName', 'status', 'requestedAt']) && newData.child('uid').val() == $requesterUid && newData.child('email').isString() && newData.child('displayName').isString() && newData.child('displayName').val().length <= 80 && (newData.child('status').val() == 'pending' || newData.child('status').val() == 'approved' || newData.child('status').val() == 'rejected') && newData.child('requestedAt').isNumber() && (!newData.child('respondedAt').exists() || newData.child('respondedAt').isNumber())"
+          }
+        },
+
+        "data": {
+          ".read": "auth != null && root.child('mubarak_projects').child($projectId).child('members').child(auth.uid).exists()",
+          ".write": "auth != null && root.child('mubarak_projects').child($projectId).child('members').child(auth.uid).exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['data', 'updated_at', 'revision', 'updated_by']) && newData.child('data').child('app').val() == 'Mosque-Mubarak-Quran-App' && newData.child('updated_at').isNumber() && newData.child('revision').isString() && newData.child('updated_by').val() == auth.uid"
+        }
+      }
+    }
+  }
+}
