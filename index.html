@@ -117,15 +117,18 @@
         .passage-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; animation: section-in .2s ease-out; }
         .passage-heading { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #475569; font-size: 12px; }
         .passage-row label { min-width: 0; }
-        .passage-surah-field, .passage-type-field { grid-column: 1 / -1; }
+        .passage-surah-field, .passage-type-field, .passage-score-field { grid-column: 1 / -1; }
+        .review-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; white-space: nowrap; }
+        .passage-score-field .passage-score { font-weight: 800; }
+        .passage-score.passage-score-low { border-color: #fca5a5 !important; background: #fff1f2; color: #991b1b; }
         .passage-row[data-recitation="حفظ جديد"] { border-inline-start: 3px solid #047857; }
         .passage-row[data-recitation="ماضي"] { border-inline-start: 3px solid #4f46e5; }
         .passage-remove { width: 30px; height: 30px; border-radius: 6px; color: #64748b; }
         .passage-remove:hover { color: #b91c1c; background: #fff1f2; }
         .passage-row button:disabled { opacity: .3; cursor: not-allowed; }
         @media (min-width: 640px) {
-            .passage-row { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr) 65px 65px; align-items: end; }
-            .passage-surah-field, .passage-type-field { grid-column: auto; }
+            .passage-row { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.05fr) 56px 56px 82px; align-items: end; }
+            .passage-surah-field, .passage-type-field, .passage-score-field { grid-column: auto; }
             .passage-row .field { font-size: 12px; padding: 9px 6px; }
         }
         @keyframes section-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
@@ -593,7 +596,7 @@
                                 <th class="p-3.5">التاريخ</th>
                                 <th class="p-3.5">النوع</th>
                                 <th class="p-3.5">المقدار المسَمَّع (السورة والآيات)</th>
-                                <th class="p-3.5">الدرجة من 10</th>
+                                <th class="p-3.5">متوسط درجة الجلسة</th>
                                 <th class="p-3.5">ملاحظات المحفظ</th>
                                 <th class="p-3.5 text-center">إجراءات</th>
                             </tr>
@@ -933,16 +936,17 @@
                         </div>
                     </div>
                     <div id="sessionPassages" class="space-y-2"></div>
-                    <p id="sessionPassageHelp" class="muted mt-2">اختَر «جديد» أو «ماضي (مراجعة)» لكل مقطع. يمكن الجمع بينهما في نفس الجلسة، وحتى في نفس السورة بوضعها في سطرين.</p>
+                    <p id="sessionPassageHelp" class="muted mt-2">اختَر «جديد» أو «ماضي (مراجعة)» لكل مقطع، واكتب <b>درجة كل سورة على حدة</b> من 0 إلى 10. يمكن الجمع بين النوعين في نفس الجلسة، وحتى في نفس السورة بوضعها في سطرين.</p>
                     <p id="sessionTypeSummary" class="text-xs font-bold text-emerald-800 mt-2" role="status" aria-live="polite"></p>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                        الدرجة (من 10) <span class="text-red-500">*</span>
+                <div class="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+                    <label class="block text-xs font-bold text-slate-700 mb-1" for="sessionScoreInput">
+                        متوسط درجة الجلسة (من 10) — يُحسب تلقائياً من درجات السور
                     </label>
-                    <input type="number" id="sessionScoreInput" min="0" max="10" step="0.5" value="10" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-lg outline-none font-bold text-center text-emerald-900" aria-describedby="scoreHelp">
-                    <p id="scoreHelp" class="muted mt-1">درجة واحدة لهذه الجلسة من 0 إلى 10. لو تريد درجة مستقلة للجديد وأخرى للماضي، احفظ جلستين بنفس التاريخ؛ لن تستبدل إحداهما الأخرى.</p>
+                    <input type="number" id="sessionScoreInput" min="0" max="10" step="0.1" readonly class="w-full px-4 py-3 rounded-xl border border-emerald-300 bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-lg outline-none font-bold text-center text-emerald-900" aria-describedby="scoreHelp">
+                    <p id="scoreHelp" class="muted mt-1">اكتب درجة كل سورة داخل المقطع المخصص لها (من 0 إلى 10)، ورقم المتوسط هنا يُحدَّث فورياً. أي سورة درجتها <b>4 أو أقل</b> تُكتب في رسالة ولي الأمر وفي التقرير بعبارة «يراجع على السورة».</p>
+                    <p id="scoreSummary" class="text-xs font-bold text-emerald-900 mt-2" role="status" aria-live="polite"></p>
                 </div>
 
                 <div>
@@ -1001,7 +1005,7 @@
                         <h4 class="text-2xl font-black text-emerald-900 mt-0.5" id="profileTotalSessions">0</h4>
                     </div>
                     <div class="bg-amber-50 rounded-2xl p-3 text-center border border-amber-100">
-                        <span class="text-xs text-amber-700 font-medium">متوسط الدرجات</span>
+                        <span class="text-xs text-amber-700 font-medium">متوسط درجات الجلسات</span>
                         <h4 class="text-2xl font-black text-amber-900 mt-0.5" id="profileAvgScore">0 / 10</h4>
                     </div>
                     <div class="bg-teal-50 rounded-2xl p-3 text-center border border-teal-100">
@@ -1009,6 +1013,9 @@
                         <h4 class="text-sm font-bold text-teal-900 mt-2 truncate" id="profileLastSurah">لم يبدأ</h4>
                     </div>
                 </div>
+
+                <!-- سور تحتاج مراجعة (أي سورة درجتها 4 أو أقل) -->
+                <div id="profileReviewNotice" class="hidden rounded-2xl border border-red-200 bg-red-50 p-3 text-xs font-bold text-red-800 leading-relaxed"></div>
 
                 <!-- Info Cards -->
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-sm space-y-2">
@@ -1055,7 +1062,7 @@
                     <div id="profileSessionsList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
                         <!-- Populated via JS -->
                     </div>
-                    <p class="text-[11px] text-slate-500 mt-2">اضغط <i class="fa-brands fa-whatsapp text-emerald-600"></i> بجانب أي جلسة لإرسال درجتها فوراً لولي الأمر.</p>
+                    <p class="text-[11px] text-slate-500 mt-2">اضغط <i class="fa-brands fa-whatsapp text-emerald-600"></i> بجانب أي جلسة لإرسال درجة كل سورة ومتوسط الجلسة فوراً لولي الأمر، مع تنبيه «يراجع على السورة» لأي سورة درجتها 4 أو أقل.</p>
                 </div>
             </div>
 
@@ -1103,7 +1110,7 @@
 
             <div class="p-6 overflow-y-auto space-y-5 text-sm text-slate-700 leading-loose">
                 <div><h4 class="font-bold text-emerald-900">1. سجّل الطالب / الطالبة</h4><p>أدخل الاسم والجنس (ذكر/أنثى) وتاريخ الانضمام والسورة التي بدأ منها وعدد الأجزاء المنجزة. الرسائل والتقارير تُصاغ تلقائياً بـ«طالب» أو «طالبة» حسب الجنس.</p></div>
-                <div><h4 class="font-bold text-emerald-900">2. سجّل الجديد والماضي</h4><p>حدّد عدد مقاطع التسميع، ثم اختر لكل مقطع السورة والآيات ونوعه: جديد أو ماضي (مراجعة). يمكن الجمع بينهما في جلسة واحدة بدرجة عامة، أو تسجيل جلستين في اليوم نفسه لو لكل نوع درجة مختلفة. يظهر النوع مع الآيات في السجل ورسالة ولي الأمر والتقرير.</p></div>
+                <div><h4 class="font-bold text-emerald-900">2. سجّل الجديد والماضي</h4><p>حدّد عدد مقاطع التسميع، ثم اختر لكل مقطع السورة والآيات ونوعه: جديد أو ماضي (مراجعة)، واكتب <b>درجة مستقلة لكل سورة</b> من 10. يظهر متوسط درجة الجلسة تلقائياً في الأسفل، ودرجات كل سورة تُحفظ وتظهر في السجل وفي رسالة ولي الأمر وفي تقرير PDF. أي سورة درجتها <b>4 أو أقل</b> تُكتب صريحاً بعبارة «يراجع على السورة» مع تنبيه للمراجعة.</p></div>
                 <div><h4 class="font-bold text-emerald-900">3. اقرأ معلومات السور والتفسير</h4><p>اضغط أي سورة في الفهرس، ثم اختر الآية والمفسر. تحتاج هذه الميزة إلى اتصال بالإنترنت.</p></div>
                 <div><h4 class="font-bold text-emerald-900">4. المتابعة الأسبوعية وتقرير PDF لولي الأمر</h4><p>الخطة: يبدأ الطالب الجديد يوم السبت ويُسمَّع ما عليه يوم الجمعة، وتُذكر الأهل بالمطلوب أسبوعياً (السورة ورقم الآية). زر واتساب يُنزّل تقرير PDF كاملاً (بيانات، منحنى التطور، ترتيبه في سيرته الحالية، وسجل التسميع) ثم يفتح واتساب برسالة جاهزة. لا يُرسل التقرير إلا بعد 4 تسميعات كي تكتمل بيانات التحليل، وحتى ذلك الحين تُرسل رسالة الخطة الأسبوعية فقط.</p></div>
                 <div><h4 class="font-bold text-emerald-900">5. الحضور والغياب</h4><p>سجّل حضور كل حلقة، ومن يُسجَّل غائباً يُجهَّز له فوراً رسالة استفسار لولي الأمر عن سبب الغياب والظروف الخاصة.</p></div>
@@ -1514,6 +1521,8 @@
         const MAX_SESSION_PASSAGES = 114;
         let passageRowSequence = 0;
         const HIGH_SCORE = 9;
+        // درجة السورة: 4 أو أقل ⇒ يُكتب في الرسالة أن الطالب يراجع على هذه السورة.
+        const REVIEW_THRESHOLD = 4;
         const TAFSIR_EDITIONS = [
             ['ar.muyassar', 'التفسير الميسر'], ['ar.jalalayn', 'تفسير الجلالين'],
             ['ar.qurtubi', 'تفسير القرطبي'], ['ar.baghawi', 'تفسير البغوي'],
@@ -1688,7 +1697,7 @@
                 const surah = QURAN_SURAHS.find(q => q.name === s.surah);
                 const fromAyah = s.fromAyah ?? 1;
                 const toAyah = s.toAyah ?? surah?.ayahs;
-                const score = s.score ?? 10;
+                const rawScore = s.score ?? 10;
                 const rawPassages = Array.isArray(s.passages) && s.passages.length ? s.passages : [{ surah: s.surah, fromAyah, toAyah }];
                 if (rawPassages.length > MAX_SESSION_PASSAGES) throw new Error('عدد المقاطع في إحدى الجلسات أكبر من الحد المسموح.');
                 const passages = rawPassages.map(item => {
@@ -1697,10 +1706,15 @@
                     if (!info || !Number.isInteger(item.fromAyah) || !Number.isInteger(item.toAyah) || item.fromAyah < 1 || item.toAyah < item.fromAyah || item.toAyah > info.ayahs) throw new Error('نطاق آيات غير صحيح في إحدى الجلسات.');
                     const type = normalizeRecitationType(item.type ?? s.type);
                     if (!PASSAGE_TYPES.includes(type)) throw new Error('حدد جديد أو ماضي لكل مقطع تسميع في النسخة الاحتياطية.');
-                    return { surah: info.name, fromAyah: item.fromAyah, toAyah: item.toAyah, type };
+                    // درجات السور: تُحفظ كما هي، والجلسات القديمة تأخذ درجة الجلسة لكل سورة فيها.
+                    const passageScore = normalizePassageScore(item.score, normalizePassageScore(s.score, 10));
+                    return { surah: info.name, fromAyah: item.fromAyah, toAyah: item.toAyah, type, score: passageScore ?? 0 };
                 });
                 const first = passages[0];
-                if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 10 || (s.type != null && !SESSION_TYPES.includes(s.type))) throw new Error('نوع تسميع أو درجة غير صالحة.');
+                if (typeof rawScore !== 'number' || !Number.isFinite(rawScore) || rawScore < 0 || rawScore > 10 || (s.type != null && !SESSION_TYPES.includes(s.type))) throw new Error('نوع تسميع أو درجة غير صالحة.');
+                // درجة الجلسة تُعاد حسابها دائماً كمتوسط درجات السور، حتى تبقى الأرقام متسقة في كل الأجهزة.
+                const passagesAverage = averagePassageScore(passages);
+                const score = passagesAverage === null ? rawScore : passagesAverage;
                 return { id: id(s.id), studentId: s.studentId, date: date(s.date), type: summarizePassageTypes(passages), surah: first.surah, fromAyah: first.fromAyah, toAyah: first.toAyah, passages, score, notes: text(s.notes, 2000), createdAt: text(s.createdAt, 50) };
             });
             return { students: cleanStudents, sessions: cleanSessions };
@@ -2040,6 +2054,7 @@
                         </div>
                         <div class="text-left">
                             <span class="score-chip ${scoreChipClass(ses.score)}">${formatNumber(ses.score ?? 0)} / 10</span>
+                            <span class="block text-[10px] text-slate-400">متوسط الجلسة</span>
                             <span class="block text-[11px] text-slate-400 mt-1">${ses.date}</span>
                         </div>
                     `;
@@ -2242,11 +2257,15 @@
                                 <div class="mb-2 last:mb-0">
                                     <span class="text-xs font-bold ${item.type === 'حفظ جديد' ? 'text-emerald-700' : 'text-indigo-700'}">${recitationTypeLabel(item.type)}</span>
                                     <span class="font-bold text-emerald-950 font-quran text-base">: سورة ${escapeHtml(item.surah)}</span>
+                                    <span class="mr-1 align-middle">${gradeChip(item.score)}</span>
+                                    ${passageNeedsReview(item.score) ? `<span class="review-badge align-middle" title="${escapeHtml(passageReviewText(item.score))}">⚠️ يراجع على السورة</span>` : ''}
                                     <span class="text-xs text-slate-500 block">من آية ${formatNumber(item.fromAyah)} إلى آية ${formatNumber(item.toAyah)}</span>
                                 </div>`).join('')}
                         </td>
                         <td class="p-3.5">
                             <span class="score-chip ${scoreChipClass(ses.score)}">${formatNumber(ses.score ?? 0)}<span class="opacity-60 font-normal"> / 10</span></span>
+                            <span class="block text-[11px] text-slate-400 mt-1">متوسط ${formatNumber(sessionPassages(ses).length)} ${sessionPassages(ses).length > 1 ? 'سور' : 'سورة'}</span>
+                            ${reviewSurahsOf(sessionPassages(ses)).length ? `<span class="block text-[11px] font-bold text-red-700 mt-1">⚠️ يحتاج مراجعة</span>` : ''}
                         </td>
                         <td class="p-3.5 text-xs text-slate-500 max-w-xs truncate" title="${escapeHtml(ses.notes || '')}">
                             ${ses.notes ? escapeHtml(ses.notes) : '<span class="text-slate-300">لا توجد</span>'}
@@ -2511,7 +2530,7 @@
             remove.type = 'button'; remove.className = 'passage-remove';
             remove.setAttribute('aria-label', 'إزالة هذا المقطع'); remove.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
             remove.disabled = !removable;
-            remove.onclick = () => { row.remove(); refreshPassageRowControls(containerId); };
+            remove.onclick = () => { row.remove(); refreshPassageRowControls(containerId); syncSessionScores(); };
             heading.append(number, remove);
             fromWrap.appendChild(from); toWrap.appendChild(to); surahWrap.appendChild(select);
             row.append(heading, surahWrap);
@@ -2539,6 +2558,28 @@
                 surahWrap.style.gridColumn = '1 / -1';
             }
             row.append(fromWrap, toWrap);
+            if (isSession) {
+                const scoreWrap = document.createElement('label');
+                scoreWrap.className = 'passage-score-field';
+                scoreWrap.htmlFor = `${rowId}-score`;
+                scoreWrap.innerHTML = '<span class="block text-[10px] font-bold text-slate-500 mb-1">درجة السورة من 10 <span class="text-red-500">*</span></span>';
+                const scoreInput = document.createElement('input');
+                scoreInput.id = `${rowId}-score`;
+                scoreInput.type = 'number';
+                scoreInput.min = '0'; scoreInput.max = '10'; scoreInput.step = '0.1';
+                scoreInput.required = true;
+                scoreInput.inputMode = 'decimal';
+                scoreInput.className = 'field passage-score text-center';
+                scoreInput.placeholder = 'من 10';
+                const initialScore = normalizePassageScore(passage.score);
+                scoreInput.value = initialScore === null ? '' : String(initialScore);
+                scoreInput.setAttribute('aria-label', `درجة سورة ${passage.surah || ''} من 10`);
+                const onScoreInput = () => { scoreInput.classList.toggle('passage-score-low', passageNeedsReview(scoreInput.valueAsNumber)); syncSessionScores(); };
+                scoreInput.addEventListener('input', onScoreInput);
+                scoreInput.addEventListener('change', onScoreInput);
+                scoreWrap.appendChild(scoreInput);
+                row.appendChild(scoreWrap);
+            }
             select.addEventListener('change', () => setPassageRowLimits(row));
             setPassageRowLimits(row);
             container.appendChild(row);
@@ -2555,6 +2596,36 @@
             if (containerId === 'sessionPassages') syncSessionPassageCount();
         }
 
+        // كل سورة لها درجة مستقلة، والمتوسط يُحسب تلقائياً في خانة درجة الجلسة.
+        function syncSessionScores() {
+            const container = byId('sessionPassages');
+            if (!container) return;
+            const rows = [...container.querySelectorAll('.passage-row')];
+            const scored = rows
+                .map(row => row.querySelector('.passage-score'))
+                .filter(Boolean)
+                .map(input => normalizePassageScore(input.valueAsNumber))
+                .filter(value => value !== null);
+            rows.forEach(row => {
+                const input = row.querySelector('.passage-score');
+                if (input) input.classList.toggle('passage-score-low', passageNeedsReview(input.valueAsNumber));
+            });
+            const average = scored.length ? Math.round((scored.reduce((sum, value) => sum + value, 0) / scored.length) * 10) / 10 : null;
+            const averageInput = byId('sessionScoreInput');
+            if (averageInput) averageInput.value = average === null ? '' : String(average);
+            const summary = byId('scoreSummary');
+            if (!summary) return;
+            if (!rows.length) { summary.textContent = ''; return; }
+            const lowCount = scored.filter(value => value <= REVIEW_THRESHOLD).length;
+            if (scored.length < rows.length) {
+                summary.className = 'text-xs font-bold text-amber-800 mt-2';
+                summary.textContent = `أدخل درجة كل سورة: ${formatNumber(scored.length)} من ${formatNumber(rows.length)} — ${average === null ? 'لا يوجد متوسط بعد' : `المتوسط الحالي ${formatNumber(average)} من 10`}`;
+                return;
+            }
+            summary.className = lowCount ? 'text-xs font-bold text-red-700 mt-2' : 'text-xs font-bold text-emerald-900 mt-2';
+            summary.textContent = `عدد السور: ${formatNumber(rows.length)} — متوسط الجلسة: ${formatNumber(average)} من 10${lowCount ? ` — ${formatNumber(lowCount)} سورة يراجع عليها الطالب (درجة ${formatNumber(REVIEW_THRESHOLD)} أو أقل)` : ''}`;
+        }
+
         function syncSessionPassageCount() {
             const rows = [...byId('sessionPassages').querySelectorAll('.passage-row')];
             byId('sessionSurahCount').value = rows.length;
@@ -2563,6 +2634,7 @@
             const past = types.filter(type => type === 'ماضي').length;
             const unset = types.length - fresh - past;
             byId('sessionTypeSummary').textContent = `جديد: ${formatNumber(fresh)} | ماضي: ${formatNumber(past)}${unset ? ` | لم يحدد النوع: ${formatNumber(unset)}` : ''}`;
+            syncSessionScores();
         }
 
         function setSessionPassageCount() {
@@ -2591,6 +2663,8 @@
             const info = QURAN_SURAHS.find(item => item.name === row.querySelector('.passage-surah')?.value);
             const from = row.querySelector('.passage-from');
             const to = row.querySelector('.passage-to');
+            const scoreInput = row.querySelector('.passage-score');
+            if (scoreInput) scoreInput.setAttribute('aria-label', info ? `درجة سورة ${info.name} من 10` : 'درجة السورة من 10');
             if (!info) {
                 from.removeAttribute('max');
                 to.removeAttribute('max');
@@ -2606,7 +2680,8 @@
                 surah: row.querySelector('.passage-surah').value,
                 fromAyah: row.querySelector('.passage-from').valueAsNumber,
                 toAyah: row.querySelector('.passage-to').valueAsNumber,
-                ...(row.querySelector('.passage-type') ? { type: row.querySelector('.passage-type').value } : {})
+                ...(row.querySelector('.passage-type') ? { type: row.querySelector('.passage-type').value } : {}),
+                ...(row.querySelector('.passage-score') ? { score: row.querySelector('.passage-score').valueAsNumber } : {})
             }));
         }
 
@@ -2634,8 +2709,13 @@
                 fromAyah: session.fromAyah ?? 1,
                 toAyah: session.toAyah ?? QURAN_SURAHS.find(q => q.name === session.surah)?.ayahs
             }];
-            // Old sessions inherit their original type; mixed sessions keep each passage's type.
-            return items.map(item => ({ ...item, type: normalizeRecitationType(item.type ?? session.type) }));
+            // Old sessions inherit their original type (and their single score) — mixed sessions keep each passage's own type/score.
+            const fallbackScore = normalizePassageScore(session.score);
+            return items.map(item => ({
+                ...item,
+                type: normalizeRecitationType(item.type ?? session.type),
+                score: normalizePassageScore(item.score, fallbackScore) ?? 0
+            }));
         }
 
         function summarizePassageTypes(passages) {
@@ -2658,6 +2738,44 @@
             return (passages || []).map(item => `${item.type ? recitationTypeLabel(item.type) + ': ' : ''}سورة ${item.surah} (من آية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)})`).join(' + ');
         }
 
+        /* ============================================================
+           درجات السور: لكل سورة درجة مستقلة من 10، ودرجة الجلسة = متوسطها.
+           أي سورة بدرجة 4 أو أقل تُعلَّم بأن الطالب «يراجع على السورة».
+           ============================================================ */
+        function normalizePassageScore(value, fallback = null) {
+            let num = NaN;
+            if (typeof value === 'number') num = value;
+            else if (typeof value === 'string' && value.trim() !== '') num = Number(value);
+            if (Number.isFinite(num) && num >= 0 && num <= 10) return Math.round(num * 10) / 10;
+            if (fallback === null || fallback === undefined || fallback === '') return null;
+            const fallbackNum = typeof fallback === 'number' ? fallback : Number(fallback);
+            return Number.isFinite(fallbackNum) && fallbackNum >= 0 && fallbackNum <= 10 ? Math.round(fallbackNum * 10) / 10 : null;
+        }
+
+        function passageNeedsReview(score) {
+            const value = normalizePassageScore(score);
+            return value !== null && value <= REVIEW_THRESHOLD;
+        }
+
+        function passageReviewText(score) {
+            return passageNeedsReview(score) ? `يراجع على السورة (درجتها ${formatNumber(normalizePassageScore(score))} من 10)` : '';
+        }
+
+        function averagePassageScore(passages) {
+            const list = (passages || []).map(item => normalizePassageScore(item?.score)).filter(value => value !== null);
+            if (!list.length) return null;
+            return Math.round((list.reduce((sum, value) => sum + value, 0) / list.length) * 10) / 10;
+        }
+
+        function reviewSurahsOf(passages) {
+            return [...new Set((passages || []).filter(item => passageNeedsReview(item?.score)).map(item => item.surah).filter(Boolean))];
+        }
+
+        function gradeChip(score) {
+            const low = passageNeedsReview(score);
+            return `<span class="score-chip ${low ? 'bg-red-100 text-red-800 border border-red-300' : scoreChipClass(score)}">${formatNumber(normalizePassageScore(score) ?? 0)}/10</span>`;
+        }
+
         function weeklyPlanPassages(student) {
             const plan = weeklyPlan(student);
             return Array.isArray(plan.passages) ? plan.passages : [];
@@ -2675,7 +2793,6 @@
             const studentId = document.getElementById('sessionStudentSelect').value;
             const date = document.getElementById('sessionDateInput').value;
             const passages = readPassageRows('sessionPassages');
-            const score = byId('sessionScoreInput').valueAsNumber;
             const notes = document.getElementById('sessionNotesInput').value.trim();
 
             const student = students.find(s => s.id === studentId);
@@ -2686,8 +2803,12 @@
                 const info = QURAN_SURAHS.find(q => q.name === passage.surah);
                 if (!info || !Number.isInteger(passage.fromAyah) || !Number.isInteger(passage.toAyah) || passage.fromAyah < 1 || passage.fromAyah > passage.toAyah || passage.toAyah > info.ayahs) return notify(`راجع نطاق آيات سورة ${passage.surah || ''}.`, 'error');
                 if (!PASSAGE_TYPES.includes(passage.type)) return notify(`حدد هل مقطع سورة ${passage.surah} جديد أم ماضي.`, 'error');
+                passage.score = normalizePassageScore(passage.score);
+                if (passage.score === null) return notify(`أدخل درجة سورة ${passage.surah} من صفر إلى 10.`, 'error');
             }
-            if (!Number.isFinite(score) || score < 0 || score > 10) return notify('أدخل الدرجة من صفر إلى 10.', 'error');
+            // درجة الجلسة = متوسط درجات السور المسجلة فيها.
+            const score = averagePassageScore(passages);
+            if (score === null) return notify('أدخل درجة كل سورة من صفر إلى 10.', 'error');
             const firstPassage = passages[0];
             const type = summarizePassageTypes(passages);
 
@@ -2716,7 +2837,8 @@
             }
             if (!commitData({ sessions: [...sessions, newSession], students: nextStudents })) return;
             closeModal('addSessionModal');
-            notify(`تم حفظ جلسة التسميع (${recitationTypeLabel(type)}) دون تغيير الجلسات السابقة في نفس اليوم.`);
+            const lowSurahs = reviewSurahsOf(passages);
+            notify(`تم حفظ التسميع (${recitationTypeLabel(type)}) بدرجة لكل سورة، ومتوسط الجلسة ${formatNumber(score)} من 10${lowSurahs.length ? ` — تنبيه: ${lowSurahs.map(name => `سورة ${name}`).join('، ')} يراجع عليها الطالب` : ''}. لم تتأثر الجلسات السابقة في نفس اليوم.`, lowSurahs.length ? 'info' : 'success');
         }
 
         function deleteSession(sessionId) {
@@ -2735,6 +2857,7 @@
             const latest = studentSessions(studentId)[0];
             setPassageRows('sessionPassages', 'session', latest ? sessionPassages(latest) : [{ surah: student.startSurah, fromAyah: 1, toAyah: '' }]);
             byId('sessionSurahCount').value = document.querySelectorAll('#sessionPassages .passage-row').length || 1;
+            syncSessionScores();
             updateSessionStudentContext();
         }
 
@@ -2786,6 +2909,16 @@
                 byId('profileLastSurah').title = '';
             }
 
+            // تنبيه السور التي يراجع عليها الطالب (درجة 4 أو أقل)
+            const profileReview = [...new Set(stdSessions.flatMap(ses => reviewSurahsOf(sessionPassages(ses))))];
+            const reviewBox = byId('profileReviewNotice');
+            if (reviewBox) {
+                reviewBox.classList.toggle('hidden', !profileReview.length);
+                reviewBox.innerHTML = profileReview.length
+                    ? `⚠️ يراجع على هذه السور (درجة ${formatNumber(REVIEW_THRESHOLD)} أو أقل): <span class="text-red-900">${escapeHtml(profileReview.map(name => `سورة ${name}`).join('، '))}</span>`
+                    : '';
+            }
+
             const sessionsList = document.getElementById('profileSessionsList');
             sessionsList.innerHTML = '';
 
@@ -2795,17 +2928,22 @@
                 `;
             } else {
                 stdSessions.forEach(ses => {
-                    const amount = passagesDescription(sessionPassages(ses));
+                    const sesPassages = sessionPassages(ses);
+                    const amount = passagesDescription(sesPassages);
+                    const lowSurahs = reviewSurahsOf(sesPassages);
+                    const gradeLine = sesPassages.map(item => `سورة ${escapeHtml(item.surah)}: <b class="${passageNeedsReview(item.score) ? 'text-red-700' : 'text-emerald-700'}">${formatNumber(item.score)}/10</b>`).join(' • ');
                     const row = document.createElement('div');
                     row.className = "flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white border border-slate-200 text-xs";
                     row.innerHTML = `
                         <div class="min-w-0">
                             <span class="font-bold text-slate-800">${escapeHtml(amount)}</span>
                             <span class="text-slate-400 mr-1">(${sessionTypeLabel(ses)})</span>
+                            <span class="block text-[11px] text-slate-600 mt-1">${gradeLine}</span>
                             <span class="block text-[11px] text-slate-400 font-mono mt-0.5">${formatDate(ses.date)}</span>
+                            ${lowSurahs.length ? `<span class="review-badge mt-1">⚠️ يراجع على: ${escapeHtml(lowSurahs.map(name => `سورة ${name}`).join('، '))}</span>` : ''}
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
-                            <span class="score-chip ${scoreChipClass(ses.score)}">${formatNumber(ses.score ?? 0)}/10</span>
+                            <span class="score-chip ${scoreChipClass(ses.score)}" title="متوسط درجات سور الجلسة">${formatNumber(ses.score ?? 0)}/10</span>
                             ${st.phone ? `<button onclick="sendSessionResult('${st.id}', '${ses.id}')" title="إرسال هذه الدرجة لولي الأمر" aria-label="إرسال هذه الدرجة لولي الأمر" class="text-emerald-600 hover:bg-emerald-50 rounded-lg p-1.5"><i class="fa-brands fa-whatsapp"></i></button>` : ''}
                             <button onclick="deleteSession('${ses.id}')" aria-label="حذف جلسة التسميع" class="text-slate-300 hover:text-red-500 p-1">
                                 <i class="fa-solid fa-trash-can"></i>
@@ -3190,18 +3328,20 @@
             const records = studentSessions(student.id);
             const list = limit ? records.slice(0, limit) : records;
             if (!list.length) return [`لم يسجل تسميع حتى الآن باسم ${t} ${student.name}.`];
-            const lines = ['*درجات التسميع المسجلة:*'];
+            const lines = ['*درجات التسميع المسجلة (درجة لكل سورة + متوسط الجلسة):*'];
             list.forEach((session, index) => {
                 const passages = sessionPassages(session);
                 lines.push(`${formatNumber(index + 1)}. ${formatDate(session.date)} | ${sessionTypeLabel(session)}`);
-                passages.forEach(item => lines.push(`- ${recitationTypeLabel(item.type)}: سورة ${item.surah} من آية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}`));
-                lines.push(`*درجة الجلسة: ${formatNumber(session.score ?? 0)}/10*`);
+                passages.forEach(item => lines.push(`- ${recitationTypeLabel(item.type)}: سورة ${item.surah} من آية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)} | *درجة السورة: ${formatNumber(item.score)}/10*${passageNeedsReview(item.score) ? ' ⚠️ يراجع على السورة' : ''}`));
+                lines.push(`*متوسط الجلسة: ${formatNumber(session.score ?? 0)}/10* (${formatNumber(passages.length)} ${passages.length > 1 ? 'سور' : 'سورة'})`);
                 if (session.notes) lines.push(`   ملاحظة المحفظ: ${session.notes}`);
             });
             const scores = records.map(r => r.score ?? 0);
             const average = scores.length ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : 0;
+            const reviewSurahs = [...new Set(records.flatMap(record => reviewSurahsOf(sessionPassages(record))))];
             lines.push('');
-            lines.push(`*المجموع:* ${formatNumber(records.length)} جلسة — *المتوسط: ${formatNumber(average)}/10* — أعلى درجة ${formatNumber(Math.max(...scores))} وأدنى درجة ${formatNumber(Math.min(...scores))}`);
+            lines.push(`*المجموع:* ${formatNumber(records.length)} جلسة — *متوسط الجلسات: ${formatNumber(average)}/10* — أعلى متوسط ${formatNumber(Math.max(...scores))} وأدنى متوسط ${formatNumber(Math.min(...scores))}`);
+            if (reviewSurahs.length) lines.push(`⚠️ *سور يراجع عليها ${t} (درجة ${formatNumber(REVIEW_THRESHOLD)} أو أقل):* ${reviewSurahs.map(name => `سورة ${name}`).join('، ')}`);
             if (limit && records.length > limit) lines.push(`(أحدث ${formatNumber(limit)} جلسة — باقي الجلسات ${formatNumber(records.length - limit)} موجودة في تقرير PDF)`);
             return lines;
         }
@@ -3234,19 +3374,24 @@
             return lines.join('\n');
         }
 
-        // Short message sent right after a recitation is recorded: the score goes straight to the parent.
+        // Short message sent right after a recitation is recorded: درجة كل سورة + المتوسط + تنبيه المراجعة.
         function sessionResultMessage(student, session) {
             const t = studentTitle(student);
             const passages = sessionPassages(session);
+            const average = averagePassageScore(passages) ?? 0;
+            const lowSurahs = reviewSurahsOf(passages);
             const lines = [
                 'السلام عليكم ورحمة الله وبركاته',
                 `*نتيجة تسميع اليوم - ${t} ${student.name}*`,
                 `التاريخ: ${formatDate(session.date)}`,
                 `النوع: ${sessionTypeLabel(session)}`,
-                '*المقدار المسمع:*',
-                ...passages.map(item => `- ${recitationTypeLabel(item.type)}: سورة ${item.surah} من آية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}`),
-                `*درجة الجلسة: ${formatNumber(session.score ?? 0)} من 10*`
+                '*المقدار المسمع ودرجة كل سورة:*',
+                ...passages.map(item => `- ${recitationTypeLabel(item.type)}: سورة ${item.surah} من آية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}\n   درجة سورة ${item.surah}: *${formatNumber(item.score)} من 10*${passageNeedsReview(item.score) ? ' ⚠️ — يراجع على السورة' : ''}`),
+                `*متوسط درجة الجلسة: ${formatNumber(average)} من 10*` + (passages.length > 1 ? ` (متوسط درجات ${formatNumber(passages.length)} سور)` : '')
             ];
+            if (lowSurahs.length) {
+                lines.push('', `⚠️ *مطلوب المراجعة:* ${lowSurahs.map(name => `سورة ${name}`).join('، ')} — درجتها ${formatNumber(REVIEW_THRESHOLD)} أو أقل، ونرجو مراجعة ${g(student, 'الطالب', 'الطالبة')} لهذه السور قبل التسميع القادم.`);
+            }
             if (session.notes) lines.push(`ملاحظة المحفظ: ${session.notes}`);
             const plan = weeklyPlan(student);
             if (plan.isSet) lines.push('', `المطلوب القادم: ${planDescription(plan)} — التسميع يوم ${plan.reciteDay}.`);
@@ -3254,7 +3399,7 @@
             if (all.length) {
                 const scores = all.map(item => item.score ?? 0);
                 const average = Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10;
-                lines.push('', `المتوسط العام حتى الآن: ${formatNumber(average)}/10 من ${formatNumber(all.length)} جلسة.`);
+                lines.push('', `المتوسط العام حتى الآن: ${formatNumber(average)}/10 من ${formatNumber(all.length)} جلسة، محسوباً من درجات كل سورة.`);
             }
             lines.push('', `رجاءً راجعوا مع ${t} المقدار المسمع لتثبيت الحفظ.`, '', 'مسجد مبارك - حلقات تحفيظ القرآن الكريم');
             return lines.join('\n');
@@ -3270,7 +3415,7 @@
                 return;
             }
             openWhatsApp(student.phone, sessionResultMessage(student, session));
-            notify('تم تجهيز رسالة نتيجة التسميع بالدرجة لولي الأمر.');
+            notify('تم تجهيز رسالة نتيجة التسميع: درجة كل سورة والمتوسط العام لولي الأمر.');
         }
 
         function weeklyPlanMessage(student) {
@@ -3475,7 +3620,7 @@
             const descriptions = {
                 all: `${formatNumber(students.length)} طالب، ${formatNumber(sessions.length)} جلسة تسميع، وكشف ترتيب المتفوقين.`,
                 students: `${formatNumber(students.length)} طالب: تاريخ الانضمام، سورة البداية، وعدد الأجزاء المنجزة.`,
-                sessions: `${formatNumber(sessions.length)} جلسة: الطالب والتاريخ والسورة والآيات والدرجة والملاحظات.`,
+                sessions: `${formatNumber(sessions.length)} جلسة: الطالب والتاريخ والسورة والآيات ودرجة كل سورة ومتوسط الجلسة والملاحظات.`,
                 files: `${formatNumber(students.length)} ملفاً كاملاً، صفحة (أو أكثر) مستقلة لكل طالب بكل تاريخ تسميعه ودرجاته وملاحظاته.`,
                 ranking: `ترتيب ${formatNumber(students.length)} طالب بالنقاط والدرجات والانتظام في الفترة المختارة.`
             };
@@ -3658,23 +3803,24 @@
         }
 
         function addSessionReport(stage, records, title = 'سجل التسميع والمتابعة') {
-            addTablePages(stage, title, `إجمالي الجلسات: ${formatNumber(records.length)}. كل سورة تُسجَّل في سطر مستقل، والملاحظات الطويلة تستكمل في صفوف تحمل كلمة «تابع».`,
-                ['#', 'الطالب', 'التاريخ', 'نوع التسميع', 'السورة والآيات', 'الدرجة من 10', 'ملاحظات المتابعة'], [4, 18, 12, 12, 24, 10, 20],
+            addTablePages(stage, title, `إجمالي الجلسات: ${formatNumber(records.length)}. كل سورة تُسجَّل في سطر مستقل بدرجتها، ومتوسط الجلسة يظهر في سطر مستقل، وأي سورة بدرجة ${formatNumber(REVIEW_THRESHOLD)} أو أقل يُكتب أمامها «يراجع على السورة». والملاحظات الطويلة تستكمل في صفوف تحمل كلمة «تابع».`,
+                ['#', 'الطالب', 'التاريخ', 'نوع التسميع', 'السورة والآيات', 'درجة السورة من 10', 'ملاحظات المتابعة'], [4, 18, 12, 12, 24, 10, 20],
                 sortedSessions(records).flatMap((session, index) => {
                     const student = students.find(st => st.id === session.studentId);
-                    const rows = sessionPassages(session).map((item, itemIndex) => [
+                    const items = sessionPassages(session);
+                    const rows = items.map((item, itemIndex) => [
                         itemIndex === 0 ? formatNumber(index + 1) : (itemIndex === 1 ? '↳' : ''),
                         student?.name || 'غير موجود',
                         itemIndex === 0 ? formatDate(session.date) : '',
                         recitationTypeLabel(item.type),
-                        `سورة ${item.surah}\nآية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}`,
-                        itemIndex === 0 ? formatNumber(session.score ?? 0) : '',
+                        `سورة ${item.surah}\nآية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}${passageNeedsReview(item.score) ? '\n⚠️ يراجع على السورة' : ''}`,
+                        formatNumber(item.score),
                         itemIndex === 0 ? (session.notes || 'لا توجد') : ''
                     ]);
-                    const scores = sessionPassages(session).length > 1 ? [[
-                        '', '', '', '', 'درجة الجلسة', formatNumber(session.score ?? 0), 'درجة واحدة لجميع المقاطع'
+                    const scoreSummary = items.length > 1 ? [[
+                        '', '', '', '', 'متوسط الجلسة', formatNumber(session.score ?? 0), `متوسط درجات ${formatNumber(items.length)} سور`
                     ]] : [];
-                    return rows.concat(scores);
+                    return rows.concat(scoreSummary);
                 }));
         }
 
@@ -3704,7 +3850,7 @@
                 ${area ? `<path d="${area}" fill="rgba(4,120,87,.08)"/>` : ''}
                 <path d="${path}" fill="none" stroke="#047857" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
                 ${dots}
-                <text x="${W / 2}" y="${H - 4}" font-size="11" fill="#64748b" text-anchor="middle" font-family="Cairo">تاريخ التسميع (شهر/يوم) — المحور الرأسي: الدرجة من 10</text>
+                <text x="${W / 2}" y="${H - 4}" font-size="11" fill="#64748b" text-anchor="middle" font-family="Cairo">تاريخ التسميع (شهر/يوم) — المحور الرأسي: متوسط درجة الجلسة من 10</text>
             </svg>`;
         }
 
@@ -3718,11 +3864,13 @@
             const progress = progressAnalysis(records);
             const peers = peerRanking(student);
             const plan = weeklyPlan(student);
+            const reviewNames = [...new Set(records.flatMap(record => reviewSurahsOf(sessionPassages(record))))];
             const details = [
                 [`اسم ${t}`, student.name], ['الجنس', g(student, 'ذكر', 'أنثى')],
                 ['الحلقة', student.halaqa || 'غير محددة'], ['تاريخ الانضمام', formatDate(student.startDate)],
                 [`${g(student, 'بدأ', 'بدأت')} الحفظ من`, `سورة ${student.startSurah}`], ['عدد الأجزاء المنجزة', `${formatNumber(student.completedJuz)} من ${formatNumber(30)}`],
-                ['جلسات التسميع', formatNumber(records.length)], ['متوسط الدرجة', records.length ? `${formatNumber(average)} / ${formatNumber(10)}` : 'لا توجد'],
+                ['جلسات التسميع', formatNumber(records.length)], ['متوسط درجات الجلسات', records.length ? `${formatNumber(average)} / ${formatNumber(10)}` : 'لا توجد'],
+                ['سور يراجع عليها (درجة ٤ أو أقل)', reviewNames.length ? reviewNames.map(name => `سورة ${name}`).join('، ') : 'لا يوجد'],
                 ['جلسات بدرجة ٩+', formatNumber(high)], ['آخر تسميع', records.length ? formatDate(records[records.length - 1].date) : 'لا يوجد'],
                 ['السورة الحالية', `سورة ${peers.surah}`], [`الترتيب بين زملاء نفس السورة`, peers.total ? `${formatNumber(peers.position)} من ${formatNumber(peers.total)}` : '—'],
                 ['المطلوب هذا الأسبوع', planDescription(plan)], ['مواعيد الأسبوع', `الجديد ${plan.newDay} — التسميع ${plan.reciteDay}`]
@@ -3741,7 +3889,7 @@
             const trendClass = progress.trend === 'up' ? 'trend-up' : progress.trend === 'down' ? 'trend-down' : 'trend-flat';
             const trendIcon = progress.trend === 'up' ? '▲' : progress.trend === 'down' ? '▼' : '●';
             trendBox.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-                <strong style="color:#123f32;font-size:15px">مدى التطور في الدرجات</strong>
+                <strong style="color:#123f32;font-size:15px">مدى التطور في متوسط درجات الجلسات</strong>
                 <span class="trend-pill ${trendClass}">${trendIcon} ${escapeHtml(progress.label)}${progress.enough ? ` (${progress.delta > 0 ? '+' : ''}${formatNumber(progress.delta)})` : ''}</span>
             </div>${records.length ? buildScoreChartSvg(records) : '<p class="report-summary">لا توجد جلسات بعد لرسم منحنى التطور.</p>'}`;
             page.appendChild(trendBox);
@@ -3766,18 +3914,23 @@
                 return;
             }
 
-            const headings = ['#', 'تاريخ التسميع', 'نوع التسميع', 'السورة والآيات', 'الدرجة من 10', 'ملاحظات المحفظ'];
+            const headings = ['#', 'تاريخ التسميع', 'نوع التسميع', 'السورة والآيات', 'درجة السورة من 10', 'ملاحظات المحفظ'];
             const widths = [5, 14, 13, 22, 11, 35];
             let pageNumber = 1;
-            const sessionRow = (session, index) => sessionPassages(session).map((item, itemIndex) => ([
-                itemIndex === 0 ? formatNumber(index + 1) : (itemIndex === 1 ? '↳' : ''),
-                itemIndex === 0 ? formatDate(session.date) : '',
-                recitationTypeLabel(item.type),
-                `سورة ${item.surah}\nآية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}`,
-                itemIndex === 0 ? formatNumber(session.score ?? 0) : '',
-                itemIndex === 0 ? (session.notes || 'لا توجد') : ''
-            ]));
-            let currentPage = createReportPage(stage, `سجل تسميع ${t} الكامل: ${student.name}`, `كل جلسات التسميع (${formatNumber(records.length)} جلسة) مرتبة من الأقدم إلى الأحدث بالتاريخ والدرجة والملاحظات.`);
+            const sessionRow = (session, index) => {
+                const items = sessionPassages(session);
+                const rows = items.map((item, itemIndex) => ([
+                    itemIndex === 0 ? formatNumber(index + 1) : (itemIndex === 1 ? '↳' : ''),
+                    itemIndex === 0 ? formatDate(session.date) : '',
+                    recitationTypeLabel(item.type),
+                    `سورة ${item.surah}\nآية ${formatNumber(item.fromAyah)} إلى ${formatNumber(item.toAyah)}${passageNeedsReview(item.score) ? '\n⚠️ يراجع على السورة' : ''}`,
+                    formatNumber(item.score),
+                    itemIndex === 0 ? (session.notes || 'لا توجد') : ''
+                ]));
+                if (items.length > 1) rows.push(['', '', '', '', `متوسط الجلسة: ${formatNumber(session.score ?? 0)}`, `متوسط درجات ${formatNumber(items.length)} سور`]);
+                return rows;
+            };
+            let currentPage = createReportPage(stage, `سجل تسميع ${t} الكامل: ${student.name}`, `كل جلسات التسميع (${formatNumber(records.length)} جلسة) مرتبة من الأقدم إلى الأحدث: درجة مستقلة لكل سورة، ومتوسط للجلسة، مع تنبيه «يراجع على السورة» لأي سورة درجتها ${formatNumber(REVIEW_THRESHOLD)} أو أقل.`);
             let table, tbody;
             const buildTable = targetPage => {
                 table = document.createElement('table');
@@ -3798,7 +3951,7 @@
                     tbody.appendChild(row);
                 }
             };
-            // كل سورة في الجلسة تظهر في سطر مستقل، والدرجة واحدة على الجلسة كلها.
+            // كل سورة في الجلسة تظهر في سطر مستقل بدرجتها، ويليه سطر «متوسط الجلسة» عند تعدد السور.
             records.forEach((session, index) => {
                 sessionRow(session, index).forEach(values => {
                     const chunks = values.map((value, column) => splitReportText(value, Math.max(40, Math.floor(widths[column] * 5))));
@@ -3954,6 +4107,8 @@
                 byId('sessionStudentSelect').value = '';
                 setPassageRows('sessionPassages', 'session', [{}]);
                 byId('sessionSurahCount').value = 1;
+                byId('sessionScoreInput').value = '';
+                syncSessionScores();
                 updateSessionStudentContext();
             }
             modalTriggers.set(id, document.activeElement);
@@ -5294,5 +5449,5 @@
         updateOnlineStatus();
     })();
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a46387c20f3ba630',t:'MTc5MTI3Nzc5OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
