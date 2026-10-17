@@ -255,9 +255,13 @@
                     </button>
                     <label class="bg-emerald-800/70 hover:bg-emerald-700 text-emerald-100 px-3 py-2.5 rounded-xl text-sm transition-all border border-emerald-600/50 flex items-center gap-1.5 cursor-pointer">
                         <i class="fa-solid fa-upload"></i>
-                        <span class="hidden sm:inline">استعادة نسخة</span>
+                        <span class="hidden sm:inline">استيراد نسخة</span>
                         <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
                     </label>
+                    <button onclick="openRestoreModal()" title="تراجع عن آخر عملية أو ارجع لنسخة سابقة" class="bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 border border-amber-400/40 px-3 py-2.5 rounded-xl text-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span>تراجع واسترجاع</span>
+                    </button>
                     <button onclick="openQuestionsModal()" class="bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/40 px-3 py-2.5 rounded-xl text-sm transition-all flex items-center gap-1.5 cursor-pointer" title="دليل استخدام المنصة">
                         <i class="fa-solid fa-circle-question"></i>
                         <span>دليل الاستخدام</span>
@@ -266,11 +270,11 @@
                         <i class="fa-solid fa-mobile-screen-button"></i>
                         <span>تثبيت التطبيق</span>
                     </button>
-                    <!-- مؤشر المزامنة (غير قابل للنقر) -->
-                    <div id="syncIndicator" class="flex items-center gap-1.5 bg-emerald-400/15 border border-emerald-300/30 text-emerald-100 px-3 py-2.5 rounded-xl text-xs font-bold cursor-default" title="المزامنة التلقائية">
+                    <!-- مؤشر المزامنة: اضغط للمزامنة الفورية مع كل الأجهزة -->
+                    <button type="button" id="syncIndicator" onclick="syncNow()" class="flex items-center gap-1.5 bg-emerald-400/15 border border-emerald-300/30 text-emerald-100 px-3 py-2.5 rounded-xl text-xs font-bold cursor-pointer" title="اضغط للمزامنة الآن مع كل الأجهزة">
                         <span id="syncIndicatorDot" class="sync-dot"></span>
                         <span id="syncIndicatorLabel">جارٍ الاتصال…</span>
-                    </div>
+                    </button>
                 </div>
             </div>
 
@@ -1114,7 +1118,7 @@
                 <div><h4 class="font-bold text-emerald-900">3. اقرأ معلومات السور والتفسير</h4><p>اضغط أي سورة في الفهرس، ثم اختر الآية والمفسر. تحتاج هذه الميزة إلى اتصال بالإنترنت.</p></div>
                 <div><h4 class="font-bold text-emerald-900">4. المتابعة الأسبوعية وتقرير PDF لولي الأمر</h4><p>الخطة: يبدأ الطالب الجديد يوم السبت ويُسمَّع ما عليه يوم الجمعة، وتُذكر الأهل بالمطلوب أسبوعياً (السورة ورقم الآية). زر واتساب يُنزّل تقرير PDF كاملاً (بيانات، منحنى التطور، ترتيبه في سيرته الحالية، وسجل التسميع) ثم يفتح واتساب برسالة جاهزة. لا يُرسل التقرير إلا بعد 4 تسميعات كي تكتمل بيانات التحليل، وحتى ذلك الحين تُرسل رسالة الخطة الأسبوعية فقط.</p></div>
                 <div><h4 class="font-bold text-emerald-900">5. الحضور والغياب</h4><p>سجّل حضور كل حلقة، ومن يُسجَّل غائباً يُجهَّز له فوراً رسالة استفسار لولي الأمر عن سبب الغياب والظروف الخاصة.</p></div>
-                <div class="border-t border-slate-200 pt-4"><h4 class="font-bold text-sky-800">المزامنة التلقائية بين الأجهزة</h4><p>التطبيق متصل دائماً بقاعدة بيانات مسجد مبارك، فيظهر أي تسجيل أو تسميع أو حضور على الكمبيوتر والجوال فوراً وبدون تسجيل دخول. عند عدم توفر الإنترنت يعمل التطبيق محلياً، وتُرفع التعديلات تلقائياً عند عودة الاتصال.</p><p class="mt-2">لضمان الخصوصية، في لوحة Firebase افتح <bdi dir="ltr">Realtime Database → Rules</bdi> واجعلها:</p><pre class="mt-2 rounded-lg bg-slate-900 p-3 text-[11px] leading-relaxed text-slate-100 overflow-x-auto" dir="ltr">{
+                <div class="border-t border-slate-200 pt-4"><h4 class="font-bold text-sky-800">المزامنة التلقائية بين الأجهزة</h4><p>كل تسجيل يظهر على كل الأجهزة فوراً بدون تسجيل دخول، ولو سجّل جهازان في نفس الوقت فلا يضيع تسجيل أي منهما: تُدمج البيانات ويظهر عند كل جهاز ما سجّله هو وما سجّله الآخر. عند عدم توفر الإنترنت يعمل التطبيق محلياً، وتُرفع التعديلات تلقائياً عند عودة الاتصال. زر «مزامنة الآن» أسفل الهيدر يجبر المزامنة فوراً.</p><p class="mt-2"><strong>زر «تراجع واسترجاع»:</strong> يُحفظ تلقائياً سجل بكل خطوة (تسجيل طالب، تسميع، حذف، حضور، استيراد). زر واحد يعيد آخر خطوة، أو اختر أي نسخة سابقة من القائمة ليعود التطبيق كما كان وقتها — ويمكن التراجع عن التراجع نفسه.</p><p class="mt-2">لضمان الخصوصية، في لوحة Firebase افتح <bdi dir="ltr">Realtime Database → Rules</bdi> واجعلها:</p><pre class="mt-2 rounded-lg bg-slate-900 p-3 text-[11px] leading-relaxed text-slate-100 overflow-x-auto" dir="ltr">{
   "rules": {
     "mubarak_app_data": {
       "$uid": {
@@ -1278,6 +1282,40 @@
                     <p class="muted mt-1 mb-3">PDF للقراءة فقط. نسخة JSON تشمل الطلاب والتسميع والأجزاء المنجزة.</p>
                     <button onclick="downloadBackup()" class="text-action border border-slate-200"><i class="fa-solid fa-download ml-2"></i> نسخة احتياطية JSON</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة التراجع والاسترجاع -->
+    <div id="restoreModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4" role="dialog" aria-modal="true" aria-labelledby="restoreTitle">
+        <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+            <div class="bg-gradient-to-r from-emerald-900 to-teal-800 text-white p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-400 text-emerald-950 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div>
+                        <h3 id="restoreTitle" class="font-bold text-lg">التراجع والاسترجاع</h3>
+                        <p class="text-xs text-emerald-200">نسخة تُحفظ تلقائياً قبل كل تسجيل أو حذف — ارجع لأي خطوة بضغطة واحدة</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('restoreModal')" class="text-white/80 hover:text-white text-xl cursor-pointer" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 overflow-y-auto space-y-3">
+                <div class="flex flex-wrap items-center gap-2">
+                    <button id="undoLastButton" onclick="undoLastChange()" class="bg-amber-500 hover:bg-amber-600 text-emerald-950 font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-rotate-left"></i><span>تراجع عن آخر عملية</span>
+                    </button>
+                    <button onclick="syncNow()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-arrows-rotate"></i><span>مزامنة الآن</span>
+                    </button>
+                    <button onclick="downloadBackup()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-download"></i><span>نسخة احتياطية</span>
+                    </button>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    تُحفظ نسخة تلقائياً قبل كل عملية: إضافة أو تعديل أو حذف طالب، تسجيل تسميع أو حذفه، الحضور والغياب، واستيراد نسخة احتياطية.
+                    استرجاع أي نسخة يعيد البيانات كما كانت وقتها، ويمكنك التراجع عن الاسترجاع نفسه من نفس القائمة.
+                </p>
+                <div id="restoreList" class="space-y-2"></div>
             </div>
         </div>
     </div>
@@ -1534,7 +1572,7 @@
             completed: { label: 'تم التسميع', cls: 'bg-emerald-100 text-emerald-800' },
             needs_review: { label: 'يحتاج إعادة', cls: 'bg-rose-100 text-rose-800' }
         };
-        const MODAL_IDS = ['addStudentModal', 'addSessionModal', 'studentProfileModal', 'questionsModal', 'surahDetailsModal', 'exportModal', 'confirmModal', 'attendanceModal', 'reminderModal', 'weeklyPlanModal'];
+        const MODAL_IDS = ['addStudentModal', 'addSessionModal', 'studentProfileModal', 'questionsModal', 'surahDetailsModal', 'exportModal', 'confirmModal', 'attendanceModal', 'reminderModal', 'weeklyPlanModal', 'restoreModal'];
         let students = [];
         let sessions = [];
         let activeStudentForProfile = null;
@@ -1576,6 +1614,251 @@
         let cloudLastWrite = '';
         let cloudPushTimer = null;
         let cloudDetacher = null;
+        let cloudPushSeq = 0;
+
+        // ===== التراجع والاسترجاع + الحذف الآمن بين الأجهزة =====
+        const HISTORY_KEY = 'mb_history_v1';
+        const HISTORY_LIMIT = 15;
+        const DELETE_KEEP_DAYS = 120;
+        const LEGACY_STAMP = '2025-01-01T00:00:00.000Z'; // وقت موحّد للسجلات القديمة قبل تحديث اليوم
+        let deletedRecords = {};        // { recordId: ISO } علامة حذف حتى لا يعيدها جهاز آخر عند المزامنة
+        let historySuppressed = false;  // منع تسجيل خطوة جديدة أثناء الاسترجاع نفسه
+        let seedMode = false;           // جهاز جديد لم يُسجَّل عليه شيء بعد: يبدأ من بيانات السحابة بدل الأسماء التجريبية
+
+        function nowISO() { return new Date().toISOString(); }
+        function recordStamp(record) { return typeof record?.updatedAt === 'string' ? record.updatedAt : ''; }
+
+        function normalizeDeleted(input) {
+            const output = {};
+            if (!input || typeof input !== 'object') return output;
+            Object.entries(input).forEach(([key, value]) => {
+                if (!/^[a-zA-Z0-9_-]{1,100}$/.test(key)) return;
+                if (typeof value !== 'string' || !value) return;
+                output[key] = value;
+            });
+            return output;
+        }
+
+        function localSyncPayload() {
+            return { app: APP_NAME, version: '4.0', students, sessions, attendance: attendanceData(), deleted: { ...deletedRecords } };
+        }
+
+        /* ================== التراجع والاسترجاع ================== */
+        function readHistory() {
+            try {
+                const list = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                return Array.isArray(list) ? list : [];
+            } catch { return []; }
+        }
+        function writeHistory(list) {
+            try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); }
+            catch { /* مساحة التخزين ممتلئة: نتجاهل النسخة الإضافية */ }
+        }
+        function stateSnapshot() {
+            return { students, sessions, attendance: attendanceData(), deleted: { ...deletedRecords } };
+        }
+        // تُحفظ صورة كاملة من البيانات قبل كل تعديل، وبها يمكن التراجع بخطوة واحدة أو للرجوع لأي مرحلة.
+        function pushHistory(label, snapshot) {
+            if (historySuppressed) return;
+            try {
+                const state = JSON.parse(JSON.stringify(snapshot || stateSnapshot()));
+                const newest = readHistory()[0];
+                if (newest && JSON.stringify(newest.state) === JSON.stringify(state)) return;
+                const entry = {
+                    id: makeId('hst'),
+                    label: String(label || 'تغيير في البيانات').slice(0, 160),
+                    at: nowISO(),
+                    studentCount: state.students?.length || 0,
+                    sessionCount: state.sessions?.length || 0,
+                    state
+                };
+                // نقيّد حجم سجل النسخ حتى لا يستهلك مساحة التخزين في الأجهزة الضعيفة
+                const MAX_HISTORY_BYTES = 1.6 * 1024 * 1024;
+                let kept = [];
+                let bytes = 0;
+                for (const item of [entry, ...readHistory()].slice(0, HISTORY_LIMIT)) {
+                    const size = JSON.stringify(item).length * 2;
+                    if (kept.length && bytes + size > MAX_HISTORY_BYTES) break;
+                    kept.push(item);
+                    bytes += size;
+                }
+                writeHistory(kept);
+            } catch (error) {
+                console.warn('تعذر حفظ خطوة التراجع', error);
+            }
+        }
+        function historyTime(entry) {
+            try { return new Date(entry.at).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }); }
+            catch { return ''; }
+        }
+        function applyHistoryEntry(entry) {
+            if (!entry || !entry.state) return notify('هذه النسخة غير صالحة.', 'error');
+            try {
+                // نحتفظ بصورة من الحالة الحالية قبل الاسترجاع، فيمكن التراجع عن الاسترجاع نفسه.
+                historySuppressed = true;
+                const currentState = stateSnapshot();
+                historySuppressed = false;
+                pushHistory(`ما قبل استرجاع: «${entry.label}»`, currentState);
+                historySuppressed = true;
+                const state = entry.state;
+                const clean = validateData({ app: APP_NAME, version: '4.0', students: state.students || [], sessions: state.sessions || [] });
+                students = clean.students.map(s => ({ ...s, updatedAt: recordStamp(s) || LEGACY_STAMP }));
+                sessions = clean.sessions.map(s => ({ ...s, updatedAt: recordStamp(s) || LEGACY_STAMP }));
+                deletedRecords = normalizeDeleted(state.deleted);
+                let attendance = [];
+                try { attendance = validateAttendanceImport(state.attendance || [], new Set(students.map(s => s.id))); } catch { attendance = []; }
+                // السجلات التي سبق حذفها وتعود الآن بالاسترجاع: نُلغي علامة الحذف ونُحدّث وقتها حتى تعود على كل الأجهزة.
+                const reviveStamp = nowISO();
+                const revive = record => {
+                    if (record?.id && deletedRecords[record.id]) {
+                        record.updatedAt = reviveStamp;
+                        delete deletedRecords[record.id];
+                    }
+                };
+                students.forEach(revive);
+                sessions.forEach(revive);
+                attendance.forEach(revive);
+                localStorage.setItem('mb_attendance', JSON.stringify(attendance.map(r => ({ ...r, updatedAt: recordStamp(r) || LEGACY_STAMP }))));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', students, sessions, deleted: deletedRecords }));
+                historySuppressed = false;
+                MODAL_IDS.filter(id => id !== 'restoreModal').forEach(id => { if (!byId(id).classList.contains('hidden')) closeModal(id); });
+                updateApp();
+                renderRestoreList();
+                pushCloudData({ silent: true, force: true });
+                notify('تم استرجاع البيانات كما كانت في هذه النسخة.');
+            } catch (error) {
+                historySuppressed = false;
+                notify(`لم يتغير شيء: ${error.message || 'تعذر الاسترجاع'}`, 'error');
+            }
+        }
+        function undoLastChange() {
+            const list = readHistory();
+            if (!list.length) return notify('لا توجد عملية محفوظة للتراجع عنها بعد. أي تسجيل جديد سيحفظ نسخة قبل تنفيذه.', 'info');
+            const latest = list[0];
+            if (latest?.state && JSON.stringify(latest.state) === JSON.stringify(stateSnapshot())) return notify('أنت بالفعل على أحدث نسخة محفوظة.', 'info');
+            requestConfirmation('التراجع عن آخر عملية؟', `سيعود التطبيق إلى الحالة قبل: «${latest.label}»\nالوقت: ${historyTime(latest)}\n(${formatNumber(latest.studentCount)} طالب و${formatNumber(latest.sessionCount)} تسميع)\n\nيمكنك التراجع عن هذا التراجع نفسه من قائمة النسخ.`, () => applyHistoryEntry(latest), 'تراجع');
+        }
+        function openRestoreModal() {
+            renderRestoreList();
+            openModal('restoreModal');
+        }
+        function renderRestoreList() {
+            const container = byId('restoreList');
+            if (!container) return;
+            const list = readHistory();
+            const undoButton = byId('undoLastButton');
+            if (undoButton) {
+                undoButton.disabled = !list.length;
+                undoButton.classList.toggle('opacity-50', !list.length);
+                undoButton.classList.toggle('cursor-not-allowed', !list.length);
+            }
+            if (!list.length) {
+                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">لا توجد نسخ محفوظة بعد. تُحفظ نسخة تلقائياً قبل كل تسجيل أو تعديل أو حذف.</p>';
+                return;
+            }
+            container.replaceChildren();
+            list.forEach((entry, index) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3';
+                row.innerHTML = `
+                    <div class="min-w-0">
+                        <p class="text-sm font-bold text-slate-800 truncate">${escapeHtml(entry.label)}</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(historyTime(entry))} • ${formatNumber(entry.studentCount)} طالب • ${formatNumber(entry.sessionCount)} تسميع${index === 0 ? ' • <span class="text-emerald-700 font-bold">آخر عملية</span>' : ''}</p>
+                    </div>
+                    <button type="button" data-entry="${escapeHtml(entry.id)}" class="shrink-0 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-xs px-3 py-2 rounded-lg">
+                        <i class="fa-solid fa-clock-rotate-left ml-1"></i> استرجاع
+                    </button>`;
+                const button = row.querySelector('button');
+                button.addEventListener('click', () => requestConfirmation('الاسترجاع إلى هذه النسخة؟', `ستعود البيانات إلى: «${entry.label}»\nالوقت: ${historyTime(entry)}\n(${formatNumber(entry.studentCount)} طالب و${formatNumber(entry.sessionCount)} تسميع)\n\nيمكنك التراجع عن الاسترجاع نفسه من نفس القائمة.`, () => applyHistoryEntry(entry), 'استرجاع'));
+                container.appendChild(row);
+            });
+        }
+
+        /* ================== الحذف الآمن بين الأجهزة ================== */
+        function markDeleted(records) {
+            const stamp = nowISO();
+            (records || []).forEach(record => { if (record?.id) deletedRecords[record.id] = stamp; });
+            cleanupDeletedMarkers();
+        }
+        function forgetDeleted(records) {
+            (records || []).forEach(record => { if (record?.id) delete deletedRecords[record.id]; });
+        }
+        function cleanupDeletedMarkers() {
+            const limit = Date.now() - DELETE_KEEP_DAYS * 24 * 60 * 60 * 1000;
+            Object.keys(deletedRecords).forEach(id => {
+                const time = Date.parse(deletedRecords[id] || '');
+                if (!Number.isFinite(time) || time < limit) delete deletedRecords[id];
+            });
+        }
+
+        /* ================== الدمج بين الأجهزة ================== */
+        // اختيار أحد سجلين لهما نفس المعرّف: الأحدث وقت تعديل، وعند التعادل مقارنة ثابتة تتفق عليها كل الأجهزة.
+        function pickDeterministic(candidates) {
+            return (candidates || []).reduce((best, current) => {
+                if (!best) return current;
+                const bestStamp = recordStamp(best);
+                const currentStamp = recordStamp(current);
+                if (currentStamp !== bestStamp) return currentStamp > bestStamp ? current : best;
+                return JSON.stringify(current) > JSON.stringify(best) ? current : best;
+            }, null);
+        }
+        function mergeDeletedMaps(...maps) {
+            const output = {};
+            maps.forEach(map => Object.entries(normalizeDeleted(map)).forEach(([recordId, stamp]) => {
+                if (!output[recordId] || stamp > output[recordId]) output[recordId] = stamp;
+            }));
+            return output;
+        }
+        // نتيجة الدمج هي اتحاد سجلات الجهازين: يظهر عندي ما سجّلتَه، ويظهر عندك ما سجّلته.
+        function mergeData(localData = {}, remoteData = {}) {
+            const cleanRemote = validateData({ app: APP_NAME, version: '4.0', students: remoteData.students || [], sessions: remoteData.sessions || [] });
+            let cleanLocal;
+            try {
+                cleanLocal = validateData({ app: APP_NAME, version: '4.0', students: localData.students || [], sessions: localData.sessions || [] });
+            } catch (error) {
+                cleanLocal = { students: [], sessions: [] };
+            }
+            // علامات الحذف تُجمع من الجهازين: الحذف من أي جهاز يسري على الجميع ولا يعود مع المزامنة.
+            const deletedMap = mergeDeletedMaps(localData.deleted, remoteData.deleted);
+            const studentGroups = new Map();
+            [...cleanLocal.students, ...cleanRemote.students].forEach(student => {
+                const deletionTime = deletedMap[student.id];
+                if (deletionTime && recordStamp(student) <= deletionTime) return;
+                const group = studentGroups.get(student.id) || [];
+                group.push(student);
+                studentGroups.set(student.id, group);
+            });
+            const mergedStudents = [...studentGroups.values()].map(pickDeterministic).filter(Boolean);
+            const studentIds = new Set(mergedStudents.map(s => s.id));
+            const sessionGroups = new Map();
+            [...cleanLocal.sessions, ...cleanRemote.sessions].forEach(session => {
+                if (!studentIds.has(session.studentId)) return;
+                const deletionTime = deletedMap[session.id];
+                if (deletionTime && recordStamp(session) <= deletionTime) return;
+                const group = sessionGroups.get(session.id) || [];
+                group.push(session);
+                sessionGroups.set(session.id, group);
+            });
+            const mergedSessions = [...sessionGroups.values()].map(pickDeterministic).filter(Boolean);
+            const attendanceGroups = new Map();
+            [...(localData.attendance || []), ...(remoteData.attendance || [])].forEach(record => {
+                if (!record || !studentIds.has(record.studentId) || !record.date) return;
+                const deletionTime = deletedMap[record.id];
+                if (deletionTime && recordStamp(record) <= deletionTime) return;
+                const key = `${record.studentId}__${record.date}`;
+                const group = attendanceGroups.get(key) || [];
+                group.push(record);
+                attendanceGroups.set(key, group);
+            });
+            let mergedAttendance = [];
+            try { mergedAttendance = validateAttendanceImport([...attendanceGroups.values()].map(pickDeterministic).filter(Boolean), studentIds); }
+            catch { mergedAttendance = []; }
+            // ترتيب ثابت يجعل نتيجة الدمج متطابقة على كل الأجهزة أياً كان اتجاه الدمج.
+            mergedStudents.sort((a, b) => a.id.localeCompare(b.id));
+            mergedSessions.sort((a, b) => a.id.localeCompare(b.id));
+            mergedAttendance.sort((a, b) => `${a.date}__${a.studentId}`.localeCompare(`${b.date}__${b.studentId}`));
+            return { students: mergedStudents, sessions: mergedSessions, attendance: mergedAttendance, deleted: deletedMap, changed: false };
+        }
 
         function byId(id) { return document.getElementById(id); }
         function todayISO(daysAgo = 0) {
@@ -1689,7 +1972,7 @@
                     if (!passages.length || !Object.prototype.hasOwnProperty.call(PLAN_STATUSES, status)) throw new Error('خطة أسبوعية غير صالحة في ملف البيانات.');
                     weeklyPlan = { weekStart: date(s.weeklyPlan.weekStart), passages, status };
                 }
-                return { id: id(s.id), name: text(s.name, 120, true), gender, startDate: date(s.startDate), startSurah: s.startSurah, completedJuz: parts, halaqa: text(s.halaqa, 100), phone: text(s.phone, 50), goal: text(s.goal, 300), notes: text(s.notes, 2000), weeklyPlan };
+                return { id: id(s.id), name: text(s.name, 120, true), gender, startDate: date(s.startDate), startSurah: s.startSurah, completedJuz: parts, halaqa: text(s.halaqa, 100), phone: text(s.phone, 50), goal: text(s.goal, 300), notes: text(s.notes, 2000), weeklyPlan, updatedAt: text(s.updatedAt, 40) };
             });
             const studentIds = new Set(cleanStudents.map(s => s.id));
             const cleanSessions = (data.sessions ?? []).map(s => {
@@ -1715,7 +1998,7 @@
                 // درجة الجلسة تُعاد حسابها دائماً كمتوسط درجات السور، حتى تبقى الأرقام متسقة في كل الأجهزة.
                 const passagesAverage = averagePassageScore(passages);
                 const score = passagesAverage === null ? rawScore : passagesAverage;
-                return { id: id(s.id), studentId: s.studentId, date: date(s.date), type: summarizePassageTypes(passages), surah: first.surah, fromAyah: first.fromAyah, toAyah: first.toAyah, passages, score, notes: text(s.notes, 2000), createdAt: text(s.createdAt, 50) };
+                return { id: id(s.id), studentId: s.studentId, date: date(s.date), type: summarizePassageTypes(passages), surah: first.surah, fromAyah: first.fromAyah, toAyah: first.toAyah, passages, score, notes: text(s.notes, 2000), createdAt: text(s.createdAt, 50), updatedAt: text(s.updatedAt, 40) };
             });
             return { students: cleanStudents, sessions: cleanSessions };
         }
@@ -1724,6 +2007,7 @@
             try {
                 const snapshot = localStorage.getItem(STORAGE_KEY);
                 let source;
+                seedMode = snapshot === null && localStorage.getItem('mb_students') === null;
                 if (snapshot !== null) {
                     source = JSON.parse(snapshot);
                 } else {
@@ -1735,10 +2019,19 @@
                     };
                 }
                 const clean = validateData(source);
-                students = clean.students;
-                sessions = clean.sessions;
+                deletedRecords = normalizeDeleted(source.deleted);
+                cleanupDeletedMarkers();
+                // نُدمغ كل سجل بوقت تعديل (السجلات القديمة تأخذ وقتاً موحّداً) ليعرف كل جهاز الأحدث عند المزامنة.
+                students = clean.students.map(s => ({ ...s, updatedAt: recordStamp(s) || LEGACY_STAMP }));
+                sessions = clean.sessions.map(s => ({ ...s, updatedAt: recordStamp(s) || LEGACY_STAMP }));
+                let attendance = [];
+                try {
+                    attendance = validateAttendanceImport(source.attendance || [], new Set(students.map(s => s.id)))
+                        .map(r => ({ ...r, updatedAt: recordStamp(r) || LEGACY_STAMP }));
+                } catch { attendance = []; }
+                localStorage.setItem('mb_attendance', JSON.stringify(attendance));
                 // Persist the simplified schema once so removed legacy fields do not return.
-                saveData(clean);
+                saveData({ students, sessions });
             } catch (error) {
                 loadFailed = true;
                 storageWarning = 'تعذر قراءة البيانات المحفوظة. لم يتم استبدالها. استعد نسخة JSON صحيحة أو راجع إعدادات تخزين المتصفح.';
@@ -1747,14 +2040,16 @@
             }
         }
 
-        function saveData(next = { students, sessions }, allowRecovery = false) {
+        function saveData(next = { students, sessions }, allowRecovery = false, historyLabel = '') {
             if (loadFailed && !allowRecovery) {
                 notify('لا يمكن استبدال بيانات تعذر قراءتها. استعد نسخة احتياطية أولاً.', 'error');
                 return false;
             }
+            // صورة من الحالة قبل التعديل تُتيح التراجع بخطوة واحدة في أي وقت.
+            if (historyLabel) pushHistory(historyLabel, stateSnapshot());
             try {
                 // One atomic snapshot prevents a student deletion from leaving orphan sessions.
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', ...next }));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', ...next, deleted: deletedRecords }));
                 scheduleCloudPush();
                 loadFailed = false;
                 storageWarning = '';
@@ -1767,13 +2062,13 @@
             }
         }
 
-        function commitData(changes, allowRecovery = false) {
+        function commitData(changes, allowRecovery = false, historyLabel = '') {
             if (pdfBusy) {
                 notify('انتظر انتهاء تصدير PDF ثم احفظ التعديل، للحفاظ على اتساق بيانات التقرير.', 'info');
                 return false;
             }
             const next = { students, sessions, ...changes };
-            if (!saveData(next, allowRecovery)) return false;
+            if (!saveData(next, allowRecovery, historyLabel)) return false;
             students = next.students;
             sessions = next.sessions;
             updateApp();
@@ -1792,7 +2087,7 @@
                 offline: ['bg-slate-400/15 border-slate-300/30 text-slate-200', 'bg-slate-400', 'غير متصل — حفظ محلي']
             };
             const [wrapClass, dotClass, defaultText] = styles[state] || styles.connecting;
-            wrap.className = `flex items-center gap-1.5 border px-3 py-2.5 rounded-xl text-xs font-bold cursor-default ${wrapClass}`;
+            wrap.className = `flex items-center gap-1.5 border px-3 py-2.5 rounded-xl text-xs font-bold cursor-pointer ${wrapClass}`;
             dot.className = `sync-dot ${dotClass}`;
             label.textContent = text || defaultText;
             wrap.title = text || defaultText;
@@ -1855,6 +2150,10 @@
             return error?.message || 'حدث خطأ غير متوقع.';
         }
 
+        /* ============ المزامنة الفورية بين كل الأجهزة ============
+           كل تسجيل يُرفع بعد لحظات، ويصل للجهاز الآخر ويظهر فيه فوراً.
+           وإذا سجّل الجهازان في نفس الوقت تُدمج البيانات: يظهر عندي ما سجّلته أنت، ويظهر عندك ما سجّلته أنا.
+           ============================================================ */
         async function finishCloudSync(user, isNewAccount = false) {
             if (!cloudDb || !user) return;
             cloudUser = user;
@@ -1866,79 +2165,176 @@
             cloudDetacher = ref.on('value', snapshot => {
                 const value = snapshot.val();
                 if (!value || !value.data || value.updated_at === cloudLastWrite || cloudApplying) return;
-                applyRemoteSnapshot(value.data);
-                cloudLastWrite = value.updated_at || '';
+                // وصل تسجيل جديد من جهاز آخر: يُدمج هنا فوراً، ثم يُرفع الناتج المدموج لو كان فيه ما يخص هذا الجهاز.
+                const changed = acceptRemote(value.data, value.updated_at || '');
+                if (changed) pushCloudData({ silent: true, force: true });
             });
 
             const snapshot = await ref.once('value');
             const existing = snapshot.val();
-            if (!existing || isNewAccount) await pushCloudData();
-            else {
-                applyRemoteSnapshot(existing.data);
-                cloudLastWrite = existing.updated_at || '';
+            if (!existing) {
+                await pushCloudData({ silent: true, force: true });
+                seedMode = false;
+                notify('تم ربط هذه النسخة بالسحابة، وأصبحت البيانات تتزامن بين كل الأجهزة تلقائياً.');
+            } else if (seedMode && !isNewAccount) {
+                adoptCloudSeed(existing.data, existing.updated_at || '');
+            } else {
+                const mergedNow = acceptRemote(existing.data, existing.updated_at || '');
+                if (isNewAccount || mergedNow) await pushCloudData({ silent: true, force: true });
             }
         }
 
         function cloudSnapshot() {
-            return { app: APP_NAME, version: '4.0', exportDate: new Date().toISOString(), students, sessions, attendance: attendanceData() };
+            return { app: APP_NAME, version: '4.0', exportDate: nowISO(), students, sessions, attendance: attendanceData(), deleted: { ...deletedRecords } };
         }
 
         function scheduleCloudPush() {
             if (!cloudReady || cloudApplying) return;
             clearTimeout(cloudPushTimer);
-            cloudPushTimer = setTimeout(() => pushCloudData(), 800);
+            cloudPushTimer = setTimeout(() => pushCloudData({ silent: true }), 700);
         }
 
-        async function pushCloudData() {
+        // رفع البيانات: ندمج مع أحدث نسخة في السحابة أولاً حتى لا يُلغي جهاز تسجيلات الجهاز الآخر.
+        async function pushCloudData({ silent = false, force = false } = {}) {
             if (!cloudReady || !cloudUser || !cloudDb) return false;
-            const updatedAt = new Date().toISOString();
-            const snapshot = cloudSnapshot();
-            cloudLastWrite = updatedAt;
+            clearTimeout(cloudPushTimer);
             try {
-                await cloudDb.ref(`${CLOUD_PATH}/${cloudUser.uid}`).set({ data: snapshot, updated_at: updatedAt });
-                notify('تم رفع بيانات هذا الجهاز إلى السحابة.');
+                const ref = cloudDb.ref(`${CLOUD_PATH}/${cloudUser.uid}`);
+                const remoteValue = (await ref.once('value')).val();
+                if (remoteValue?.data && !force) adoptMerge(remoteValue.data, remoteValue.updated_at || '');
+                cloudPushSeq += 1;
+                const updatedAt = `${nowISO()}-${String(cloudPushSeq).padStart(4, '0')}`;
+                cloudLastWrite = updatedAt;
+                await ref.set({ data: cloudSnapshot(), updated_at: updatedAt });
+                if (!silent) notify('تمت المزامنة: بياناتك وبيانات الأجهزة الأخرى صارت واحدة.');
                 return true;
             } catch (error) {
-                notify(`تعذر رفع البيانات: ${error.message || 'تحقق من الاتصال.'}`, 'error');
+                if (!silent) notify(`تعذر رفع البيانات: ${error.message || 'تحقق من الاتصال.'}`, 'error');
                 return false;
             }
         }
 
-        async function pullCloudData() {
-            if (!cloudReady || !cloudUser || !cloudDb) return false;
+        // سحب فوري عند الطلب (زر المزامنة).
+        async function pullCloudData({ silent = false } = {}) {
+            if (!cloudReady || !cloudUser || !cloudDb) {
+                if (!silent) notify('المزامنة تحتاج اتصالاً بالإنترنت. بياناتك محفوظة على هذا الجهاز.', 'info');
+                return false;
+            }
             try {
                 const snapshot = await cloudDb.ref(`${CLOUD_PATH}/${cloudUser.uid}`).once('value');
                 const value = snapshot.val();
                 if (!value?.data) {
-                    notify('لا توجد بيانات محفوظة في السحابة بعد. ارفع بيانات هذا الجهاز أولاً.');
-                    return false;
+                    await pushCloudData({ silent: true, force: true });
+                    if (!silent) notify('لا توجد بيانات سابقة في السحابة، فتم رفع بيانات هذا الجهاز لتبدأ المزامنة.');
+                    return true;
                 }
-                applyRemoteSnapshot(value.data);
-                cloudLastWrite = value.updated_at || '';
-                notify('تم تنزيل أحدث البيانات من السحابة.');
+                const changed = adoptMerge(value.data, value.updated_at || '');
+                if (changed) await pushCloudData({ silent: true, force: true });
+                if (!silent) notify(changed ? 'تمت المزامنة: ظهرت بيانات جديدة من جهاز آخر، ورفعت لهذا الجهاز ما سجّلته.' : 'بياناتك محدّثة بالفعل مع كل الأجهزة.', changed ? 'success' : 'info');
                 return true;
             } catch (error) {
-                notify(`تعذر تنزيل البيانات: ${error.message || 'تحقق من الاتصال.'}`, 'error');
+                if (!silent) notify(`تعذر تنزيل البيانات: ${error.message || 'تحقق من الاتصال.'}`, 'error');
                 return false;
             }
         }
 
-        function applyRemoteSnapshot(snapshot) {
-            try {
-                const clean = validateData(snapshot);
-                const attendance = validateAttendanceImport(snapshot.attendance || [], new Set(clean.students.map(s => s.id)));
-                cloudApplying = true;
-                students = clean.students;
-                sessions = clean.sessions;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', students, sessions }));
-                localStorage.setItem('mb_attendance', JSON.stringify(attendance));
-                cloudApplying = false;
-                updateApp();
-                notify('تم تحديث البيانات من جهاز آخر.');
-            } catch (error) {
-                cloudApplying = false;
-                notify(`وصلت بيانات غير صالحة ولم تُطبّق: ${error.message}`, 'error');
+        function syncNow() {
+            if (!cloudReady || !cloudUser) {
+                notify('جارٍ الاتصال بالسحابة… ستتم المزامنة تلقائياً بعد لحظات.', 'info');
+                cloudAutoSignIn();
+                return;
             }
+            notify('جارٍ المزامنة مع كل الأجهزة…', 'info');
+            pullCloudData({ silent: false });
+        }
+
+        // دمج بيانات جهاز آخر مع بيانات هذا الجهاز (اتحاد السجلات وليس استبدالها).
+        // بصمة المحتوى (بدون أوقات التعديل) لمعرفة هل الاستيراد فيه جديد فعلاً.
+        function contentSignature(data) {
+            const strip = record => { const { updatedAt, ...rest } = record || {}; return rest; };
+            return JSON.stringify({
+                students: [...(data?.students || [])].map(strip).sort((a, b) => String(a.id).localeCompare(String(b.id))),
+                sessions: [...(data?.sessions || [])].map(strip).sort((a, b) => String(a.id).localeCompare(String(b.id))),
+                attendance: [...(data?.attendance || [])].map(strip).sort((a, b) => `${a.date}__${a.studentId}`.localeCompare(`${b.date}__${b.studentId}`))
+            });
+        }
+
+        // مقارنة ثابتة (بعد الترتيب) حتى لا يُعدّ الاختلاف في ترتيب السجلات تغييراً.
+        function canonicalSyncState(data) {
+            const sortById = list => [...(list || [])].sort((a, b) => String(a?.id).localeCompare(String(b?.id)));
+            const attendanceSorted = [...(data?.attendance || [])].sort((a, b) => `${a?.date}__${a?.studentId}`.localeCompare(`${b?.date}__${b?.studentId}`));
+            const deletedSorted = Object.entries(data?.deleted || {}).sort(([a], [b]) => a.localeCompare(b));
+            return JSON.stringify({ students: sortById(data?.students), sessions: sortById(data?.sessions), attendance: attendanceSorted, deleted: deletedSorted });
+        }
+
+        function admitRemoteData(remoteData, updatedAt = '') {
+            const localData = localSyncPayload();
+            const merged = mergeData(localData, remoteData || {});
+            if (canonicalSyncState(merged) === canonicalSyncState(localData)) {
+                if (updatedAt) cloudLastWrite = updatedAt;
+                return false;
+            }
+            historySuppressed = true;
+            cloudApplying = true;
+            try {
+                students = merged.students.map(s => ({ ...s, updatedAt: recordStamp(s) || LEGACY_STAMP }));
+                sessions = merged.sessions.map(s => ({ ...s, updatedAt: recordStamp(s) || LEGACY_STAMP }));
+                deletedRecords = merged.deleted;
+                localStorage.setItem('mb_attendance', JSON.stringify(merged.attendance.map(r => ({ ...r, updatedAt: recordStamp(r) || LEGACY_STAMP }))));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', students, sessions, deleted: deletedRecords }));
+            } finally {
+                cloudApplying = false;
+                historySuppressed = false;
+            }
+            if (updatedAt) cloudLastWrite = updatedAt;
+            updateApp();
+            return true;
+        }
+
+        // جهاز جديد تماماً: نستلم بيانات السحابة كما هي بدل ضم الأسماء التجريبية إليها.
+        function adoptCloudSeed(remoteData, updatedAt = '') {
+            try {
+                const clean = validateData({ app: APP_NAME, version: '4.0', students: remoteData.students || [], sessions: remoteData.sessions || [] });
+                let attendance = [];
+                try { attendance = validateAttendanceImport(remoteData.attendance || [], new Set(clean.students.map(s => s.id))); } catch { attendance = []; }
+                historySuppressed = true;
+                cloudApplying = true;
+                try {
+                    students = clean.students.map(s => ({ ...s, updatedAt: recordStamp(s) || LEGACY_STAMP }));
+                    sessions = clean.sessions.map(s => ({ ...s, updatedAt: recordStamp(s) || LEGACY_STAMP }));
+                    deletedRecords = normalizeDeleted(remoteData.deleted);
+                    localStorage.setItem('mb_attendance', JSON.stringify(attendance.map(r => ({ ...r, updatedAt: recordStamp(r) || LEGACY_STAMP }))));
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({ app: APP_NAME, version: '4.0', students, sessions, deleted: deletedRecords }));
+                } finally {
+                    cloudApplying = false;
+                    historySuppressed = false;
+                }
+                if (updatedAt) cloudLastWrite = updatedAt;
+                seedMode = false;
+                updateApp();
+                notify('تم تنزيل بيانات المسجد على هذا الجهاز، وأصبحت المزامنة تلقائية.');
+                return true;
+            } catch (error) {
+                seedMode = false;
+                notify(`وصلت بيانات غير صالحة ولم تُطبّق: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function adoptMerge(remoteData, updatedAt = '') {
+            try {
+                return admitRemoteData(remoteData, updatedAt);
+            } catch (error) {
+                console.warn('تعذر دمج بيانات السحابة', error);
+                notify(`وصلت بيانات غير صالحة ولم تُطبّق: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function acceptRemote(remoteData, updatedAt = '') {
+            const changed = adoptMerge(remoteData, updatedAt);
+            if (changed) notify('تم تحديث البيانات من جهاز آخر، وظهرت كل التسجيلات الجديدة.');
+            return changed;
         }
 
 
@@ -1976,7 +2372,7 @@
             updateSessionStudentContext();
             updateExportSummary();
             const hasDemoStudents = students.some(s => INITIAL_STUDENTS.some(d => d.id === s.id && d.name === s.name));
-            byId('storageNotice').textContent = storageWarning || 'البيانات محفوظة على هذا المتصفح فقط. احفظ نسخة احتياطية دورياً من قائمة التصدير.' + (hasDemoStudents ? ' توجد أسماء تجريبية يمكنك تعديلها أو حذفها.' : '');
+            byId('storageNotice').textContent = storageWarning || 'كل تسجيل يُحفظ على هذا الجهاز ويصل للأجهزة الأخرى تلقائياً، وزر «تراجع واسترجاع» يعيدك لأي خطوة سابقة.' + (hasDemoStudents ? ' توجد أسماء تجريبية يمكنك تعديلها أو حذفها.' : '');
             if (activeStudentForProfile && !byId('studentProfileModal').classList.contains('hidden')) {
                 const updated = students.find(s => s.id === activeStudentForProfile.id);
                 if (updated) viewStudentProfile(updated.id);
@@ -2437,8 +2833,9 @@
                 notes: byId('studentNotesInput').value.trim(),
                 weeklyPlan: existing?.weeklyPlan || null
             };
+            record.updatedAt = nowISO();
             const next = editId ? students.map(s => s.id === editId ? record : s) : [...students, record];
-            if (!commitData({ students: next })) return;
+            if (!commitData({ students: next }, false, editId ? `تعديل بيانات ${record.name}` : `تسجيل طالب جديد: ${record.name}`)) return;
             closeModal('addStudentModal');
             notify(editId ? `تم تحديث بيانات ${studentTitle(record)} وإنجاز${g(record, 'ه', 'ها')}.` : `تم تسجيل ${studentTitle(record)} بنجاح.`);
             if (!editId) askToNotifyParent(record);
@@ -2473,8 +2870,9 @@
             const student = students.find(s => s.id === studentId);
             if (!student) return;
             const count = sessions.filter(s => s.studentId === studentId).length;
-            requestConfirmation(`حذف ${studentTitle(student)} نهائياً؟`, `${g(student, 'سيُحذف الطالب', 'ستُحذف الطالبة')} «${student.name}» وجميع جلسات${g(student, 'ه', 'ها')} (${formatNumber(count)} جلسة)، ${g(student, 'ويُزال', 'وتُزال')} من التقارير وكشف الترتيب.\nلا يمكن التراجع عن الحذف دون نسخة احتياطية.`, () => {
-                if (commitData({ students: students.filter(s => s.id !== studentId), sessions: sessions.filter(s => s.studentId !== studentId) })) notify('تم حذف الطالب وجميع جلساته.');
+            requestConfirmation(`حذف ${studentTitle(student)} نهائياً؟`, `${g(student, 'سيُحذف الطالب', 'ستُحذف الطالبة')} «${student.name}» وجميع جلسات${g(student, 'ه', 'ها')} (${formatNumber(count)} جلسة)، ${g(student, 'ويُزال', 'وتُزال')} من التقارير وكشف الترتيب.\nيمكنك التراجع عن الحذف من زر «تراجع واسترجاع».`, () => {
+                markDeleted([student, ...sessions.filter(s => s.studentId === studentId)]);
+                if (commitData({ students: students.filter(s => s.id !== studentId), sessions: sessions.filter(s => s.studentId !== studentId) }, false, `حذف ${student.name} وجميع جلساته (${formatNumber(count)} جلسة)`)) notify('تم حذف الطالب وجميع جلساته. ويمكنك التراجع من زر «تراجع واسترجاع».');
             });
         }
 
@@ -2814,6 +3212,7 @@
 
             const newSession = {
                 id: makeId('ses'),
+                updatedAt: nowISO(),
                 studentId,
                 date,
                 type,
@@ -2835,7 +3234,7 @@
             if (activeSavedPlan && activeSavedPlan.status !== 'completed' && date >= schedule.weekStart && date <= schedule.fridayISO && coversPlan) {
                 nextStudents = students.map(item => item.id === studentId ? { ...item, weeklyPlan: { ...activeSavedPlan, status: 'completed' } } : item);
             }
-            if (!commitData({ sessions: [...sessions, newSession], students: nextStudents })) return;
+            if (!commitData({ sessions: [...sessions, newSession], students: nextStudents }, false, `تسجيل تسميع لـ ${student.name}: ${passages.map(p => `سورة ${p.surah}`).join('، ')}`)) return;
             closeModal('addSessionModal');
             const lowSurahs = reviewSurahsOf(passages);
             notify(`تم حفظ التسميع (${recitationTypeLabel(type)}) بدرجة لكل سورة، ومتوسط الجلسة ${formatNumber(score)} من 10${lowSurahs.length ? ` — تنبيه: ${lowSurahs.map(name => `سورة ${name}`).join('، ')} يراجع عليها الطالب` : ''}. لم تتأثر الجلسات السابقة في نفس اليوم.`, lowSurahs.length ? 'info' : 'success');
@@ -2843,8 +3242,10 @@
 
         function deleteSession(sessionId) {
             if (!sessions.some(s => s.id === sessionId)) return;
-            requestConfirmation('حذف جلسة التسميع؟', 'سيتم حذف هذه الجلسة من سجل الطالب. عدد الأجزاء المعتمد لا يتغير بحذف جلسة.', () => {
-                if (commitData({ sessions: sessions.filter(s => s.id !== sessionId) })) notify('تم حذف جلسة التسميع.');
+            requestConfirmation('حذف جلسة التسميع؟', 'سيتم حذف هذه الجلسة من سجل الطالب. عدد الأجزاء المعتمد لا يتغير بحذف جلسة.\nيمكنك التراجع من زر «تراجع واسترجاع».', () => {
+                const session = sessions.find(s => s.id === sessionId);
+                markDeleted([session]);
+                if (commitData({ sessions: sessions.filter(s => s.id !== sessionId) }, false, 'حذف جلسة تسميع')) notify('تم حذف جلسة التسميع. ويمكنك التراجع من زر «تراجع واسترجاع».');
             });
         }
 
@@ -3078,7 +3479,8 @@
         function attendanceData() {
             try { return JSON.parse(localStorage.getItem('mb_attendance') || '[]'); } catch { return []; }
         }
-        function saveAttendance(records) {
+        function saveAttendance(records, historyLabel = '') {
+            if (historyLabel) pushHistory(historyLabel, stateSnapshot());
             try {
                 localStorage.setItem('mb_attendance', JSON.stringify(records));
                 scheduleCloudPush();
@@ -3107,11 +3509,12 @@
         function saveAttendanceRecord() {
             const date = byId('attendanceDate').value || todayISO();
             const records = attendanceData().filter(r => r.date !== date);
+            const stamp = nowISO();
             students.forEach(st => {
                 const value = document.querySelector(`input[name="att_${st.id}"]:checked`)?.value || 'present';
-                records.push({ id: makeId('att'), studentId: st.id, date, status: value });
+                records.push({ id: makeId('att'), studentId: st.id, date, status: value, updatedAt: stamp });
             });
-            saveAttendance(records);
+            saveAttendance(records, `تسجيل حضور وغياب يوم ${formatDate(date)}`);
             closeModal('attendanceModal');
             const absent = students.filter(st => document.querySelector(`input[name="att_${st.id}"]:checked`)?.value === 'absent');
             if (!absent.length) return notify('تم تسجيل حضور الجميع. بارك الله فيهم.');
@@ -3255,7 +3658,7 @@
                 if (!info || !Number.isInteger(item.fromAyah) || !Number.isInteger(item.toAyah) || item.fromAyah < 1 || item.toAyah < item.fromAyah || item.toAyah > info.ayahs) return notify(`راجع آيات سورة ${item.surah}.`, 'error');
             }
             const plan = { weekStart: byId('weeklyPlanWeekStart').value, passages, status };
-            if (!commitData({ students: students.map(item => item.id === studentId ? { ...item, weeklyPlan: plan } : item) })) return;
+            if (!commitData({ students: students.map(item => item.id === studentId ? { ...item, weeklyPlan: plan, updatedAt: nowISO() } : item) }, false, `حفظ خطة ${student.name} الأسبوعية`)) return;
             closeModal('weeklyPlanModal');
             notify(`تم حفظ خطة ${studentTitle(student)}: ${planDescription(plan)}.`);
         }
@@ -4041,17 +4444,32 @@
                 const parsed = JSON.parse(await file.text());
                 const clean = validateData(parsed);
                 const cleanAttendance = validateAttendanceImport(parsed.attendance ?? [], new Set(clean.students.map(student => student.id)));
-                requestConfirmation('استعادة النسخة الاحتياطية؟', `سيتم استبدال البيانات الحالية بـ ${formatNumber(clean.students.length)} طالب و${formatNumber(clean.sessions.length)} جلسة.\nنزّل نسخة من بياناتك الحالية أولاً إذا احتجت إليها.`, () => {
-                    if (commitData(clean, true)) {
-                        saveAttendance(cleanAttendance);
+                const stamp = nowISO();
+                const imported = {
+                    students: clean.students.map(s => ({ ...s, updatedAt: recordStamp(s) || stamp })),
+                    sessions: clean.sessions.map(s => ({ ...s, updatedAt: recordStamp(s) || stamp })),
+                    attendance: cleanAttendance.map(r => ({ ...r, updatedAt: recordStamp(r) || stamp })),
+                    deleted: normalizeDeleted(parsed.deleted)
+                };
+                const preview = mergeData({ ...localSyncPayload(), deleted: { ...imported.deleted, ...deletedRecords } }, imported);
+                if (contentSignature(preview) === contentSignature(localSyncPayload())) {
+                    return notify('هذا الملف مطابق لبياناتك الحالية، فلا يوجد ما يُضاف.', 'info');
+                }
+                requestConfirmation('استعادة النسخة الاحتياطية؟', `ستُضاف محتويات الملف إلى بياناتك الحالية (دمج وليس استبدال): ${formatNumber(imported.students.length)} طالب و${formatNumber(imported.sessions.length)} تسميع في الملف، ليصبح الإجمالي ${formatNumber(preview.students.length)} طالب و${formatNumber(preview.sessions.length)} تسميع.\nلا يُحذف شيء موجود الآن، ويمكنك التراجع من زر «تراجع واسترجاع».`, () => {
+                    deletedRecords = { ...imported.deleted, ...deletedRecords };
+                    pushHistory('استيراد نسخة احتياطية من ملف', stateSnapshot());
+                    if (admitRemoteData(imported)) {
                         MODAL_IDS.forEach(id => closeModal(id));
                         resetSessionFilters();
                         byId('studentHalaqaFilter').value = 'all';
                         byId('studentSearchInput').value = '';
                         renderStudentsTable();
-                        notify('تمت استعادة البيانات بنجاح.');
+                        pushCloudData({ silent: true });
+                        notify('تمت استعادة النسخة الاحتياطية ودَمجها مع بياناتك ورفعها لكل الأجهزة.');
+                    } else {
+                        notify('الملف مطابق لبياناتك الحالية، فلا شيء جديد يُضاف.', 'info');
                     }
-                }, 'استبدال واستعادة');
+                }, 'دمج واستعادة');
             } catch (error) {
                 notify(`لم تُغيّر بياناتك. ${error instanceof SyntaxError ? 'الملف ليس JSON صالحاً.' : error.message}`, 'error');
             }
@@ -4064,7 +4482,7 @@
             return raw.map(record => {
                 if (!record || typeof record !== 'object' || typeof record.id !== 'string' || !/^[a-zA-Z0-9_-]{1,100}$/.test(record.id) || ids.has(record.id) || !studentIds.has(record.studentId) || !/^\d{4}-\d{2}-\d{2}$/.test(record.date) || !['present', 'absent'].includes(record.status)) throw new Error('يوجد سجل حضور غير صالح.');
                 ids.add(record.id);
-                return { id: record.id, studentId: record.studentId, date: record.date, status: record.status };
+                return { id: record.id, studentId: record.studentId, date: record.date, status: record.status, updatedAt: typeof record.updatedAt === 'string' ? record.updatedAt.slice(0, 40) : '' };
             });
         }
 
@@ -4078,6 +4496,7 @@
         }
 
         function runConfirmedAction() {
+            if (byId('confirmModal').classList.contains('hidden')) return;
             const action = confirmedAction;
             closeModal('confirmModal');
             if (action) action();
@@ -5443,11 +5862,11 @@
             try { notify('عاد الاتصال — جاري مزامنة البيانات'); } catch (e) {}
             // إعادة الاتصال تلقائياً عند عودة الإنترنت.
             if (typeof cloudAutoSignIn === 'function' && !cloudUser) cloudAutoSignIn();
-            else if (typeof pushCloudData === 'function' && cloudReady) pushCloudData();
+            else if (typeof pullCloudData === 'function' && cloudReady) pullCloudData({ silent: true });
         });
         window.addEventListener('offline', () => { updateOnlineStatus(); try { notify('انقطع الاتصال — التطبيق يعمل محلياً وبياناتك محفوظة', 'info'); } catch (e) {} });
         updateOnlineStatus();
     })();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a46387c20f3ba630',t:'MTc5MTI3Nzc5OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4beb486da7d97e0',t:'MTc5MjIzMzgzNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
